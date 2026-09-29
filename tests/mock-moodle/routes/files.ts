@@ -25,6 +25,8 @@ function sendFile(
     lastModified: string;
     etag: string;
     style: DispositionStyle;
+    /** Spread the body over this many ms (slow downloads for restart tests). */
+    throttleMs?: number;
   },
 ): void {
   const headers: Record<string, string | number> = {
@@ -36,7 +38,31 @@ function sendFile(
   const cd = disposition(file.style, file.name);
   if (cd !== undefined) headers['content-disposition'] = cd;
   res.writeHead(200, headers);
-  res.end(method === 'HEAD' ? undefined : Buffer.alloc(file.size, 0x25));
+  if (method === 'HEAD') {
+    res.end();
+    return;
+  }
+  const body = Buffer.alloc(file.size, 0x25);
+  const throttle = file.throttleMs ?? 0;
+  if (throttle <= 0) {
+    res.end(body);
+    return;
+  }
+  const chunks = 10;
+  const step = Math.ceil(body.length / chunks);
+  let sent = 0;
+  const timer = setInterval(() => {
+    if (res.destroyed) {
+      clearInterval(timer);
+      return;
+    }
+    res.write(body.subarray(sent, sent + step));
+    sent += step;
+    if (sent >= body.length) {
+      clearInterval(timer);
+      res.end();
+    }
+  }, throttle / chunks);
 }
 
 function resourcePage(r: SeedResource): string {
@@ -105,8 +131,9 @@ export const fileRoutes: readonly Route[] = [
         contentType: r.contentType,
         size: r.size,
         lastModified: r.lastModified,
-        etag: `"${r.contextId}-${r.revision}-${r.size}"`,
+        etag: `"${r.contextId}-${r.revision}-${r.size}-${r.lastModified}"`,
         style: r.disposition,
+        ...(r.throttleMs === undefined ? {} : { throttleMs: r.throttleMs }),
       });
     },
   },

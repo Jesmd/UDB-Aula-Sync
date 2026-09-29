@@ -19,6 +19,8 @@ export interface SeedResource {
   readonly head: boolean;
   /** Answer 429 (Retry-After: 1) to the first N requests for the file. */
   rateLimit?: number;
+  /** Spread the body over this many ms. */
+  throttleMs?: number;
 }
 
 export interface SeedFolderFile {
