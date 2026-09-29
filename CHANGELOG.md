@@ -14,6 +14,26 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 - El botón "Abrir" del aviso no abría el archivo en Brave: ahora es una página de la extensión enmarcada en
   el aviso, cuyo clic sí cuenta como gesto del usuario (ADR-016).
 
+### Añadido (M4)
+
+- M4: panel "Descargas del curso" (botón flotante) con "Descargar esta sección", "Descargar todo el curso",
+  "Solo nuevos" y "Reintentar fallidos". Escanea las pestañas disponibles, muestra el plan y pide
+  confirmación por encima de 100 archivos o 200 MB. Carpetas del curso con sus subcarpetas.
+- M4: etiquetas de estado junto a cada archivo (Nuevo, Descargado, Actualizado, Solo lectura, Falta en disco,
+  Omitido, Error), sin mover la página.
+- M4: tarjeta de detalles (modo "tarjeta" o foco del teclado): tipo, nombre real, tamaño, destino, estado,
+  "Descargar", "Copiar ruta", "Abrir" y "Mostrar en carpeta".
+- M4: popup con la cola (pausar, reanudar, cancelar, reintentar), los cursos descargados y búsqueda en lo
+  descargado con "Abrir" y "Mostrar en carpeta".
+- M4: Opciones completas: General, Rutas (con ejemplo en vivo), Nombres, Sincronización (política, filtros,
+  intervalo), Cursos (ajustes por curso) y Seguridad. Ajustes v2 con migración desde v1.
+- M4: pruebas de accesibilidad (axe, WCAG 2.1 AA) en popup, opciones y la UI del curso.
+
+### Corregido (M4)
+
+- Elementos ocultos de la UI inyectada (botón "Descargar" de la tarjeta, "Cancelar") se veían por el reset
+  `all: unset`.
+
 ### Añadido (M3)
 
 - M3: clic para descargar. Al pasar el cursor (400 ms) se resuelve el archivo; el clic lo guarda en su
