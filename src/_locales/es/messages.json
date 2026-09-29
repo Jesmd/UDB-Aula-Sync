@@ -891,5 +891,104 @@
   },
   "optAutoDownloadHint": {
     "message": "Lo nuevo que encuentre la búsqueda periódica se descarga solo. Nunca en la primera sincronización, que siempre es a mano."
+  },
+  "error_folder_not_set": {
+    "message": "No has elegido la carpeta a verificar."
+  },
+  "error_folder_permission": {
+    "message": "El navegador no deja leer la carpeta. Vuelve a autorizarla en Opciones > Carpeta."
+  },
+  "tabFolder": {
+    "message": "Carpeta"
+  },
+  "planAdopted": {
+    "message": "Ya estaban en la carpeta"
+  },
+  "folderIntro": {
+    "message": "Opcional. Elige la carpeta $BASE$ que está dentro de Descargas. Con ella la extensión nota los archivos que borraste y no vuelve a bajar los que ya tienes (mismo nombre y tamaño).",
+    "placeholders": {
+      "base": {
+        "content": "$1"
+      }
+    }
+  },
+  "folderReadOnly": {
+    "message": "Solo lectura: nunca crea, cambia ni borra nada. El navegador puede volver a pedir permiso en cada sesión."
+  },
+  "folderUnsupported": {
+    "message": "Este navegador no permite elegir carpetas. En Brave, activa brave://flags/#file-system-access-api y reinícialo."
+  },
+  "folderChosen": {
+    "message": "Carpeta: $NAME$.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "folderGranted": {
+    "message": "Con permiso de lectura."
+  },
+  "folderNeedsPermission": {
+    "message": "Necesita permiso otra vez."
+  },
+  "folderPick": {
+    "message": "Elegir carpeta"
+  },
+  "folderChange": {
+    "message": "Cambiar carpeta"
+  },
+  "folderAuthorize": {
+    "message": "Autorizar de nuevo"
+  },
+  "folderCheck": {
+    "message": "Comprobar ahora"
+  },
+  "folderForget": {
+    "message": "Dejar de usar"
+  },
+  "folderChecking": {
+    "message": "Leyendo la carpeta…"
+  },
+  "folderSummary": {
+    "message": "$NAME$: $COUNT$ archivos.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "folderTruncated": {
+    "message": "La carpeta es muy grande: se leyeron los primeros 20 000 elementos. Los borrados no se pueden confirmar."
+  },
+  "folderWrongName": {
+    "message": "La carpeta elegida no se llama como la carpeta base ($BASE$). Elige Descargas/$BASE$.",
+    "placeholders": {
+      "base": {
+        "content": "$1"
+      }
+    }
+  },
+  "folderAllThere": {
+    "message": "Todos los archivos descargados siguen en su sitio."
+  },
+  "folderMissing": {
+    "message": "$COUNT$ archivos descargados ya no están. Aparecerán como «Falta en disco» y «Descargar todo» los repondrá.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlAdopted": {
+    "message": "«$NAME$» ya estaba en tu carpeta: no se descargó otra vez.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }
