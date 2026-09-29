@@ -11,6 +11,90 @@
   "toastClose": {
     "message": "Cerrar aviso"
   },
+  "dlStarting": {
+    "message": "Descargando «$NAME$»…",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlQueued": {
+    "message": "«$NAME$» en cola de descarga.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlSaved": {
+    "message": "Guardado en $PATH$",
+    "placeholders": {
+      "path": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlOpened": {
+    "message": "Abierto: $PATH$",
+    "placeholders": {
+      "path": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlUpToDate": {
+    "message": "«$NAME$» ya está descargado y al día.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlUpdateSkipped": {
+    "message": "Hay una versión nueva de «$NAME$». Tu ajuste es no actualizar.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlFailed": {
+    "message": "No se pudo descargar «$NAME$»: $ERROR$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
+  },
+  "dlRetrying": {
+    "message": "Error temporal con «$NAME$»; se reintentará.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlReadOnly": {
+    "message": "«$NAME$» es de solo lectura: no tiene un archivo descargable.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlSaveDialog": {
+    "message": "La descarga no empieza. Si el navegador pregunta dónde guardar cada archivo, desactiva «Preguntar dónde guardar» en la configuración de descargas y confirma tu carpeta de Descargas."
+  },
+  "dlOpen": {
+    "message": "Abrir"
+  },
+  "dlShow": {
+    "message": "Mostrar en carpeta"
+  },
   "popupTitle": {
     "message": "UDB Aula Sync"
   },
@@ -157,6 +241,21 @@
   },
   "error_download_interrupted": {
     "message": "La descarga se interrumpió."
+  },
+  "error_disk_full": {
+    "message": "No hay espacio en el disco para la descarga."
+  },
+  "error_file_rejected": {
+    "message": "El navegador o el sistema rechazó el archivo (bloqueado, nombre no válido o sin permiso)."
+  },
+  "error_cancelled": {
+    "message": "La descarga se canceló."
+  },
+  "error_verification_failed": {
+    "message": "El archivo descargado no coincide con el esperado. Se reintentará."
+  },
+  "error_invalid_transition": {
+    "message": "Estado interno de la cola no válido."
   },
   "error_open_blocked": {
     "message": "El navegador no permitió abrir el archivo."
