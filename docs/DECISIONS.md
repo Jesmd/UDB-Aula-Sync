@@ -214,3 +214,21 @@ terminan las 3 sin duplicados.
 
 **Consecuencias.** En Windows y macOS no aplica. En un Linux sin locale UTF-8 los nombres con acentos
 fallarían con un mensaje claro. Si hiciera falta, se añadiría una opción de transliteración.
+
+## ADR-016 "Abrir" dentro de un iframe de la extensión
+
+**Contexto.** En Brave, el botón "Abrir" del aviso no abría el archivo. El botón vivía en la página de
+Moodle y enviaba un mensaje al worker. `chrome.downloads.open` exige un gesto del usuario y el clic hecho en
+la página no llega como gesto al worker. En M0 funcionó porque el clic venía de una página de la extensión.
+
+**Decisión.** "Abrir" y "Mostrar en carpeta" son una pequeña página de la extensión (`src/open/index.html`)
+enmarcada en el aviso. Su clic ocurre en contexto de extensión y llama a `chrome.downloads.open` directamente.
+
+- La página solo recibe el id del archivo. Pide al worker su `downloadId` (`files/get`, solo para páginas de
+  la extensión) y solo abre archivos del índice.
+- Los tipos fuera de la lista blanca se muestran en su carpeta, nunca se abren.
+- Se declara en `web_accessible_resources` solo para el origen del Aula Digital (`check-manifest` lo valida).
+- El aviso reutiliza el mismo iframe entre actualizaciones (moverlo lo recargaría).
+
+**Consecuencias.** Abrir tras una descarga nueva requiere un clic en "Abrir". Un archivo ya descargado se
+intenta abrir al hacer clic en el enlace y, si el navegador lo impide, el aviso trae el mismo botón.
