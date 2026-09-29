@@ -43,6 +43,8 @@ export interface CourseSyncDeps {
   readonly download: (payload: DownloadPayload) => Promise<boolean>;
   readonly online: () => boolean;
   readonly screenLocked: () => Promise<boolean>;
+  /** Downloads are running: a periodic run waits so requests stay at 2 at once (spec §2). */
+  readonly busy: () => Promise<boolean>;
   readonly badge: (count: number) => void;
   readonly notifyNovelties: (notices: readonly NoveltyNotice[]) => void;
   readonly notifySessionLost: () => void;
@@ -108,6 +110,10 @@ export class CourseSync {
     if (trigger !== 'manual' && (await this.deps.screenLocked())) {
       await this.deps.meta.set(KEYS.pending, true);
       return summary('locked');
+    }
+    if (trigger !== 'manual' && (await this.deps.busy())) {
+      await this.deps.meta.set(KEYS.pending, true);
+      return summary('busy');
     }
     const snapshots = await this.deps.snapshots.all();
     if (snapshots.length === 0) return summary('no_courses');
@@ -193,7 +199,7 @@ export class CourseSync {
     };
   }
 
-  /** The screen unlocked or the network came back: run a sync that was put off. */
+  /** The screen unlocked, the network came back or downloads ended: run a sync put off. */
   async resumePending(): Promise<SyncSummary | null> {
     if ((await this.deps.meta.get<boolean>(KEYS.pending)) !== true) return null;
     return this.run('resume');

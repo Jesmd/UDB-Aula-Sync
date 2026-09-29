@@ -284,7 +284,8 @@ export interface SyncSummary {
   readonly novelties: number;
   readonly queued: number;
   /** Why nothing ran, if so. */
-  readonly skipped: 'running' | 'no_courses' | 'offline' | 'locked' | 'session_lost' | null;
+  readonly skipped:
+    'running' | 'no_courses' | 'offline' | 'locked' | 'busy' | 'session_lost' | null;
   readonly errorCode: string | null;
 }
 
