@@ -23,6 +23,8 @@ export const ERROR_CODES = [
   'storage',
   'unsafe_path',
   'invalid_template',
+  'folder_not_set',
+  'folder_permission',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
