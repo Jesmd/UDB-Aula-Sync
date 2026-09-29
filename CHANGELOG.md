@@ -6,6 +6,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### Añadido
 
+- Etiqueta animada sobre el cursor en los archivos descargables ("Preparando…" y luego "Clic para guardar";
+  "Solo lectura" si no hay archivo). Respeta `prefers-reduced-motion`.
+
+### Corregido
+
+- El botón "Abrir" del aviso no abría el archivo en Brave: ahora es una página de la extensión enmarcada en
+  el aviso, cuyo clic sí cuenta como gesto del usuario (ADR-016).
+
+### Añadido (M3)
+
 - M3: clic para descargar. Al pasar el cursor (400 ms) se resuelve el archivo; el clic lo guarda en su
   carpeta y lo abre (lista blanca). Alt+clic solo descarga; Ctrl/Shift/clic central, comportamiento normal.
 - M3: índice local (IndexedDB) con huellas. Un archivo al día no se vuelve a bajar. Uno cambiado queda
