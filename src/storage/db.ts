@@ -1,5 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Fingerprint } from '../core/planning/fingerprint';
+import type { CourseSnapshot } from '../core/planning/snapshot-diff';
 import type { Task } from '../core/queue/task';
 import { DB_VERSION, runMigrations } from './migrations';
 
@@ -28,10 +29,7 @@ export interface MetaRecord {
 export interface UdbSyncDb extends DBSchema {
   files: { key: string; value: FileRecord; indexes: { byCourse: number; byPath: string } };
   tasks: { key: string; value: Task; indexes: { byState: string } };
-  snapshots: {
-    key: number;
-    value: { readonly courseId: number; readonly takenAt: number; readonly data: unknown };
-  };
+  snapshots: { key: number; value: CourseSnapshot };
   meta: { key: string; value: MetaRecord };
 }
 
