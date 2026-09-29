@@ -288,6 +288,23 @@ describe('syncCourse against the mock server', () => {
     expect(requests().filter((r) => r.includes('view.php')).length).toBe(3);
   });
 
+  it('sees a new resource and an opened section on the page', async () => {
+    mock.state.pageEdits.set(103, {
+      activities: [{ section: 5, cmid: 4501, name: 'Guía 5: <nueva>' }],
+      revealed: [12],
+    });
+    const seed = mock.state.resources.get(4002);
+    if (seed === undefined) throw new Error('seed 4002');
+    mock.state.resources.set(4501, { ...seed, cmid: 4501 });
+    const result = await syncCourse(103, new Set([4002, 4101, 4102, 4201, 4202]), [], deps());
+    mock.state.pageEdits.clear();
+    if (!result.ok) throw new Error(result.error.code);
+    expect(result.value.files.map((f) => [f.cmid, f.activityName])).toEqual([
+      [4501, 'Guía 5: <nueva>'],
+    ]);
+    expect(result.value.snapshot.sections.find((s) => s.key === 'n:12')?.available).toBe(true);
+  });
+
   it('stops after one request when the session is lost', async () => {
     mock.state.requests.length = 0;
     mock.state.loggedIn = false;
