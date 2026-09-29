@@ -7,7 +7,7 @@ export type DispositionStyle = 'utf8-raw' | 'rfc5987' | 'none';
 
 export interface SeedResource {
   readonly cmid: number;
-  readonly mode: ResourceMode;
+  mode: ResourceMode;
   readonly contextId: number;
   revision: number;
   readonly fileName: string;
@@ -127,6 +127,42 @@ export const RESOURCES: readonly SeedResource[] = [
     disposition: 'none',
     head: true,
   },
+  // Course 103 (fixture topics): the whole course is one page ("Descargar todo" E2E).
+  ...[
+    [4002, 'Planificación del ciclo.pdf', 'application/pdf', 20_000],
+    [4101, 'Guia 1: Repaso Fundamentos de Redes.pdf', 'application/pdf', 30_000],
+    [
+      4102,
+      'Presentación Tema 1.pptx',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      60_000,
+    ],
+    [4201, 'Topologia_Jerarquica_Guia2.pdf', 'application/pdf', 25_000],
+    [4302, 'Examen resuelto.pdf', 'application/pdf', 15_000],
+  ].map(([cmid, fileName, contentType, size]): SeedResource => ({
+    cmid: Number(cmid),
+    mode: 'redirect',
+    contextId: 6000 + Number(cmid),
+    revision: 1,
+    fileName: String(fileName),
+    contentType: String(contentType),
+    size: Number(size),
+    lastModified: DATE,
+    disposition: 'utf8-raw',
+    head: true,
+  })),
+  {
+    cmid: 4301,
+    mode: 'readonly',
+    contextId: 10_301,
+    revision: 1,
+    fileName: 'Guía 3.pdf',
+    contentType: 'application/pdf',
+    size: 1_000,
+    lastModified: DATE,
+    disposition: 'none',
+    head: true,
+  },
   // Resolver edge cases.
   {
     cmid: 9001,
@@ -174,6 +210,21 @@ export const FOLDERS: readonly SeedFolder[] = [
         name: 'tabla.xlsx',
         contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         size: 9_000,
+      },
+    ],
+  },
+  {
+    cmid: 4202,
+    name: 'Archivos Packet Tracer',
+    contextId: 10_202,
+    revision: 1,
+    files: [
+      { path: [], name: 'lab1.pkt', contentType: 'application/octet-stream', size: 5_000 },
+      {
+        path: ['Resueltos'],
+        name: 'lab1-resuelto.pkt',
+        contentType: 'application/octet-stream',
+        size: 6_000,
       },
     ],
   },
