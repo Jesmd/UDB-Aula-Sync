@@ -44,7 +44,8 @@ export type ScanScope =
 const MAX_SECTION_PAGES = 200;
 const aborted = () => err(appError('cancelled', 'scan cancelled'));
 
-const sectionKey = (s: SectionRef) =>
+/** Stable id of a section across pages and syncs. */
+export const sectionKey = (s: SectionRef): string =>
   s.number === null ? `name:${s.parent ?? ''}/${s.name}` : `n:${s.number}`;
 
 /**
