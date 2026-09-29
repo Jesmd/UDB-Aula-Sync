@@ -1,21 +1,11 @@
 import { buildPlan, type PlanItem } from '../core/planning/sync-plan';
-import { numberWidth } from '../core/text/pad-numbers';
 import { sendMessage } from '../shared/browser-api';
 import { t } from '../shared/i18n';
-import type {
-  DownloadPayload,
-  DownloadPreviewResponse,
-  DownloadUpdateMessage,
-} from '../shared/messages';
+import type { DownloadPreviewResponse, DownloadUpdateMessage } from '../shared/messages';
 import type { HtmlParser } from '../moodle/html-parser';
+import { payloadFor } from '../moodle/payload';
 import type { FetchLike } from '../moodle/resolver/head-probe';
-import {
-  resolveItems,
-  scanCourse,
-  type CourseScan,
-  type FoundFile,
-  type ScanScope,
-} from '../moodle/scan';
+import { resolveItems, scanCourse, type FoundFile, type ScanScope } from '../moodle/scan';
 import { courseSettings, type Settings } from '../storage/settings-schema';
 import type { PageContext } from './page-context';
 import type { PageStatus } from './page-status';
@@ -23,38 +13,6 @@ import type { CoursePanel, PlanView } from './ui/course-panel';
 import { formatBytes } from './ui/format';
 
 export type BulkMode = 'section' | 'all' | 'new';
-
-/** Message fields for one found file, with its section in the scanned course. */
-export function payloadFor(scan: CourseScan, found: FoundFile, open = false): DownloadPayload {
-  const position = scan.sections.indexOf(found.item.section) + 1;
-  return {
-    target: 'background',
-    courseId: scan.course.id,
-    cmid: found.item.activity.cmid,
-    course: { fullName: scan.course.fullName, shortName: scan.course.shortName },
-    section: {
-      name: found.item.section.name,
-      parent: found.item.section.parent,
-      position: Math.max(1, position),
-      numberWidth: Math.min(4, numberWidth(scan.sections.map((s) => s.name))),
-    },
-    activityName: found.item.activity.name,
-    file: {
-      url: found.file.url,
-      fileKey: found.file.ref.fileKey,
-      path: found.file.ref.path,
-      revision: found.file.ref.revision,
-      originalName: found.file.originalName,
-      extension: found.file.extension,
-      size: found.file.size,
-      lastModified: found.file.lastModified,
-      etag: found.file.etag,
-      contentType: found.file.contentType,
-    },
-    folderPath: found.folderPath === null ? null : [...found.folderPath],
-    open,
-  };
-}
 
 export interface BulkDeps {
   readonly doc: Document;
