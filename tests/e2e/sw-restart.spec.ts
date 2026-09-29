@@ -42,9 +42,11 @@ test('a worker restart in the middle of the queue resumes it', async ({
   const worker = targetInfos.find((t) => t.type === 'service_worker');
   await cdp.send('Target.closeTarget', { targetId: worker?.targetId ?? '' });
 
-  // The next message wakes a fresh worker: its in-memory log starts over.
-  await expect.poll(async () => (await logs()).split('\n')[0]).toContain('worker started');
-  expect(await logs()).not.toContain('installed');
+  // The next message wakes a fresh worker. The log kept the first one's entries (ADR-029):
+  // two starts, one install.
+  const count = (text: string, word: string) => text.split(word).length - 1;
+  await expect.poll(async () => count(await logs(), 'worker started')).toBe(2);
+  expect(count(await logs(), 'installed')).toBe(1);
 
   await expect
     .poll(async () => (await queue()).tasks.map((t) => t.state), { timeout: 30_000 })
