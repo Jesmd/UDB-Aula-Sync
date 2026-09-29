@@ -891,5 +891,104 @@
   },
   "optAutoDownloadHint": {
     "message": "New material found by the periodic check downloads on its own. Never on the first sync, which is always by hand."
+  },
+  "error_folder_not_set": {
+    "message": "You have not chosen the folder to verify."
+  },
+  "error_folder_permission": {
+    "message": "The browser does not allow reading the folder. Authorize it again in Options > Folder."
+  },
+  "tabFolder": {
+    "message": "Folder"
+  },
+  "planAdopted": {
+    "message": "Already in the folder"
+  },
+  "folderIntro": {
+    "message": "Optional. Choose the $BASE$ folder inside Downloads. With it the extension notices files you deleted and does not download again the ones you already have (same name and size).",
+    "placeholders": {
+      "base": {
+        "content": "$1"
+      }
+    }
+  },
+  "folderReadOnly": {
+    "message": "Read-only: it never creates, changes or deletes anything. The browser may ask for permission again each session."
+  },
+  "folderUnsupported": {
+    "message": "This browser cannot choose folders. In Brave, enable brave://flags/#file-system-access-api and restart it."
+  },
+  "folderChosen": {
+    "message": "Folder: $NAME$.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "folderGranted": {
+    "message": "Read permission granted."
+  },
+  "folderNeedsPermission": {
+    "message": "Needs permission again."
+  },
+  "folderPick": {
+    "message": "Choose folder"
+  },
+  "folderChange": {
+    "message": "Change folder"
+  },
+  "folderAuthorize": {
+    "message": "Authorize again"
+  },
+  "folderCheck": {
+    "message": "Check now"
+  },
+  "folderForget": {
+    "message": "Stop using"
+  },
+  "folderChecking": {
+    "message": "Reading the folder…"
+  },
+  "folderSummary": {
+    "message": "$NAME$: $COUNT$ files.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "folderTruncated": {
+    "message": "The folder is very large: only the first 20,000 entries were read. Deletions cannot be confirmed."
+  },
+  "folderWrongName": {
+    "message": "The chosen folder is not named like the base folder ($BASE$). Choose Downloads/$BASE$.",
+    "placeholders": {
+      "base": {
+        "content": "$1"
+      }
+    }
+  },
+  "folderAllThere": {
+    "message": "Every downloaded file is still in place."
+  },
+  "folderMissing": {
+    "message": "$COUNT$ downloaded files are gone. They will show as \"Missing on disk\" and \"Download all\" will bring them back.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlAdopted": {
+    "message": "\"$NAME$\" was already in your folder: it was not downloaded again.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
   }
 }
