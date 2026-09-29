@@ -289,5 +289,198 @@
   },
   "error_invalid_template": {
     "message": "The path template is not valid."
+  },
+  "panelOpen": {
+    "message": "Course downloads"
+  },
+  "panelTitle": {
+    "message": "UDB Aula Sync"
+  },
+  "panelSection": {
+    "message": "Download this section"
+  },
+  "panelAll": {
+    "message": "Download the whole course"
+  },
+  "panelNew": {
+    "message": "New only"
+  },
+  "panelRetry": {
+    "message": "Retry failed"
+  },
+  "panelCancel": {
+    "message": "Cancel"
+  },
+  "panelClose": {
+    "message": "Close"
+  },
+  "panelHint": {
+    "message": "Compares with what you already downloaded and fetches only what is missing or changed."
+  },
+  "scanSections": {
+    "message": "Looking for sections… $DONE$ of $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "scanFiles": {
+    "message": "Checking files… $DONE$ of $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "scanPlanning": {
+    "message": "Preparing the plan…"
+  },
+  "planTitle": {
+    "message": "Download plan"
+  },
+  "planNew": {
+    "message": "New"
+  },
+  "planUpdated": {
+    "message": "Updated"
+  },
+  "planUnchanged": {
+    "message": "Unchanged"
+  },
+  "planMissing": {
+    "message": "Missing on disk"
+  },
+  "planReadOnly": {
+    "message": "Read-only"
+  },
+  "planOmitted": {
+    "message": "Left out by filters"
+  },
+  "planErrors": {
+    "message": "With errors"
+  },
+  "planSkippedSections": {
+    "message": "Sections left out"
+  },
+  "planTotal": {
+    "message": "$COUNT$ files will be downloaded ($SIZE$).",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "planUnknownSizes": {
+    "message": "$COUNT$ of unknown size.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "planConfirm": {
+    "message": "Download $COUNT$ files",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "planBig": {
+    "message": "This is a large download (over 100 files or 200 MB). Confirm to continue."
+  },
+  "planNothing": {
+    "message": "Nothing to download: everything is up to date."
+  },
+  "bulkProgress": {
+    "message": "Downloading: $DONE$ of $TOTAL$ done, $FAILED$ failed.",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      },
+      "failed": {
+        "content": "$3"
+      }
+    }
+  },
+  "bulkDone": {
+    "message": "Done: $DONE$ downloaded, $FAILED$ failed.",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "retryDone": {
+    "message": "Retrying $COUNT$ downloads.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "statusNuevo": {
+    "message": "New"
+  },
+  "statusDescargado": {
+    "message": "Downloaded"
+  },
+  "statusActualizado": {
+    "message": "Updated"
+  },
+  "statusSoloLectura": {
+    "message": "Read-only"
+  },
+  "statusPerdido": {
+    "message": "Missing on disk"
+  },
+  "statusOmitido": {
+    "message": "Left out"
+  },
+  "statusError": {
+    "message": "Error"
+  },
+  "cardType": {
+    "message": "Type"
+  },
+  "cardFile": {
+    "message": "File"
+  },
+  "cardSize": {
+    "message": "Size"
+  },
+  "cardDest": {
+    "message": "Saved to"
+  },
+  "cardStatus": {
+    "message": "Status"
+  },
+  "cardDownload": {
+    "message": "Download"
+  },
+  "cardCopy": {
+    "message": "Copy path"
+  },
+  "cardCopied": {
+    "message": "Path copied"
+  },
+  "cardUnknown": {
+    "message": "unknown"
   }
 }

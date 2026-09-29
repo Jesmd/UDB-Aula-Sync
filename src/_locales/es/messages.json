@@ -289,5 +289,198 @@
   },
   "error_invalid_template": {
     "message": "La plantilla de rutas no es válida."
+  },
+  "panelOpen": {
+    "message": "Descargas del curso"
+  },
+  "panelTitle": {
+    "message": "UDB Aula Sync"
+  },
+  "panelSection": {
+    "message": "Descargar esta sección"
+  },
+  "panelAll": {
+    "message": "Descargar todo el curso"
+  },
+  "panelNew": {
+    "message": "Solo nuevos"
+  },
+  "panelRetry": {
+    "message": "Reintentar fallidos"
+  },
+  "panelCancel": {
+    "message": "Cancelar"
+  },
+  "panelClose": {
+    "message": "Cerrar"
+  },
+  "panelHint": {
+    "message": "Compara con lo ya descargado y baja solo lo que falta o cambió."
+  },
+  "scanSections": {
+    "message": "Buscando secciones… $DONE$ de $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "scanFiles": {
+    "message": "Revisando archivos… $DONE$ de $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "scanPlanning": {
+    "message": "Preparando el plan…"
+  },
+  "planTitle": {
+    "message": "Plan de descarga"
+  },
+  "planNew": {
+    "message": "Nuevos"
+  },
+  "planUpdated": {
+    "message": "Actualizados"
+  },
+  "planUnchanged": {
+    "message": "Sin cambios"
+  },
+  "planMissing": {
+    "message": "Faltan en disco"
+  },
+  "planReadOnly": {
+    "message": "Solo lectura"
+  },
+  "planOmitted": {
+    "message": "Omitidos por filtro"
+  },
+  "planErrors": {
+    "message": "Con error"
+  },
+  "planSkippedSections": {
+    "message": "Secciones omitidas"
+  },
+  "planTotal": {
+    "message": "Se descargarán $COUNT$ archivos ($SIZE$).",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "planUnknownSizes": {
+    "message": "$COUNT$ sin tamaño conocido.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "planConfirm": {
+    "message": "Descargar $COUNT$ archivos",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "planBig": {
+    "message": "Es una descarga grande (más de 100 archivos o 200 MB). Confírmala para continuar."
+  },
+  "planNothing": {
+    "message": "No hay nada que descargar: todo está al día."
+  },
+  "bulkProgress": {
+    "message": "Descargando: $DONE$ de $TOTAL$ listos, $FAILED$ con error.",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      },
+      "failed": {
+        "content": "$3"
+      }
+    }
+  },
+  "bulkDone": {
+    "message": "Listo: $DONE$ descargados, $FAILED$ con error.",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "retryDone": {
+    "message": "Reintentando $COUNT$ descargas.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "statusNuevo": {
+    "message": "Nuevo"
+  },
+  "statusDescargado": {
+    "message": "Descargado"
+  },
+  "statusActualizado": {
+    "message": "Actualizado"
+  },
+  "statusSoloLectura": {
+    "message": "Solo lectura"
+  },
+  "statusPerdido": {
+    "message": "Falta en disco"
+  },
+  "statusOmitido": {
+    "message": "Omitido"
+  },
+  "statusError": {
+    "message": "Error"
+  },
+  "cardType": {
+    "message": "Tipo"
+  },
+  "cardFile": {
+    "message": "Archivo"
+  },
+  "cardSize": {
+    "message": "Tamaño"
+  },
+  "cardDest": {
+    "message": "Se guarda en"
+  },
+  "cardStatus": {
+    "message": "Estado"
+  },
+  "cardDownload": {
+    "message": "Descargar"
+  },
+  "cardCopy": {
+    "message": "Copiar ruta"
+  },
+  "cardCopied": {
+    "message": "Ruta copiada"
+  },
+  "cardUnknown": {
+    "message": "desconocido"
   }
 }

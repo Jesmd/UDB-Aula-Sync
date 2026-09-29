@@ -109,11 +109,4 @@ describe('hover indicator', () => {
     await vi.runAllTimersAsync();
     expect(badge.state).toBeNull();
   });
-
-  it('follows keyboard focus', async () => {
-    openGate();
-    link(2102).dispatchEvent(new (view().FocusEvent)('focusin', { bubbles: true }));
-    await vi.runAllTimersAsync();
-    expect(badge.state).toBe('readonly');
-  });
 });

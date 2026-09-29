@@ -28,6 +28,7 @@ const request = {
     etag: null,
     contentType: null,
   },
+  folderPath: null,
   open: true,
 } satisfies DownloadRequestMessage;
 
