@@ -729,7 +729,7 @@
     "message": "Buscar novedades cada (horas)"
   },
   "optIntervalHint": {
-    "message": "Entre 1 y 48. La búsqueda automática llega en la próxima versión."
+    "message": "Entre 1 y 48. Solo revisa cursos que ya sincronizaste a mano, con red y sin la pantalla bloqueada."
   },
   "optErrInterval": {
     "message": "Escribe un número entero entre 1 y 48."
@@ -789,5 +789,107 @@
   },
   "secGentle": {
     "message": "Pide pocas cosas a la vez (máximo 2) con pausas, y se detiene si la sesión expira."
+  },
+  "notifyNewTitle": {
+    "message": "UDB Aula Sync: $COUNT$ novedades",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifySessionTitle": {
+    "message": "Tu sesión del Aula Digital caducó"
+  },
+  "notifySessionBody": {
+    "message": "La búsqueda de novedades está en pausa. Inicia sesión en el Aula Digital y seguirá sola."
+  },
+  "popupSyncTitle": {
+    "message": "Novedades"
+  },
+  "syncNow": {
+    "message": "Sincronizar ahora"
+  },
+  "syncRunning": {
+    "message": "Buscando novedades…"
+  },
+  "syncNotTracking": {
+    "message": "Aún no sigue ningún curso. Abre un curso y usa «Descargar todo el curso» o «Solo nuevos» una vez."
+  },
+  "syncTracking": {
+    "message": "Sigue $COUNT$ cursos. Última búsqueda: $WHEN$.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "when": {
+        "content": "$2"
+      }
+    }
+  },
+  "syncNever": {
+    "message": "nunca"
+  },
+  "syncSessionLost": {
+    "message": "La búsqueda automática está en pausa: tu sesión caducó. Abre el Aula Digital e inicia sesión."
+  },
+  "syncNoCourses": {
+    "message": "No hay cursos en seguimiento."
+  },
+  "syncOffline": {
+    "message": "Sin conexión. Se intentará cuando vuelva la red."
+  },
+  "syncNothingNew": {
+    "message": "Sin novedades en $COUNT$ cursos.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "syncFound": {
+    "message": "$COUNT$ novedades en $COURSES$ cursos revisados.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "courses": {
+        "content": "$2"
+      }
+    }
+  },
+  "syncQueued": {
+    "message": "$COUNT$ en descarga.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "syncMarkAllSeen": {
+    "message": "Marcar todo como visto"
+  },
+  "syncMarkSeen": {
+    "message": "Marcar como visto"
+  },
+  "courseTracked": {
+    "message": "con seguimiento"
+  },
+  "courseNotTracked": {
+    "message": "sin seguimiento"
+  },
+  "courseNew": {
+    "message": "$COUNT$ nuevos",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "optAutoDownload": {
+    "message": "Descargar novedades automáticamente"
+  },
+  "optAutoDownloadHint": {
+    "message": "Lo nuevo que encuentre la búsqueda periódica se descarga solo. Nunca en la primera sincronización, que siempre es a mano."
   }
 }

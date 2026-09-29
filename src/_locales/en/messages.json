@@ -729,7 +729,7 @@
     "message": "Check for new material every (hours)"
   },
   "optIntervalHint": {
-    "message": "From 1 to 48. Automatic checks arrive in the next version."
+    "message": "From 1 to 48. Only checks courses you already synced by hand, with network and an unlocked screen."
   },
   "optErrInterval": {
     "message": "Enter a whole number from 1 to 48."
@@ -789,5 +789,107 @@
   },
   "secGentle": {
     "message": "It makes few requests at a time (2 at most) with pauses, and stops if the session expires."
+  },
+  "notifyNewTitle": {
+    "message": "UDB Aula Sync: $COUNT$ new items",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifySessionTitle": {
+    "message": "Your Aula Digital session expired"
+  },
+  "notifySessionBody": {
+    "message": "Checking for new material is paused. Log in to Aula Digital and it will continue on its own."
+  },
+  "popupSyncTitle": {
+    "message": "New material"
+  },
+  "syncNow": {
+    "message": "Sync now"
+  },
+  "syncRunning": {
+    "message": "Checking for new material…"
+  },
+  "syncNotTracking": {
+    "message": "Not following any course yet. Open a course and use \"Download the whole course\" or \"Only new\" once."
+  },
+  "syncTracking": {
+    "message": "Following $COUNT$ courses. Last check: $WHEN$.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "when": {
+        "content": "$2"
+      }
+    }
+  },
+  "syncNever": {
+    "message": "never"
+  },
+  "syncSessionLost": {
+    "message": "Automatic checks are paused: your session expired. Open Aula Digital and log in."
+  },
+  "syncNoCourses": {
+    "message": "No courses are being followed."
+  },
+  "syncOffline": {
+    "message": "Offline. It will try again when the network is back."
+  },
+  "syncNothingNew": {
+    "message": "Nothing new in $COUNT$ courses.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "syncFound": {
+    "message": "$COUNT$ new items in $COURSES$ courses checked.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "courses": {
+        "content": "$2"
+      }
+    }
+  },
+  "syncQueued": {
+    "message": "$COUNT$ downloading.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "syncMarkAllSeen": {
+    "message": "Mark all as seen"
+  },
+  "syncMarkSeen": {
+    "message": "Mark as seen"
+  },
+  "courseTracked": {
+    "message": "followed"
+  },
+  "courseNotTracked": {
+    "message": "not followed"
+  },
+  "courseNew": {
+    "message": "$COUNT$ new",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "optAutoDownload": {
+    "message": "Download new material automatically"
+  },
+  "optAutoDownloadHint": {
+    "message": "New material found by the periodic check downloads on its own. Never on the first sync, which is always by hand."
   }
 }

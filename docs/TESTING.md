@@ -20,8 +20,23 @@ pnpm test:e2e    # build + Playwright contra el Moodle simulado
 - **E2E** (`tests/e2e/`): Chromium con la extensión de `dist/`. El host real se mapea al simulador y
   cualquier otro host falla (ADR-002). **Nunca** contra el sitio real. El simulador se reinicia antes de
   cada prueba.
+- **Novedades** (`sync-new.spec.ts`, `session-expired.spec.ts`): el simulador añade actividades y abre
+  secciones (`/__test/activity`, `/__test/reveal`) y mide cuántas peticiones atiende a la vez
+  (`maxInFlight`, nunca más de 2). La alarma se dispara creando `udbsync-sync` con `when` cercano.
 - **Accesibilidad**: `@axe-core/playwright` con WCAG 2.1 A/AA en popup, opciones y la UI inyectada
   (`popup-options.spec.ts`, `download-all.spec.ts`).
+
+## Manual (M5)
+
+1. `git pull && pnpm install && pnpm build` y recarga la extensión.
+2. **Primero H3:** Opciones > Diagnóstico > "Probar sesión en segundo plano (H3)". Envía el JSON. Si dice
+   `"sessionSent": false`, la búsqueda en segundo plano no puede funcionar en Brave.
+3. En un curso, pulsa "Descargar todo el curso". El popup debe decir "Sigue 1 cursos".
+4. Popup > "Sincronizar ahora": debe decir "Sin novedades en 1 cursos".
+5. Cuando el docente publique algo, "Sincronizar ahora" (o esperar 6 h) muestra el contador en el icono, una
+   notificación y la marca "Nuevo" en la página.
+6. Cierra sesión en el Aula Digital y pulsa "Sincronizar ahora": una sola notificación de sesión caducada.
+   Al volver a iniciar sesión y abrir un curso, el aviso del popup desaparece.
 
 ## Manual (M4)
 

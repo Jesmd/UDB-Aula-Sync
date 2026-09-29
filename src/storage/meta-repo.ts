@@ -14,6 +14,9 @@ export interface MetaRepo {
   courses(): Promise<CourseMeta[]>;
   get<T>(key: string): Promise<T | undefined>;
   set(key: string, value: unknown): Promise<void>;
+  delete(key: string): Promise<void>;
+  /** Every entry whose key starts with `prefix`. */
+  list(prefix: string): Promise<[string, unknown][]>;
 }
 
 const COURSE_PREFIX = 'course:';
@@ -31,6 +34,13 @@ export function createMetaRepo(db: IDBPDatabase<UdbSyncDb>): MetaRepo {
     set: async (key, value) => {
       await db.put('meta', { key, value });
     },
+    delete: async (key) => {
+      await db.delete('meta', key);
+    },
+    list: async (prefix) =>
+      (await db.getAll('meta'))
+        .filter((m) => m.key.startsWith(prefix))
+        .map((m): [string, unknown] => [m.key, m.value]),
   };
 }
 
@@ -50,5 +60,10 @@ export function createMemoryMetaRepo(): MetaRepo {
       values.set(key, value);
       return Promise.resolve();
     },
+    delete: (key) => {
+      values.delete(key);
+      return Promise.resolve();
+    },
+    list: (prefix) => Promise.resolve([...values].filter(([k]) => k.startsWith(prefix))),
   };
 }

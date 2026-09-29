@@ -14,6 +14,18 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 - El botón "Abrir" del aviso no abría el archivo en Brave: ahora es una página de la extensión enmarcada en
   el aviso, cuyo clic sí cuenta como gesto del usuario (ADR-016).
 
+### Añadido (M5)
+
+- M5: novedades. Tras el primer "Descargar todo" o "Solo nuevos" de un curso, la extensión lo revisa cada
+  6 h (configurable) en segundo plano, con red y sin pantalla bloqueada. Cuenta archivos nuevos y secciones
+  que se abren.
+- M5: contador en el icono, una notificación agrupada por búsqueda y marca "Nuevo" junto al archivo.
+- M5: popup con "Sincronizar ahora", cursos en seguimiento, novedades por curso y "Marcar como visto".
+- M5: opción por curso "Descargar novedades automáticamente" (apagada por defecto).
+- M5: sesión caducada en segundo plano: una sola notificación y ninguna petición más hasta volver a iniciar
+  sesión.
+- M5: reintento con espera ante 429 y errores 5xx, respetando `Retry-After`, en la página y en segundo plano.
+
 ### Añadido (M4)
 
 - M4: panel "Descargas del curso" (botón flotante) con "Descargar esta sección", "Descargar todo el curso",

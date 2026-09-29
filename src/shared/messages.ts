@@ -2,6 +2,7 @@ import * as v from 'valibot';
 import type { DiagnosticReport } from '../moodle/diagnostic';
 import type { HypothesisReport } from '../moodle/hypotheses';
 import type { Task } from '../core/queue/task';
+import type { CourseSnapshot, Novelty } from '../core/planning/snapshot-diff';
 import type { FileRecord } from '../storage/db';
 import type { CourseMeta } from '../storage/meta-repo';
 import type { FileStatus } from './types';
@@ -61,6 +62,38 @@ const DownloadPreviewMessage = v.object({
   type: v.literal('download/preview'),
 });
 
+const SnapshotSchema = v.object({
+  version: v.literal(1),
+  courseId: positiveInt,
+  takenAt: v.pipe(v.number(), v.integer(), v.minValue(0)),
+  sections: v.pipe(
+    v.array(
+      v.object({
+        key: text(700),
+        name: text(300),
+        parent: nullableText(300),
+        available: v.boolean(),
+      }),
+    ),
+    v.maxLength(400),
+    v.readonly(),
+  ),
+  items: v.pipe(
+    v.array(
+      v.object({
+        cmid: positiveInt,
+        name: text(300),
+        sectionKey: text(700),
+        modname: text(40),
+        available: v.boolean(),
+        downloadable: v.boolean(),
+      }),
+    ),
+    v.maxLength(5000),
+    v.readonly(),
+  ),
+});
+
 const BackgroundRequest = v.variant('type', [
   v.object({ target: v.literal('background'), type: v.literal('ping') }),
   DownloadRequestMessage,
@@ -94,6 +127,19 @@ const BackgroundRequest = v.variant('type', [
   }),
   v.object({ target: v.literal('background'), type: v.literal('spike/fetch-worker') }),
   v.object({ target: v.literal('background'), type: v.literal('spike/fetch-offscreen') }),
+  /** A full course scan from the page: the manual first sync (spec §2) or a refresh. */
+  v.object({
+    target: v.literal('background'),
+    type: v.literal('snapshot/save'),
+    snapshot: SnapshotSchema,
+  }),
+  /** "Sincronizar ahora" (popup). */
+  v.object({ target: v.literal('background'), type: v.literal('sync/run') }),
+  v.object({
+    target: v.literal('background'),
+    type: v.literal('novelties/clear'),
+    courseId: v.nullable(positiveInt),
+  }),
 ]);
 
 const OffscreenRequest = v.variant('type', [
@@ -102,6 +148,14 @@ const OffscreenRequest = v.variant('type', [
     target: v.literal('offscreen'),
     type: v.literal('offscreen/fetch-probe'),
     url: v.pipe(v.string(), v.url(), v.maxLength(2048)),
+  }),
+  /** Scan one course in the background and resolve its downloadable items not in `known`. */
+  v.object({
+    target: v.literal('offscreen'),
+    type: v.literal('offscreen/sync-course'),
+    courseId: positiveInt,
+    known: v.pipe(v.array(positiveInt), v.maxLength(5000)),
+    skipSections: v.pipe(v.array(text(120)), v.maxLength(60)),
   }),
 ]);
 
@@ -143,6 +197,7 @@ export type DownloadPreviewMessage = v.InferOutput<typeof DownloadPreviewMessage
 export type DownloadPayload = Omit<DownloadRequestMessage, 'type'>;
 export type DownloadUpdateMessage = Extract<ContentRequest, { type: 'content/download-update' }>;
 export type RuntimeMessage = v.InferOutput<typeof RuntimeMessage>;
+export type SnapshotMessage = v.InferOutput<typeof SnapshotSchema>;
 export type MessageTarget = RuntimeMessage['target'];
 
 export function parseMessage(raw: unknown): Result<RuntimeMessage, AppError> {
@@ -170,6 +225,10 @@ export interface ResponseMap {
   'spike/fetch-offscreen': FetchProbe;
   'offscreen/ping': { readonly reply: string };
   'offscreen/fetch-probe': FetchProbe;
+  'offscreen/sync-course': CourseSyncResult;
+  'snapshot/save': { readonly novelties: number };
+  'sync/run': SyncSummary;
+  'novelties/clear': { readonly cleared: true };
   'content/diagnose': DiagnosticReport;
   'content/test-hypotheses': HypothesisReport;
   'content/download-update': { readonly shown: boolean };
@@ -188,11 +247,46 @@ export interface ResponseMap {
     /** Paused by the user ("Pausar") or by a lost session. */
     readonly paused: boolean;
     readonly pausedBy: 'user' | 'session' | null;
+    /** Pending novelties per course id. */
+    readonly novelties: Readonly<Record<string, readonly Novelty[]>>;
+    readonly sync: SyncStatus;
   };
   'queue/retry-failed': { readonly retried: number };
   'queue/control': { readonly paused: boolean; readonly cancelled: number };
   'download/preview': DownloadPreviewResponse;
-  'files/status': { readonly files: readonly FileStatusEntry[] };
+  'files/status': {
+    readonly files: readonly FileStatusEntry[];
+    /** Activities new since the last sync (the "NUEVO" mark). */
+    readonly novelties: readonly number[];
+  };
+}
+
+/** What the offscreen document found for one course. */
+export interface CourseSyncResult {
+  readonly snapshot: CourseSnapshot;
+  /** Downloadable files of items not in `known`, ready for download/request. */
+  readonly files: readonly DownloadPayload[];
+  readonly readOnly: readonly number[];
+  readonly failed: number;
+}
+
+export interface SyncStatus {
+  /** Courses with a snapshot (synced at least once by hand). */
+  readonly tracked: readonly number[];
+  readonly lastRunAt: number | null;
+  readonly running: boolean;
+  /** Background syncs are on hold until a logged-in Aula Digital page is seen. */
+  readonly sessionLost: boolean;
+}
+
+export interface SyncSummary {
+  readonly courses: number;
+  readonly novelties: number;
+  readonly queued: number;
+  /** Why nothing ran, if so. */
+  readonly skipped:
+    'running' | 'no_courses' | 'offline' | 'locked' | 'busy' | 'session_lost' | null;
+  readonly errorCode: string | null;
 }
 
 export interface DownloadPreviewResponse {
