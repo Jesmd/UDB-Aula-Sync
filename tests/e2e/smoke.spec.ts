@@ -28,7 +28,7 @@ test('does not inject outside /auladigital/', async ({ context }) => {
 test('popup reaches the background service', async ({ context, extensionId }) => {
   const page = await context.newPage();
   await page.goto(`chrome-extension://${extensionId}/src/popup/index.html`);
-  await expect(page.getByTestId('service-status')).toContainText('0.0.1');
+  await expect(page.getByTestId('service-status')).toContainText('1.0.0');
 });
 
 test('offscreen document answers through the worker', async ({ context, extensionId }) => {

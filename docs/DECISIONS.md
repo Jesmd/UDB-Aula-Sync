@@ -385,3 +385,27 @@ Brave trae la File System Access API desactivada; hay que activar `brave://flags
 `navigator.storage.getDirectory()`). Es un `FileSystemDirectoryHandle` real con permiso de lectura concedido,
 y se guarda donde Opciones guardaría la carpeta elegida. Así el offscreen, el worker y Opciones se prueban
 con un handle de verdad. Las pruebas unitarias usan handles falsos. Elegir una carpeta real se prueba a mano.
+
+## ADR-028 Copia de seguridad (exportar e importar)
+
+**Decisión.** Opciones > General > "Exportar" guarda un JSON versionado (`udb-aula-sync-backup`, v1) en
+`Descargas/<base>/_respaldo/`. Incluye ajustes, índice de archivos, fotos de cursos y nombres de curso. No
+incluye la cola, las novedades, el permiso de la carpeta ni el registro.
+
+- La importación valida todo con valibot: formato, tamaño (20 MB), rutas relativas sin `..` ni unidades,
+  URL del `pluginfile.php` del Aula Digital. Los ajustes pasan por `normalizeSettings()`.
+- Añade o reemplaza por id; los ajustes se reemplazan.
+- Los `downloadId` pertenecen al navegador que los creó: se descartan al importar. Un archivo importado no
+  se puede abrir desde la extensión hasta que se vuelve a descargar o la carpeta lo confirma.
+
+## ADR-029 Registro persistente acotado
+
+**Decisión.** Además del anillo en memoria (500), el worker guarda en `chrome.storage.local` (`logs`) las
+últimas 300 entradas de nivel info o superior, ya redactadas, escritas como mucho cada 2 s. "Exportar
+registro" une ambos. El content script ignora los cambios de `logs` (solo reacciona a `settings`).
+
+## ADR-030 Presupuesto de rendimiento
+
+**Decisión.** `scripts/check-budget.ts` sigue los imports del content script en `dist/` (incluido el
+cargador de crxjs) y hace fallar el build si pasa de 60 KB gzip (1.0.0: unos 32 KB). El E2E de "Descargar
+todo" registra tareas largas (`longtask`) y exige que no haya ninguna de más de 50 ms.
