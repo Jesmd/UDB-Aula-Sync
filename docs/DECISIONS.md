@@ -350,3 +350,38 @@ H3 (la cookie de sesión viaja en el `fetch` del offscreen), aún sin verificar 
 La cola de descargas comparte el mismo aviso. Desde entonces la búsqueda periódica no hace ninguna
 petición hasta que una página del Aula Digital (que no sea el login) carga con la extensión activa.
 "Sincronizar ahora" sí lo intenta, porque lo pidió el usuario.
+
+## ADR-026 Verificador de carpeta (opcional)
+
+**Contexto.** Una extensión no puede listar una carpeta cualquiera. `chrome.downloads.search` solo conoce lo
+que ella descargó y su campo `exists` puede estar desactualizado (spec §5).
+
+**Decisión.**
+
+- En Opciones > Carpeta el usuario elige **una vez** la carpeta base (Descargas/UDB) con
+  `showDirectoryPicker({ mode: 'read' })`. Chromium no deja elegir Descargas ni la carpeta personal, pero sí
+  sus subcarpetas. Solo lectura: nunca se pide escritura.
+- El handle se guarda en un almacén propio (`handles`, migración 1 → 2). El worker nunca lo lee: lee `meta`
+  en bloque y quizá no pueda deserializar un handle. Solo sabe que hay carpeta por `folder:info`.
+- El documento offscreen lee la carpeta (`offscreen/folder-scan`). Si el permiso vuelve a "preguntar" (el
+  navegador puede pedirlo en cada sesión), no puede pedirlo sin un clic: devuelve `folder_permission` y
+  Opciones muestra "Autorizar de nuevo".
+- El worker guarda el listado un minuto (`FolderVerifier`) y lo usa así:
+  - **Borrado:** un archivo del índice que falta en la carpeta queda "Falta en disco". No cuenta si la
+    descarga es posterior al listado, si la ruta no está bajo la base o si el recorrido se cortó
+    (20 000 elementos, 12 niveles).
+  - **Adopción:** un archivo nuevo cuya ruta de destino ya existe con el mismo tamaño se indexa como
+    "ya_existe" sin descargarlo. Con tamaño desconocido nunca se adopta.
+- Sin carpeta, sin permiso o con cualquier error, todo sigue como antes (`chrome.downloads.search`).
+
+**Consecuencias.** Un archivo adoptado no tiene descarga del navegador: "Abrir" no está disponible para él.
+Brave trae la File System Access API desactivada; hay que activar `brave://flags/#file-system-access-api`.
+
+## ADR-027 E2E de la carpeta con OPFS
+
+**Contexto.** Playwright no puede manejar el diálogo nativo de elegir carpeta.
+
+**Decisión.** El E2E usa una carpeta del sistema de archivos privado del origen (OPFS,
+`navigator.storage.getDirectory()`). Es un `FileSystemDirectoryHandle` real con permiso de lectura concedido,
+y se guarda donde Opciones guardaría la carpeta elegida. Así el offscreen, el worker y Opciones se prueban
+con un handle de verdad. Las pruebas unitarias usan handles falsos. Elegir una carpeta real se prueba a mano.

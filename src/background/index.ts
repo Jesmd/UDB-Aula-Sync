@@ -11,6 +11,8 @@ import { ensureSyncAlarm, QUEUE_ALARM, scheduleQueueWake, SYNC_ALARM } from './a
 import { setNoveltyBadge } from './badge';
 import { CourseSync } from './course-sync';
 import { createChromeDownloadBackend } from './download-manager';
+import { FolderVerifier } from './folder-verifier';
+import { FOLDER_INFO_KEY } from '../fs-access/folder-info';
 import {
   notifyTabs,
   NOVELTY_NOTIFICATION,
@@ -57,7 +59,27 @@ const services: Promise<DownloadServices> = (async () => {
       set: (paused) => meta.set('queuePaused', paused),
     },
   });
-  const requestDeps = { files, backend, queue, meta, settings: loadSettings };
+  const verifier = new FolderVerifier({
+    configured: async () => (await meta.get(FOLDER_INFO_KEY)) !== undefined,
+    scan: async () => {
+      const result = await sendToOffscreen({ target: 'offscreen', type: 'offscreen/folder-scan' });
+      if (!result.ok) return result;
+      const { rootName, takenAt, truncated, files: entries } = result.value;
+      return {
+        ok: true,
+        value: {
+          rootName,
+          takenAt,
+          truncated,
+          files: new Map(
+            entries.map(([path, size, lastModified]) => [path, { size, lastModified }]),
+          ),
+        },
+      };
+    },
+    log: log.child('folder'),
+  });
+  const requestDeps = { files, backend, queue, meta, settings: loadSettings, folder: verifier };
   // Queue events reach `sync` only after startup, once it exists.
   const sync = new CourseSync({
     snapshots: createSnapshotsRepo(db),
@@ -94,7 +116,17 @@ const services: Promise<DownloadServices> = (async () => {
   await queue.recover();
   await sync.refreshBadge();
   await ensureSyncAlarm((await loadSettings()).syncIntervalHours);
-  return { tasks, files, meta, backend, queue, sync, settings: loadSettings };
+  return {
+    tasks,
+    files,
+    meta,
+    backend,
+    queue,
+    sync,
+    verifier,
+    folder: verifier,
+    settings: loadSettings,
+  };
 })();
 services.catch((cause: unknown) => {
   log.error(`startup failed: ${String(cause)}`);
