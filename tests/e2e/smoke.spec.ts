@@ -12,7 +12,7 @@ test('injects the ready toast in Shadow DOM on the UDB host', async ({ context, 
   // Playwright locators pierce open shadow roots.
   const toast = page.locator('#udbsync-root .udbsync-toast');
   await expect(toast).toContainText('UDB Aula Sync está activo');
-  await expect(page.locator('#udbsync-root [role="status"]')).toHaveAttribute(
+  await expect(page.locator('#udbsync-root .udbsync-toasts')).toHaveAttribute(
     'aria-live',
     'polite',
   );

@@ -33,7 +33,12 @@ test('first click downloads into the course folders; a second click does not dow
   await expect.poll(async () => (await queue()).tasks.map((t) => t.state)).toEqual(['hecha']);
   const toast = page.locator('#udbsync-root .udbsync-toast', { hasText: 'Guardado en' });
   await expect(toast).toContainText(`${WEEK_DIR}/Presentación Semana 12.pptx`);
-  await expect(toast.getByRole('button', { name: 'Mostrar en carpeta' })).toBeVisible();
+  // "Abrir" / "Mostrar en carpeta" live in a framed extension page (ADR-016).
+  const buttons = page.frameLocator('#udbsync-root iframe.udbsync-toast__frame');
+  await expect(buttons.getByRole('button', { name: 'Abrir' })).toBeEnabled();
+  await buttons.getByRole('button', { name: 'Mostrar en carpeta' }).click();
+  await buttons.getByRole('button', { name: 'Abrir' }).click();
+  await expect(buttons.locator('#status')).toHaveText('');
 
   const afterFirst = await pluginfileGets(mock, 5101);
   expect(afterFirst).toBe(before + 1);
@@ -82,4 +87,19 @@ test('modified clicks keep the native behavior', async ({ context, mock, queue }
   await page.locator('#module-2102 a.aalink').click({ modifiers: ['ControlOrMeta'] });
   await (await popup).close();
   expect((await queue()).tasks).toHaveLength(0);
+});
+
+test('a badge above the cursor shows when a file is ready to save', async ({ context, mock }) => {
+  const page = await context.newPage();
+  await page.goto(COURSE);
+  const badge = page.locator('#udbsync-root .udbsync-cursor-badge');
+  await hoverAndResolve(page, mock, 2102);
+  await expect(badge).toHaveAttribute('data-visible', 'true');
+  await expect(badge).toHaveAttribute('data-state', 'ready');
+  await expect(badge).toHaveText(/Clic para guardar/);
+  // Another file (HEAD refused, GET fallback) is also ready.
+  await hoverAndResolve(page, mock, 2104);
+  await expect(badge).toHaveAttribute('data-state', 'ready');
+  await page.mouse.move(0, 0);
+  await expect(badge).toHaveAttribute('data-visible', 'false');
 });

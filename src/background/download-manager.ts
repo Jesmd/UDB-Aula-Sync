@@ -34,6 +34,7 @@ export interface DownloadBackend {
   get(id: number): Promise<DownloadInfo | null>;
   open(id: number): Promise<Result<void, AppError>>;
   show(id: number): Promise<Result<void, AppError>>;
+  cancel(id: number): Promise<void>;
   /** Deletes a file this extension just wrote by mistake (e.g. a login page saved as a PDF). */
   removeFile(id: number): Promise<void>;
   onChanged(listener: (delta: DownloadDelta) => void): void;
@@ -112,6 +113,9 @@ export function createChromeDownloadBackend(): DownloadBackend {
       } catch (cause) {
         return err(appError('open_blocked', message(cause)));
       }
+    },
+    cancel: async (id) => {
+      await chrome.downloads.cancel(id).catch(() => undefined);
     },
     removeFile: async (id) => {
       await chrome.downloads.removeFile(id).catch(() => undefined);

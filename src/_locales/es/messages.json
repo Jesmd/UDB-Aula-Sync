@@ -95,6 +95,24 @@
   "dlShow": {
     "message": "Mostrar en carpeta"
   },
+  "dlOpenUnavailable": {
+    "message": "Archivo no disponible."
+  },
+  "dlOpenFailed": {
+    "message": "No se pudo abrir."
+  },
+  "badgeResolving": {
+    "message": "Preparando…"
+  },
+  "badgeReady": {
+    "message": "Clic para guardar"
+  },
+  "badgeReadOnly": {
+    "message": "Solo lectura"
+  },
+  "badgeError": {
+    "message": "No disponible"
+  },
   "popupTitle": {
     "message": "UDB Aula Sync"
   },
@@ -169,9 +187,6 @@
   },
   "optionsTitle": {
     "message": "Opciones de UDB Aula Sync"
-  },
-  "optionsPending": {
-    "message": "Esta sección estará disponible en un hito posterior."
   },
   "tabGeneral": {
     "message": "General"
@@ -271,5 +286,508 @@
   },
   "error_invalid_template": {
     "message": "La plantilla de rutas no es válida."
+  },
+  "panelOpen": {
+    "message": "Descargas del curso"
+  },
+  "panelTitle": {
+    "message": "UDB Aula Sync"
+  },
+  "panelSection": {
+    "message": "Descargar esta sección"
+  },
+  "panelAll": {
+    "message": "Descargar todo el curso"
+  },
+  "panelNew": {
+    "message": "Solo nuevos"
+  },
+  "panelRetry": {
+    "message": "Reintentar fallidos"
+  },
+  "panelCancel": {
+    "message": "Cancelar"
+  },
+  "panelClose": {
+    "message": "Cerrar"
+  },
+  "panelHint": {
+    "message": "Compara con lo ya descargado y baja solo lo que falta o cambió."
+  },
+  "scanSections": {
+    "message": "Buscando secciones… $DONE$ de $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "scanFiles": {
+    "message": "Revisando archivos… $DONE$ de $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "scanPlanning": {
+    "message": "Preparando el plan…"
+  },
+  "planTitle": {
+    "message": "Plan de descarga"
+  },
+  "planNew": {
+    "message": "Nuevos"
+  },
+  "planUpdated": {
+    "message": "Actualizados"
+  },
+  "planUnchanged": {
+    "message": "Sin cambios"
+  },
+  "planMissing": {
+    "message": "Faltan en disco"
+  },
+  "planReadOnly": {
+    "message": "Solo lectura"
+  },
+  "planOmitted": {
+    "message": "Omitidos por filtro"
+  },
+  "planErrors": {
+    "message": "Con error"
+  },
+  "planSkippedSections": {
+    "message": "Secciones omitidas"
+  },
+  "planTotal": {
+    "message": "Se descargarán $COUNT$ archivos ($SIZE$).",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "size": {
+        "content": "$2"
+      }
+    }
+  },
+  "planUnknownSizes": {
+    "message": "$COUNT$ sin tamaño conocido.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "planConfirm": {
+    "message": "Descargar $COUNT$ archivos",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "planBig": {
+    "message": "Es una descarga grande (más de 100 archivos o 200 MB). Confírmala para continuar."
+  },
+  "planNothing": {
+    "message": "No hay nada que descargar: todo está al día."
+  },
+  "bulkProgress": {
+    "message": "Descargando: $DONE$ de $TOTAL$ listos, $FAILED$ con error.",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      },
+      "failed": {
+        "content": "$3"
+      }
+    }
+  },
+  "bulkDone": {
+    "message": "Listo: $DONE$ descargados, $FAILED$ con error.",
+    "placeholders": {
+      "done": {
+        "content": "$1"
+      },
+      "failed": {
+        "content": "$2"
+      }
+    }
+  },
+  "retryDone": {
+    "message": "Reintentando $COUNT$ descargas.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "statusNuevo": {
+    "message": "Nuevo"
+  },
+  "statusDescargado": {
+    "message": "Descargado"
+  },
+  "statusActualizado": {
+    "message": "Actualizado"
+  },
+  "statusSoloLectura": {
+    "message": "Solo lectura"
+  },
+  "statusPerdido": {
+    "message": "Falta en disco"
+  },
+  "statusOmitido": {
+    "message": "Omitido"
+  },
+  "statusError": {
+    "message": "Error"
+  },
+  "cardType": {
+    "message": "Tipo"
+  },
+  "cardFile": {
+    "message": "Archivo"
+  },
+  "cardSize": {
+    "message": "Tamaño"
+  },
+  "cardDest": {
+    "message": "Se guarda en"
+  },
+  "cardStatus": {
+    "message": "Estado"
+  },
+  "cardDownload": {
+    "message": "Descargar"
+  },
+  "cardCopy": {
+    "message": "Copiar ruta"
+  },
+  "cardCopied": {
+    "message": "Ruta copiada"
+  },
+  "cardUnknown": {
+    "message": "desconocido"
+  },
+  "popupQueueTitle": {
+    "message": "Descargas"
+  },
+  "queueEmpty": {
+    "message": "No hay descargas pendientes."
+  },
+  "queueCounts": {
+    "message": "$WAITING$ en cola · $ACTIVE$ en curso · $FAILED$ con error",
+    "placeholders": {
+      "waiting": {
+        "content": "$1"
+      },
+      "active": {
+        "content": "$2"
+      },
+      "failed": {
+        "content": "$3"
+      }
+    }
+  },
+  "queueCurrent": {
+    "message": "Ahora: $FILE$",
+    "placeholders": {
+      "file": {
+        "content": "$1"
+      }
+    }
+  },
+  "queuePausedUser": {
+    "message": "En pausa."
+  },
+  "queuePausedSession": {
+    "message": "En pausa: tu sesión del Aula Digital expiró. Inicia sesión de nuevo y pulsa Reanudar."
+  },
+  "queuePause": {
+    "message": "Pausar"
+  },
+  "queueResume": {
+    "message": "Reanudar"
+  },
+  "queueCancel": {
+    "message": "Cancelar pendientes"
+  },
+  "queueCancelSure": {
+    "message": "¿Seguro? Pulsa otra vez"
+  },
+  "queueRetry": {
+    "message": "Reintentar fallidas"
+  },
+  "popupCoursesTitle": {
+    "message": "Cursos"
+  },
+  "coursesEmpty": {
+    "message": "Aún no has descargado nada. Abre un curso del Aula Digital y usa «Descargas del curso»."
+  },
+  "courseNoFiles": {
+    "message": "Sin descargas"
+  },
+  "courseInfo": {
+    "message": "$COUNT$ archivos · última: $DATE$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "date": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSearchTitle": {
+    "message": "Buscar en lo descargado"
+  },
+  "searchLabel": {
+    "message": "Nombre, curso o carpeta"
+  },
+  "searchNone": {
+    "message": "Sin resultados."
+  },
+  "popupDiagTitle": {
+    "message": "Diagnóstico"
+  },
+  "tabCourses": {
+    "message": "Cursos"
+  },
+  "optSaved": {
+    "message": "Cambios guardados."
+  },
+  "optSaveError": {
+    "message": "No se pudieron guardar los cambios."
+  },
+  "optInterceptClicks": {
+    "message": "Descargar al hacer clic en un archivo del curso"
+  },
+  "optInterceptClicksHint": {
+    "message": "Guarda el archivo en su carpeta en lugar de abrir el visor del Aula Digital. Ctrl+clic o clic central siguen abriendo el enlace normal."
+  },
+  "optOpenAfter": {
+    "message": "Abrir el archivo al terminar la descarga"
+  },
+  "optOpenAfterHint": {
+    "message": "Solo para tipos seguros (PDF, Office, imágenes, texto). Nunca se abren ejecutables, scripts, archivos con macros ni comprimidos."
+  },
+  "optHoverDetails": {
+    "message": "Al pasar el cursor sobre un archivo"
+  },
+  "optHoverSimple": {
+    "message": "Indicador simple"
+  },
+  "optHoverSimpleHint": {
+    "message": "una etiqueta pequeña junto al cursor"
+  },
+  "optHoverCard": {
+    "message": "Tarjeta de detalles"
+  },
+  "optHoverCardHint": {
+    "message": "tipo, tamaño, estado y dónde se guardará"
+  },
+  "optStatusBadges": {
+    "message": "Mostrar el estado junto a cada archivo"
+  },
+  "optStatusBadgesHint": {
+    "message": "Nuevo, Descargado, Actualizado, Solo lectura… calculado con tu índice local."
+  },
+  "optResetTitle": {
+    "message": "Restablecer"
+  },
+  "optResetHint": {
+    "message": "Vuelve a los valores iniciales, incluidos los ajustes por curso. Tus archivos y el índice no se tocan."
+  },
+  "optReset": {
+    "message": "Restablecer ajustes"
+  },
+  "optResetSure": {
+    "message": "¿Seguro? Pulsa otra vez"
+  },
+  "optPathsIntro": {
+    "message": "Todo se guarda dentro de la carpeta Descargas del navegador."
+  },
+  "optPreview": {
+    "message": "Ejemplo:"
+  },
+  "optBase": {
+    "message": "Carpeta base"
+  },
+  "optBaseHint": {
+    "message": "Dentro de Descargas. Puede tener subcarpetas, por ejemplo UDB/2026."
+  },
+  "optErrBase": {
+    "message": "Escribe entre 1 y 80 caracteres."
+  },
+  "optTemplate": {
+    "message": "Plantilla de ruta"
+  },
+  "optTemplateHint": {
+    "message": "Separa carpetas con /. Debe terminar en {archivo}. Disponibles: $TOKENS$",
+    "placeholders": {
+      "tokens": {
+        "content": "$1"
+      }
+    }
+  },
+  "optErrTemplate": {
+    "message": "Plantilla no válida: revisa las llaves y que termine en {archivo}."
+  },
+  "optIncludeParent": {
+    "message": "Carpeta para la pestaña padre"
+  },
+  "optIncludeParentHint": {
+    "message": "En cursos con pestañas de dos niveles (Unidad 1 › Semana 3)."
+  },
+  "optGroupByCycle": {
+    "message": "Agrupar por ciclo"
+  },
+  "optGroupByCycleHint": {
+    "message": "Añade una carpeta como 2026-C02 después de la base cuando el código del curso lo indica."
+  },
+  "optPadNumbers": {
+    "message": "Rellenar números con ceros"
+  },
+  "optPadNumbersHint": {
+    "message": "Semana 3 → Semana 03, para que se ordenen bien."
+  },
+  "optOrderPrefix": {
+    "message": "Prefijo de orden en secciones"
+  },
+  "optOrderPrefixHint": {
+    "message": "04 - Semana 3: las carpetas siguen el orden del curso."
+  },
+  "optFileNaming": {
+    "message": "Nombre del archivo guardado"
+  },
+  "optNamingActivity": {
+    "message": "Nombre de la actividad"
+  },
+  "optNamingOriginal": {
+    "message": "Nombre original del archivo"
+  },
+  "optNamingBoth": {
+    "message": "Ambos"
+  },
+  "optNamingFolderNote": {
+    "message": "Los archivos dentro de una carpeta del curso siempre conservan su nombre original."
+  },
+  "optUpdatePolicy": {
+    "message": "Si un archivo cambió en el Aula Digital"
+  },
+  "optPolicyKeep": {
+    "message": "Conservar ambas versiones"
+  },
+  "optPolicyKeepHint": {
+    "message": "la nueva se guarda con «(rev N)»; no pierdes tus notas"
+  },
+  "optPolicyOverwrite": {
+    "message": "Reemplazar el archivo"
+  },
+  "optPolicySkip": {
+    "message": "No descargar la nueva versión"
+  },
+  "optFiltersTitle": {
+    "message": "Filtros para «Descargar todo»"
+  },
+  "optFiltersHint": {
+    "message": "Los archivos filtrados aparecen como Omitido. Un clic sobre un archivo siempre lo descarga."
+  },
+  "optExcluded": {
+    "message": "Extensiones que no se descargan"
+  },
+  "optExcludedHint": {
+    "message": "Separadas por comas, por ejemplo: mp4, zip"
+  },
+  "optErrExtensions": {
+    "message": "Usa extensiones de letras y números separadas por comas (máximo 40)."
+  },
+  "optMaxSize": {
+    "message": "Tamaño máximo (MB)"
+  },
+  "optMaxSizeHint": {
+    "message": "Vacío = sin límite."
+  },
+  "optErrSize": {
+    "message": "Escribe un número entero entre 1 y 10000, o déjalo vacío."
+  },
+  "optNewsTitle": {
+    "message": "Novedades"
+  },
+  "optInterval": {
+    "message": "Buscar novedades cada (horas)"
+  },
+  "optIntervalHint": {
+    "message": "Entre 1 y 48. La búsqueda automática llega en la próxima versión."
+  },
+  "optErrInterval": {
+    "message": "Escribe un número entero entre 1 y 48."
+  },
+  "optCoursesIntro": {
+    "message": "Ajustes que solo aplican a un curso. Los campos vacíos usan el valor general."
+  },
+  "optCoursesEmpty": {
+    "message": "Aparecerán aquí los cursos que abras con la extensión activa."
+  },
+  "optCourseCustom": {
+    "message": "personalizado"
+  },
+  "optCourseInherit": {
+    "message": "Vacío = usar el valor general."
+  },
+  "optSkipSections": {
+    "message": "Pestañas o secciones que no se descargan"
+  },
+  "optSkipSectionsHint": {
+    "message": "Una por línea, por ejemplo: Recursos Bibliográficos. No distingue mayúsculas ni tildes."
+  },
+  "optCourseReset": {
+    "message": "Quitar ajustes de este curso"
+  },
+  "secHostTitle": {
+    "message": "Dónde actúa"
+  },
+  "secHost": {
+    "message": "Solo en $URL$. No puede leer ni cambiar otros sitios.",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "secOpenTitle": {
+    "message": "Qué abre automáticamente"
+  },
+  "secOpen": {
+    "message": "Al terminar una descarga solo abre estos tipos:"
+  },
+  "secNeverOpen": {
+    "message": "Ejecutables, scripts, documentos con macros (docm, xlsm, pptm) y comprimidos nunca se abren solos: se muestran en su carpeta."
+  },
+  "secDataTitle": {
+    "message": "Tus datos"
+  },
+  "secNoPasswords": {
+    "message": "No inicia sesión por ti ni guarda contraseñas, cookies o tokens: usa tu sesión abierta."
+  },
+  "secNoServers": {
+    "message": "No envía datos a ningún servidor ni tiene analíticas. El índice queda en este navegador."
+  },
+  "secReadOnly": {
+    "message": "Lo que el Aula Digital solo deja ver en su visor queda como «Solo lectura»; no se captura."
+  },
+  "secGentle": {
+    "message": "Pide pocas cosas a la vez (máximo 2) con pausas, y se detiene si la sesión expira."
   }
 }
