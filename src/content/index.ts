@@ -1,3 +1,4 @@
+import { politeFetch } from '../core/http/polite-fetch';
 import { createRateLimiter } from '../core/http/rate-limiter';
 import { sendMessage } from '../shared/browser-api';
 import { MOODLE_BASE_PATH, PROBE_CACHE_TTL_MS, RATE_LIMIT } from '../shared/constants';
@@ -63,7 +64,8 @@ function main(): void {
   // One limiter for every request this page makes: at most 2 at once, spaced (spec §2).
   // Same-origin fetches carry the session cookie (no H3 dependency).
   const limiter = createRateLimiter(RATE_LIMIT);
-  const limitedFetch: FetchLike = (input, init) => limiter.schedule(() => fetch(input, init));
+  // It also waits and retries on 429/5xx, honoring Retry-After.
+  const limitedFetch: FetchLike = politeFetch((input, init) => fetch(input, init), { limiter });
   const cache = new ResolveCache(
     (cmid) =>
       resolveResource(cmid, {

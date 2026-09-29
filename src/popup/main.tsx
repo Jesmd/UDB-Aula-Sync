@@ -7,6 +7,7 @@ import { FileSearch } from './components/FileSearch';
 import { HypothesesPanel } from './components/HypothesesPanel';
 import { QueuePanel } from './components/QueuePanel';
 import { ServiceStatus } from './components/ServiceStatus';
+import { SyncPanel } from './components/SyncPanel';
 import { useQueue } from './use-queue';
 
 function Popup() {
@@ -18,9 +19,10 @@ function Popup() {
       {failed && data === null && <p class="status-error">{t('popupStatusError')}</p>}
       {data !== null && (
         <>
+          <SyncPanel data={data} refresh={refresh} />
           <QueuePanel data={data} refresh={refresh} />
           <FileSearch data={data} />
-          <CourseList data={data} />
+          <CourseList data={data} refresh={refresh} />
         </>
       )}
       <button type="button" class="secondary" onClick={() => void chrome.runtime.openOptionsPage()}>

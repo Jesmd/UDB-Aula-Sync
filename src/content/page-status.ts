@@ -46,6 +46,9 @@ export class PageStatus {
       if (this.pills.get(file.cmid) !== undefined) continue;
       this.pills.set(file.cmid, file.localExists === false ? 'perdido_local' : 'descargado');
     }
+    // New since the last sync ("NUEVO", spec §3.4).
+    for (const cmid of result.value.novelties)
+      if (this.pills.get(cmid) === undefined) this.pills.set(cmid, 'nuevo');
   }
 
   onPreview(cmid: number, preview: DownloadPreviewResponse): void {
