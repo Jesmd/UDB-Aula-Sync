@@ -8,6 +8,8 @@ import type { TasksRepo } from '../storage/tasks-repo';
 import type { MetaRepo } from '../storage/meta-repo';
 import { isLoginUrl } from '../moodle/session';
 import type { CourseSync } from './course-sync';
+import { existsInFolder, folderMatchesBase } from '../fs-access/adopt-existing';
+import type { FolderVerifier } from './folder-verifier';
 import {
   courseFileStatuses,
   handleDownloadRequest,
@@ -61,12 +63,14 @@ const ALLOWED: Record<BackgroundRequest['type'], readonly SenderKind[]> = {
   'snapshot/save': ['udb-content'],
   'sync/run': ['extension-page'],
   'novelties/clear': ['extension-page'],
+  'folder/check': ['extension-page'],
 };
 
 export interface DownloadServices extends RequestDeps {
   readonly tasks: TasksRepo;
   readonly meta: MetaRepo;
   readonly sync: CourseSync;
+  readonly verifier: FolderVerifier;
 }
 
 export interface RouterDeps {
@@ -82,7 +86,7 @@ async function handle(
   tabId: number | null,
 ): Promise<ResponseFor<BackgroundRequest>> {
   const needsDownloads =
-    /^(download|queue|files|snapshot|sync|novelties)\//.test(message.type) ||
+    /^(download|queue|files|snapshot|sync|novelties|folder)\//.test(message.type) ||
     message.type === 'content/hello';
   const downloads =
     needsDownloads && deps.downloads !== undefined ? await deps.downloads() : undefined;
@@ -150,6 +154,24 @@ async function handle(
     case 'sync/run':
       if (downloads === undefined) return err(appError('unsupported_message', message.type));
       return ok(await downloads.sync.run('manual'));
+    case 'folder/check': {
+      if (downloads === undefined) return err(appError('unsupported_message', message.type));
+      const scanned = await downloads.verifier.refresh();
+      if (!scanned.ok) return scanned;
+      const listing = scanned.value;
+      const { base } = (await downloads.settings()).paths;
+      const missing = (await downloads.files.listAll())
+        .filter((r) => existsInFolder(listing, r.relativePath, base, r.downloadedAt) === false)
+        .map((r) => r.relativePath);
+      return ok({
+        rootName: listing.rootName,
+        files: listing.files.size,
+        truncated: listing.truncated,
+        matchesBase: folderMatchesBase(listing, base),
+        missing: missing.length,
+        missingSample: missing.slice(0, 10),
+      });
+    }
     case 'novelties/clear':
       if (downloads === undefined) return err(appError('unsupported_message', message.type));
       await downloads.sync.clear(message.courseId);
