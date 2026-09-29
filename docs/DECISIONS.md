@@ -342,7 +342,7 @@ La foto guarda ids, nombres y disponibilidad, nunca HTML (`snapshots` en Indexed
 
 **Consecuencias.** La página y el segundo plano tienen limitadores separados. Si el usuario escanea un curso
 justo durante una búsqueda periódica podría haber hasta 4 peticiones a la vez; es raro y breve. Depende de
-H3 (la cookie de sesión viaja en el `fetch` del offscreen), aún sin verificar en Brave.
+H3 (la cookie de sesión viaja en el `fetch` del offscreen), confirmada en Brave el 2026-09-29.
 
 ## ADR-025 Sesión caducada en segundo plano
 
