@@ -9,16 +9,22 @@ Ninguna se da por hecha en el código.
 
 ## Hipótesis
 
-| Id  | Hipótesis                                                                                      | Estado        | Evidencia                                                                                                                       |
-| --- | ---------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| H1  | `mod/resource/view.php?id=X&redirect=1` redirige a `pluginfile.php`                            | sin verificar | Implementada con respaldo (recurso embebido/enlace). Confirmada solo contra el simulador. Probar con Popup > "Probar hipótesis" |
-| H2  | La URL de recurso lleva revisión: `/pluginfile.php/<ctx>/mod_resource/content/<rev>/<archivo>` | sin verificar | Parser de `pluginfile` con revisión (`mod_resource`/`mod_folder` `content`). Confirmada solo contra el simulador                |
-| H3  | `fetch` desde service worker/offscreen envía la cookie de sesión                               | sin verificar | Pendiente de Opciones > Diagnóstico en Brave (M0)                                                                               |
-| H4  | `pluginfile.php` acepta HEAD                                                                   | sin verificar | HEAD con respaldo a GET cortado tras las cabeceras. Confirmada solo contra el simulador                                         |
-| H5  | Sección Onetopic: `course/view.php?id=<id>&section=<n>`; pestañas atenuadas = no disponibles   | parcial       | URL confirmada (curso 49946, 2026-09-29), con sufijo `#tabs-tree-start`. Pestañas atenuadas sin verificar                       |
-| H6  | `mod_folder` muestra un árbol con un enlace `pluginfile` por archivo (sin revisión fiable)     | sin verificar | La estructura se toma de la ruta `pluginfile` (no del árbol). Confirmada solo contra el simulador                               |
+| Id  | Hipótesis                                                                                      | Estado        | Evidencia                                                                                                                                   |
+| --- | ---------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| H1  | `mod/resource/view.php?id=X&redirect=1` redirige a `pluginfile.php`                            | confirmada    | Curso 49946, cmid 2229872, 2026-09-29: termina en `pluginfile.php` (Brave, "Probar hipótesis")                                              |
+| H2  | La URL de recurso lleva revisión: `/pluginfile.php/<ctx>/mod_resource/content/<rev>/<archivo>` | parcial       | El segmento existe pero vale **0** (curso 49946). No sirve sola para detectar cambios: la huella debe usar tamaño, `Last-Modified` y `ETag` |
+| H3  | `fetch` desde service worker/offscreen envía la cookie de sesión                               | sin verificar | Pendiente de Opciones > Diagnóstico en Brave (M0)                                                                                           |
+| H4  | `pluginfile.php` acepta HEAD                                                                   | confirmada    | HEAD 200 con `Content-Length` 341955, `application/pdf` y nombre en Content-Disposition (curso 49946)                                       |
+| H5  | Sección Onetopic: `course/view.php?id=<id>&section=<n>`; pestañas atenuadas = no disponibles   | parcial       | URL confirmada (curso 49946): 10 pestañas, sufijo `#tabs-tree-start`. Pestañas atenuadas sin verificar (0 en ese curso)                     |
+| H6  | `mod_folder` muestra un árbol con un enlace `pluginfile` por archivo (sin revisión fiable)     | sin verificar | Sin carpetas en el curso probado. Confirmada solo contra el simulador                                                                       |
 
 ## Checkpoint M2: hipótesis en el sitio real
+
+Resultado (Brave, curso 49946, 2026-09-29, 2 peticiones): H1, H4 confirmadas; H2 parcial (revisión 0);
+H5 confirmada para las URL; H6 sin datos. El Diagnóstico sin `?section=` identificó la sección
+mostrada por la miga de pan, como se esperaba.
+
+Pendiente: repetir en un curso con carpeta (H6) y con semanas atenuadas (H5).
 
 En un curso con recursos (y, si es posible, una carpeta): icono de la extensión > **Probar hipótesis
 (H1, H2, H4-H6)** > Continuar. Hace como máximo 4 peticiones, con pausas, y guarda
