@@ -94,31 +94,35 @@ export const test = base.extend<Fixtures>({
   extensionId: async ({ worker }, use) => {
     await use(new URL(worker.url()).host);
   },
-  mock: async ({ context }, use) => {
-    const call = async (path: string) => {
-      const response = await context.request.get(`${MOCK}${path}`);
-      if (!response.ok()) throw new Error(`mock ${path}: ${response.status()}`);
-      return (await response.json()) as unknown;
-    };
-    const control: MockControl = {
-      reset: async () => {
-        await call('/__test/reset');
-      },
-      requests: async () => ((await call('/__test/state')) as { requests: string[] }).requests,
-      setSession: async (loggedIn) => {
-        await call(`/__test/session?loggedIn=${loggedIn ? 1 : 0}`);
-      },
-      setResource: async (cmid, changes) => {
-        const query = new URLSearchParams({
-          cmid: String(cmid),
-          ...Object.fromEntries(Object.entries(changes).map(([k, v]) => [k, String(v)])),
-        });
-        await call(`/__test/resource?${query.toString()}`);
-      },
-    };
-    await control.reset();
-    await use(control);
-  },
+  // Auto: every test starts from a clean mock, even when it never touches it.
+  mock: [
+    async ({ context }, use) => {
+      const call = async (path: string) => {
+        const response = await context.request.get(`${MOCK}${path}`);
+        if (!response.ok()) throw new Error(`mock ${path}: ${response.status()}`);
+        return (await response.json()) as unknown;
+      };
+      const control: MockControl = {
+        reset: async () => {
+          await call('/__test/reset');
+        },
+        requests: async () => ((await call('/__test/state')) as { requests: string[] }).requests,
+        setSession: async (loggedIn) => {
+          await call(`/__test/session?loggedIn=${loggedIn ? 1 : 0}`);
+        },
+        setResource: async (cmid, changes) => {
+          const query = new URLSearchParams({
+            cmid: String(cmid),
+            ...Object.fromEntries(Object.entries(changes).map(([k, v]) => [k, String(v)])),
+          });
+          await call(`/__test/resource?${query.toString()}`);
+        },
+      };
+      await control.reset();
+      await use(control);
+    },
+    { auto: true },
+  ],
   extPage: async ({ context, extensionId }, use) => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/src/options/index.html`);
