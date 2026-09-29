@@ -10,6 +10,8 @@ import { loadSettings } from '../storage/settings';
 import { DEFAULT_SETTINGS, type Settings } from '../storage/settings-schema';
 import { registerDiagnostics } from './diagnostics';
 import { DownloadsUi } from './downloads-ui';
+import { installHoverIndicator } from './hover-indicator';
+import { CursorBadge } from './ui/cursor-badge';
 import { installInterceptor } from './interceptor';
 import { observeDebounced } from './observers';
 import { PageContext } from './page-context';
@@ -65,6 +67,18 @@ function main(): void {
     }),
   );
   const ui = new DownloadsUi(root);
+  installHoverIndicator({
+    doc: document,
+    context,
+    cache,
+    enabled: () => settings.interceptClicks,
+    badge: new CursorBadge(root, {
+      resolving: t('badgeResolving'),
+      ready: t('badgeReady'),
+      readonly: t('badgeReadOnly'),
+      error: t('badgeError'),
+    }),
+  });
   installInterceptor({
     doc: document,
     context,
