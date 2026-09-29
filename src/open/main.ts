@@ -1,6 +1,6 @@
-import { openDecision } from '../background/safe-open';
 import { sendMessage } from '../shared/browser-api';
 import { t } from '../shared/i18n';
+import { openOrShow } from '../ui/open-file';
 
 /**
  * Framed inside a toast on the Aula Digital page. The buttons call chrome.downloads
@@ -29,18 +29,12 @@ async function main(): Promise<void> {
     return;
   }
   const { downloadId, extension } = file.value;
-  // Types outside the allowlist are never opened automatically; "Abrir" shows them instead.
-  const canOpen = openDecision(extension) === 'open';
 
   openButton.disabled = false;
   showButton.disabled = false;
   openButton.addEventListener('click', () => {
     fail('');
-    if (!canOpen) {
-      chrome.downloads.show(downloadId);
-      return;
-    }
-    chrome.downloads.open(downloadId).catch((cause: unknown) => {
+    openOrShow(downloadId, extension).catch((cause: unknown) => {
       fail(`${t('dlOpenFailed')} ${cause instanceof Error ? cause.message : ''}`.trim());
     });
   });
