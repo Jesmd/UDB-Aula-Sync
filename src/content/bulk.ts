@@ -201,6 +201,7 @@ export class BulkRunner {
           [t('planNew'), plan.counts.nuevo],
           [t('planUpdated'), plan.counts.actualizado],
           [t('planMissing'), plan.counts.perdido_local],
+          [t('planAdopted'), plan.counts.ya_existe],
           [t('planUnchanged'), plan.counts.sin_cambios],
           [t('planReadOnly'), plan.counts.solo_lectura],
           [t('planOmitted'), plan.counts.omitido],

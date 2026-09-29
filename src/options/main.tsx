@@ -4,6 +4,7 @@ import { t, type MessageKey } from '../shared/i18n';
 import '../ui/page.css';
 import { CoursesPage } from './pages/Courses';
 import { DiagnosticsPage } from './pages/Diagnostics';
+import { FolderPage } from './pages/Folder';
 import { GeneralPage } from './pages/General';
 import { NamesPage } from './pages/Names';
 import { PathsPage } from './pages/Paths';
@@ -17,6 +18,7 @@ const TABS = [
   { id: 'names', label: 'tabNames', Page: NamesPage },
   { id: 'sync', label: 'tabSync', Page: SyncPage },
   { id: 'courses', label: 'tabCourses', Page: CoursesPage },
+  { id: 'folder', label: 'tabFolder', Page: FolderPage },
   { id: 'security', label: 'tabSecurity', Page: SecurityPage },
   { id: 'diagnostics', label: 'tabDiagnostics', Page: DiagnosticsPage },
 ] as const satisfies readonly {
