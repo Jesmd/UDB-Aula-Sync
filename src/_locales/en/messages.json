@@ -95,6 +95,24 @@
   "dlShow": {
     "message": "Show in folder"
   },
+  "dlOpenUnavailable": {
+    "message": "File not available."
+  },
+  "dlOpenFailed": {
+    "message": "Could not open."
+  },
+  "badgeResolving": {
+    "message": "Preparing…"
+  },
+  "badgeReady": {
+    "message": "Click to save"
+  },
+  "badgeReadOnly": {
+    "message": "Read-only"
+  },
+  "badgeError": {
+    "message": "Not available"
+  },
   "popupTitle": {
     "message": "UDB Aula Sync"
   },
