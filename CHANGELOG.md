@@ -4,6 +4,25 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+## [1.0.0] - 2026-09-29
+
+### Añadido (M7)
+
+- M7: copia de seguridad. Opciones > General > "Exportar" e "Importar" (ajustes, índice, cursos en
+  seguimiento), con validación completa del archivo.
+- M7: el registro del worker sobrevive a sus reinicios (300 entradas, redactadas) y se incluye en
+  "Exportar registro".
+- M7: presupuesto de tamaño del content script en el build (60 KB gzip) y control de tareas largas en E2E.
+- M7: guía de instalación desde zip, actualización y primer uso en el README.
+
+### Cambiado (M7)
+
+- Todos los mensajes de error pasan por un único traductor: un código desconocido muestra el error
+  genérico, nunca la clave.
+- El documento offscreen solo acepta mensajes del worker. Las copias importadas solo aceptan URL del Aula
+  Digital.
+- Versión 1.0.0.
+
 ### Añadido
 
 - Etiqueta animada sobre el cursor en los archivos descargables ("Preparando…" y luego "Clic para guardar";

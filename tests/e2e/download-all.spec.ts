@@ -38,6 +38,14 @@ test('"Descargar todo" downloads the course into its folders; "Solo nuevos" then
 }) => {
   const page = await context.newPage();
   const panel = await openPanel(page);
+  // Spec §8: nothing blocks the page for more than 50 ms while the course is scanned.
+  await page.evaluate(() => {
+    const store = window as unknown as { udbsyncLongTasks: number[] };
+    store.udbsyncLongTasks = [];
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) store.udbsyncLongTasks.push(entry.duration);
+    }).observe({ type: 'longtask' });
+  });
   await panel.getByRole('button', { name: 'Descargar todo el curso' }).click();
 
   // 6 files, well under the confirmation threshold: starts without asking. "Examen
@@ -76,6 +84,11 @@ test('"Descargar todo" downloads the course into its folders; "Solo nuevos" then
   expect(axe.violations.map((v) => v.id)).toEqual([]);
   expect(axe.passes.length).toBeGreaterThan(0);
 
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { udbsyncLongTasks: number[] }).udbsyncLongTasks,
+    ),
+  ).toEqual([]);
   // Never more than 2 requests at once (spec §2).
   expect(await mock.maxInFlight()).toBeLessThanOrEqual(2);
 

@@ -25,6 +25,7 @@ export const ERROR_CODES = [
   'invalid_template',
   'folder_not_set',
   'folder_permission',
+  'invalid_backup',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
