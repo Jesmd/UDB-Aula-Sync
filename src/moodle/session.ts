@@ -1,3 +1,5 @@
+import { queryFirst } from './dom';
+import { SELECTORS } from './selectors';
 import type { FetchProbe } from '../shared/messages';
 
 const LOGIN_PATH = /\/login\/index\.php(?:$|[?#])/;
@@ -31,4 +33,11 @@ export async function probeSession(
     redirected: response.redirected,
     sessionSent: response.ok && !isLoginUrl(response.url),
   };
+}
+
+/** True for the Moodle login page, which Moodle serves when the session expired. */
+export function isLoginDocument(doc: Document): boolean {
+  if (doc.body.id === 'page-login-index') return true;
+  const form = queryFirst(doc, SELECTORS.loginForm);
+  return form !== null && form.querySelector('input[name="password"]') !== null;
 }
