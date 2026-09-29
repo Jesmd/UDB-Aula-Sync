@@ -7,6 +7,7 @@ export const ERROR_CODES = [
   'invalid_message',
   'unsupported_message',
   'session_expired',
+  'not_course_page',
   'network',
   'http_status',
   'rate_limited',

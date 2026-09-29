@@ -49,3 +49,23 @@ describe('probeSession', () => {
     expect(probe.redirected).toBe(true);
   });
 });
+
+describe('isLoginDocument', () => {
+  it('detects the login page by body id or form', async () => {
+    const { JSDOM } = await import('jsdom');
+    const { isLoginDocument } = await import('../../../src/moodle/session');
+    const doc = (html: string) => new JSDOM(html).window.document;
+    expect(isLoginDocument(doc('<body id="page-login-index"></body>'))).toBe(true);
+    expect(
+      isLoginDocument(
+        doc(
+          '<body><form id="login"><input name="username"><input name="password" type="password"></form></body>',
+        ),
+      ),
+    ).toBe(true);
+    expect(isLoginDocument(doc('<body><form id="login"><input name="q"></form></body>'))).toBe(
+      false,
+    );
+    expect(isLoginDocument(doc('<body class="format-topics"></body>'))).toBe(false);
+  });
+});

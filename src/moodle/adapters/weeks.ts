@@ -1,2 +1,4 @@
-// M1: course layout adapter (weeks). All adapters pass the same contract suite.
-export {};
+import { createSectionedPageAdapter } from './topics';
+
+/** format_weeks renders like topics; section names are date ranges. */
+export const weeksAdapter = createSectionedPageAdapter('weeks');
