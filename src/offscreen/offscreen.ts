@@ -6,6 +6,29 @@ import { createRateLimiter } from '../core/http/rate-limiter';
 import { syncCourse } from '../moodle/course-sync';
 import { probeSession } from '../moodle/session';
 import { MOODLE_ROOT_URL } from '../shared/constants';
+import { createHandleStore, folderPermission } from '../fs-access/directory-handle';
+import { scanFolder } from '../fs-access/scan-folder';
+import { openDatabase } from '../storage/db';
+import type { FolderScanResult } from '../shared/messages';
+import type { AppError } from '../shared/errors';
+import type { Result } from '../shared/result';
+
+/** Reads the chosen folder. The permission cannot be asked for here (no user click). */
+async function readFolder(): Promise<Result<FolderScanResult, AppError>> {
+  const handle = await createHandleStore(await openDatabase()).get();
+  if (handle === undefined) return err(appError('folder_not_set', 'no folder chosen'));
+  const permission = await folderPermission(handle);
+  if (permission !== 'granted') return err(appError('folder_permission', permission));
+  const scanned = await scanFolder(handle, Date.now());
+  if (!scanned.ok) return scanned;
+  const { rootName, takenAt, truncated, files } = scanned.value;
+  return ok({
+    rootName,
+    takenAt,
+    truncated,
+    files: [...files].map(([path, f]) => [path, f.size, f.lastModified] as const),
+  });
+}
 
 // One limiter for every background request (2 at a time, 300-800 ms apart).
 const limitedFetch = politeFetch((input, init) => fetch(input, init), {
@@ -29,6 +52,8 @@ async function handle(message: OffscreenRequest): Promise<ResponseFor<OffscreenR
         () => probeSession(message.url),
         (cause) => appError('network', cause instanceof Error ? cause.message : String(cause)),
       );
+    case 'offscreen/folder-scan':
+      return readFolder();
     case 'offscreen/sync-course':
       return syncCourse(message.courseId, new Set(message.known), message.skipSections, {
         fetch: limitedFetch,

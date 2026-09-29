@@ -261,3 +261,56 @@ describe('course statuses and names', () => {
     ]);
   });
 });
+
+describe('with the folder verifier (M6)', () => {
+  const PATH = 'UDB/Estadística Aplicada ESA501 G01T/Desarrollo/Semana 02/Guia 1 - Redes.pdf';
+  const folder = (paths: Record<string, number>, takenAt = 100) => ({
+    listing: () =>
+      Promise.resolve({
+        rootName: 'UDB',
+        takenAt,
+        truncated: false,
+        files: new Map(
+          Object.entries(paths).map(([p, size]) => [p.toLowerCase(), { size, lastModified: 0 }]),
+        ),
+      }),
+  });
+
+  it('adopts a file that is already in the folder instead of downloading it', async () => {
+    const inner = PATH.slice('UDB/'.length);
+    deps = { ...deps, folder: folder({ [inner]: 10 }) };
+    const preview = await previewDownload(message(1), deps);
+    expect(preview.ok && preview.value).toMatchObject({
+      status: 'ya_existe',
+      willDownload: false,
+      relativePath: PATH,
+    });
+    const result = await handleDownloadRequest(message(1), 5, deps);
+    expect(result.ok && result.value).toMatchObject({ status: 'ya_existe', action: 'skipped' });
+    expect(backend.started).toEqual([]);
+    expect(await files.get('101:1:mod_resource/content/guia.pdf')).toMatchObject({
+      relativePath: PATH,
+      downloadId: null,
+      downloadedAt: 42,
+    });
+    // A different size is another file: download next to it.
+    const other = await previewDownload(message(2, { size: 99 }), deps);
+    expect(other.ok && other.value.status).toBe('nuevo');
+  });
+
+  it('notices a downloaded file that was deleted from the folder', async () => {
+    await downloadOnce(message(1));
+    deps = { ...deps, folder: folder({}, Date.now() + 60_000) };
+    const preview = await previewDownload(message(1), deps);
+    expect(preview.ok && preview.value).toMatchObject({
+      status: 'perdido_local',
+      willDownload: true,
+    });
+    const statuses = await courseFileStatuses(101, deps);
+    expect(statuses.map((s) => s.localExists)).toEqual([false]);
+    // A scan older than the download proves nothing.
+    deps = { ...deps, folder: folder({}, 10) };
+    const fresh = await previewDownload(message(1), deps);
+    expect(fresh.ok && fresh.value.status).toBe('sin_cambios');
+  });
+});
