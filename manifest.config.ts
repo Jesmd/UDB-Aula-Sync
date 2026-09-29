@@ -54,4 +54,10 @@ export default defineManifest({
   content_security_policy: {
     extension_pages: "script-src 'self'; object-src 'self'; base-uri 'none'",
   },
+  // "Abrir"/"Mostrar en carpeta" live in this extension page, framed inside the page's toast:
+  // a click there is a user gesture in the extension, which chrome.downloads.open requires
+  // (a click in the page does not reach the worker as a gesture; ADR-016).
+  web_accessible_resources: [
+    { resources: ['src/open/index.html'], matches: ['https://www.udbvirtual.edu.sv/*'] },
+  ],
 });
