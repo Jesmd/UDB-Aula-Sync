@@ -48,6 +48,17 @@ Cada tipo declara qué remitentes admite (`ALLOWED` en `router.ts`). Las respues
 Los mensajes `content/*` van del popup al content script con `chrome.tabs.sendMessage`. El content script
 solo acepta los que envía una página de la extensión.
 
+## Verificación de carpeta (M6, opcional)
+
+```text
+Opciones > Carpeta ── showDirectoryPicker (solo lectura) ──▶ IndexedDB `handles` + meta `folder:info`
+worker: FolderVerifier (listado 1 min) ──▶ offscreen/folder-scan ──▶ recorre la carpeta (≤ 20 000)
+  assess(): ¿el archivo del índice sigue ahí? ¿el nuevo ya existe con el mismo tamaño? (ya_existe)
+```
+
+- `fs-access/scan-folder.ts` (recorrido), `adopt-existing.ts` (reglas puras), `directory-handle.ts`
+  (handle y permiso). Sin carpeta o sin permiso, todo usa `chrome.downloads.search` como antes (ADR-026).
+
 ## Novedades (M5)
 
 ```text

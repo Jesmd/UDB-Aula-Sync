@@ -14,6 +14,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 - El botón "Abrir" del aviso no abría el archivo en Brave: ahora es una página de la extensión enmarcada en
   el aviso, cuyo clic sí cuenta como gesto del usuario (ADR-016).
 
+### Añadido (M6)
+
+- M6: verificación de carpeta (opcional). En Opciones > Carpeta eliges Descargas/UDB, solo lectura. La
+  extensión nota los archivos que borraste ("Falta en disco") y no vuelve a bajar los que ya tienes con el
+  mismo nombre y tamaño ("Ya estaban en la carpeta").
+- M6: "Comprobar ahora" lista los archivos descargados que ya no están; "Autorizar de nuevo" si el navegador
+  vuelve a pedir permiso; "Dejar de usar".
+
 ### Añadido (M5)
 
 - M5: novedades. Tras el primer "Descargar todo" o "Solo nuevos" de un curso, la extensión lo revisa cada
