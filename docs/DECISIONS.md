@@ -115,3 +115,37 @@ HTML saneado da exactamente el mismo resultado de análisis que el original.
 El content script solo responde a remitentes de la propia extensión que no son pestañas.
 
 **Consecuencias.** Sin permisos nuevos. En cualquier otra pestaña el popup muestra "Abre un curso".
+
+## ADR-010 Resolución de archivos con una sola petición
+
+**Contexto.** Para saber qué archivo hay detrás de un recurso hacen falta su URL real y sus cabeceras
+(nombre, tamaño, fecha, revisión), respetando el límite de peticiones.
+
+**Decisión.** `resolveResource` hace `GET mod/resource/view.php?id=X&redirect=1` siguiendo redirecciones (H1).
+
+- Si termina en `pluginfile.php`, esas cabeceras son la sonda y el cuerpo se cancela sin leerlo.
+- Si no, busca el archivo dentro de la página: `object`, `iframe`, `embed` o el enlace `.resourceworkaround`. Después hace una sonda HEAD, con respaldo a un GET que se aborta tras las cabeceras (H4).
+- Sin URL de archivo, el resultado es `readonly` y no se intenta nada más (§2).
+- `mod_folder`: la estructura se toma de la ruta `pluginfile`, no del marcado del árbol (H6).
+- El login, 429/503, otros códigos HTTP y los fallos de red se mapean a `session_expired`, `rate_limited`, `http_status` y `network`.
+
+**Consecuencias.** El caso normal cuesta dos peticiones HTTP (vista + redirección), sin descargar el
+archivo. El limitador y los reintentos llegan en M3 y envuelven al `fetch` inyectado.
+
+## ADR-011 Adjuntos de la descripción de tareas: pospuesto
+
+**Contexto.** `assign-intro.ts` es opcional en el §7. El Diagnóstico real no mostró adjuntos en tareas.
+
+**Decisión.** Se deja el módulo vacío; la fixture explica el motivo. Se retomará si un informe real lo pide.
+
+## ADR-012 Nombres de archivo
+
+**Decisión.**
+
+- `:` `/` `\` `|` pasan a " - " ("Guia 1: X" → "Guia 1 - X"); `<>"?*` y los caracteres de control o bidi se eliminan.
+- NFC; sin punto ni espacio final; los nombres reservados de Windows reciben "_".
+- Máximo 120 caracteres por segmento y 180 en la ruta. Se acortan primero las carpetas más largas; la extensión y el sufijo se conservan.
+- La extensión sale del nombre en Content-Disposition, después de la URL y, si el tipo no es genérico, de Content-Type.
+- Moodle envía UTF-8 sin codificar en `filename=`, que JS lee como Latin-1; se re-decodifica cuando los bytes forman UTF-8 válido. `filename*` tiene prioridad.
+- Colisión: sufijo estable " (<cmid>)".
+- Archivos de `mod_folder`: se conserva el nombre original, bajo una carpeta con el nombre de la actividad y sus subcarpetas.
