@@ -42,6 +42,8 @@ const ALLOWED: Record<BackgroundRequest['type'], readonly SenderKind[]> = {
   'download/open': ['udb-content', 'extension-page'],
   'download/show': ['udb-content', 'extension-page'],
   'queue/list': ['extension-page'],
+  // The framed "Abrir" page (src/open) is an extension page.
+  'files/get': ['extension-page'],
   'queue/retry-failed': ['extension-page'],
 };
 
@@ -61,10 +63,19 @@ async function handle(
   deps: RouterDeps,
   tabId: number | null,
 ): Promise<ResponseFor<BackgroundRequest>> {
-  const needsDownloads = message.type.startsWith('download/') || message.type.startsWith('queue/');
+  const needsDownloads = /^(download|queue|files)\//.test(message.type);
   const downloads =
     needsDownloads && deps.downloads !== undefined ? await deps.downloads() : undefined;
   switch (message.type) {
+    case 'files/get': {
+      if (downloads === undefined) return err(appError('unsupported_message', message.type));
+      const record = await downloads.files.get(message.fileId);
+      if (record?.downloadId == null)
+        return err(appError('not_downloadable', 'file not in the index'));
+      const name = record.relativePath.split('/').pop() ?? '';
+      const extension = name.includes('.') ? (name.split('.').pop() ?? '') : '';
+      return ok({ downloadId: record.downloadId, extension, relativePath: record.relativePath });
+    }
     case 'download/request':
       if (downloads === undefined) return err(appError('unsupported_message', message.type));
       return handleDownloadRequest(message, tabId, downloads);

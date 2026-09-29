@@ -1,4 +1,5 @@
 import { taskId } from '../core/queue/task';
+import { UI_PREFIX } from '../shared/constants';
 import { sendMessage } from '../shared/browser-api';
 import { t, type MessageKey } from '../shared/i18n';
 import type {
@@ -7,38 +8,52 @@ import type {
   DownloadUpdateMessage,
 } from '../shared/messages';
 import type { UiRoot } from './ui/root';
-import { showToast, type ToastAction, type ToastHandle } from './ui/toast';
+import { showToast, type ToastHandle } from './ui/toast';
 
 /** Text for an error code, from _locales ("error_<code>"). */
 const errorText = (code: string | null) => t(`error_${code ?? 'unknown'}` as MessageKey);
 
+export const OPEN_PAGE = 'src/open/index.html';
+
+interface Entry {
+  readonly toast: ToastHandle;
+  readonly name: string;
+  frame?: HTMLIFrameElement;
+}
+
 /**
  * Toasts for click-downloads: one per file, updated as the worker reports progress.
- * "Abrir" and "Mostrar en carpeta" buttons give the fresh user gesture that
- * chrome.downloads.open needs when auto-open was blocked (ADR-004).
+ * "Abrir" and "Mostrar en carpeta" are an extension page framed in the toast: a click in
+ * the page itself would not count as a user gesture for chrome.downloads.open (ADR-016).
  */
 export class DownloadsUi {
-  readonly #toasts = new Map<string, { toast: ToastHandle; name: string }>();
+  readonly #entries = new Map<string, Entry>();
   #sessionNotified = false;
 
   constructor(private readonly root: UiRoot) {}
 
-  #toast(fileId: string, name: string): ToastHandle {
-    const existing = this.#toasts.get(fileId);
-    if (existing !== undefined) return existing.toast;
+  #entry(fileId: string, name: string): Entry {
+    const existing = this.#entries.get(fileId);
+    if (existing !== undefined) return existing;
     const toast = showToast(this.root, '', { closeLabel: t('toastClose'), timeoutMs: 0 });
-    this.#toasts.set(fileId, { toast, name });
-    return toast;
+    const entry: Entry = { toast, name };
+    this.#entries.set(fileId, entry);
+    return entry;
   }
 
-  #fileActions(fileId: string): ToastAction[] {
-    const ask = (type: 'download/open' | 'download/show') => () => {
-      void sendMessage({ target: 'background', type, fileId });
-    };
-    return [
-      { label: t('dlOpen'), onClick: ask('download/open') },
-      { label: t('dlShow'), onClick: ask('download/show') },
-    ];
+  /** The framed "Abrir / Mostrar en carpeta" buttons for a file of the index. */
+  #openFrame(fileId: string, entry: Entry): HTMLIFrameElement {
+    if (entry.frame !== undefined) return entry.frame;
+    const frame = this.root.host.ownerDocument.createElement('iframe');
+    frame.className = `${UI_PREFIX}toast__frame`;
+    frame.title = `${t('dlOpen')} / ${t('dlShow')}`;
+    frame.src = `${chrome.runtime.getURL(OPEN_PAGE)}?id=${encodeURIComponent(fileId)}`;
+    entry.frame = frame;
+    return frame;
+  }
+
+  #saved(fileId: string, entry: Entry, text: string, timeoutMs = 20000): void {
+    entry.toast.update(text, { kind: 'success', embed: this.#openFrame(fileId, entry), timeoutMs });
   }
 
   /** Sends a click-download to the worker and shows the immediate answer. */
@@ -47,7 +62,7 @@ export class DownloadsUi {
     name: string,
   ): Promise<DownloadRequestResponse | null> {
     // Progress may arrive before the answer: name the toast first (same id as the worker's).
-    this.#toast(taskId(message.courseId, message.cmid, message.file.fileKey), name);
+    this.#entry(taskId(message.courseId, message.cmid, message.file.fileKey), name);
     const result = await sendMessage(message);
     if (!result.ok) {
       showToast(this.root, t('dlFailed', [name, errorText(result.error.code)]), {
@@ -57,21 +72,13 @@ export class DownloadsUi {
       return null;
     }
     const answer = result.value;
-    const toast = this.#toast(answer.fileId, name);
+    const entry = this.#entry(answer.fileId, name);
     if (answer.action === 'queued') {
-      toast.update(t('dlStarting', name), { timeoutMs: 0 });
+      entry.toast.update(t('dlStarting', name), { timeoutMs: 0 });
     } else if (answer.status === 'actualizado') {
-      toast.update(t('dlUpdateSkipped', name), {
-        actions: this.#fileActions(answer.fileId),
-        timeoutMs: 8000,
-      });
+      this.#saved(answer.fileId, entry, t('dlUpdateSkipped', name));
     } else {
-      const blocked = answer.outcome === 'blocked' || answer.outcome === null;
-      toast.update(t('dlUpToDate', name), {
-        kind: 'success',
-        ...(blocked ? { actions: this.#fileActions(answer.fileId) } : {}),
-        timeoutMs: blocked ? 10000 : 4000,
-      });
+      this.#saved(answer.fileId, entry, t('dlUpToDate', name));
     }
     return answer;
   }
@@ -101,43 +108,41 @@ export class DownloadsUi {
       return;
     }
     if (message.fileId === null) return;
-    const entry = this.#toasts.get(message.fileId);
-    const name = entry?.name ?? message.relativePath?.split('/').pop() ?? '';
-    const toast = this.#toast(message.fileId, name);
+    const known = this.#entries.get(message.fileId);
+    const entry = this.#entry(
+      message.fileId,
+      known?.name ?? message.relativePath?.split('/').pop() ?? '',
+    );
     const path = message.relativePath ?? '';
 
     if (message.event === 'opened') {
-      if (message.outcome === 'opened')
-        toast.update(t('dlOpened', path), { kind: 'success', timeoutMs: 4000 });
-      else
-        toast.update(t('dlSaved', path), {
-          kind: 'success',
-          actions: this.#fileActions(message.fileId),
-          timeoutMs: 15000,
-        });
+      this.#saved(
+        message.fileId,
+        entry,
+        message.outcome === 'opened' ? t('dlOpened', path) : t('dlSaved', path),
+      );
       return;
     }
     switch (message.state) {
       case 'hecha':
-        toast.update(t('dlSaved', path), {
-          kind: 'success',
-          actions: this.#fileActions(message.fileId),
-          timeoutMs: 15000,
-        });
+        this.#saved(message.fileId, entry, t('dlSaved', path));
         break;
       case 'fallida':
-        toast.update(t('dlFailed', [name, errorText(message.errorCode)]), {
+        entry.toast.update(t('dlFailed', [entry.name, errorText(message.errorCode)]), {
           kind: 'error',
           timeoutMs: 0,
         });
         break;
       case 'en_cola':
-        toast.update(message.errorCode === null ? t('dlQueued', name) : t('dlRetrying', name), {
-          timeoutMs: 0,
-        });
+        entry.toast.update(
+          message.errorCode === null ? t('dlQueued', entry.name) : t('dlRetrying', entry.name),
+          {
+            timeoutMs: 0,
+          },
+        );
         break;
       case 'descargando':
-        toast.update(t('dlStarting', name), { timeoutMs: 0 });
+        entry.toast.update(t('dlStarting', entry.name), { timeoutMs: 0 });
         break;
       default:
         break;

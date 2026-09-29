@@ -55,6 +55,7 @@ const BackgroundRequest = v.variant('type', [
   v.object({ target: v.literal('background'), type: v.literal('download/open'), fileId }),
   v.object({ target: v.literal('background'), type: v.literal('download/show'), fileId }),
   v.object({ target: v.literal('background'), type: v.literal('queue/list') }),
+  v.object({ target: v.literal('background'), type: v.literal('files/get'), fileId }),
   v.object({ target: v.literal('background'), type: v.literal('queue/retry-failed') }),
   v.object({
     target: v.literal('background'),
@@ -149,6 +150,11 @@ export interface ResponseMap {
   'download/request': DownloadRequestResponse;
   'download/open': { readonly outcome: 'opened' | 'shown' | 'blocked' };
   'download/show': { readonly shown: true };
+  'files/get': {
+    readonly downloadId: number;
+    readonly extension: string;
+    readonly relativePath: string;
+  };
   'queue/list': {
     readonly tasks: readonly Task[];
     readonly files: readonly FileRecord[];
