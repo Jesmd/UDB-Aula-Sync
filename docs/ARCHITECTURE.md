@@ -48,6 +48,21 @@ Cada tipo declara qué remitentes admite (`ALLOWED` en `router.ts`). Las respues
 Los mensajes `content/*` van del popup al content script con `chrome.tabs.sendMessage`. El content script
 solo acepta los que envía una página de la extensión.
 
+## Novedades (M5)
+
+```text
+alarma (6 h) / "Sincronizar ahora"
+  └─ CourseSync (worker): ¿red? ¿pantalla bloqueada? ¿descargas? ¿sesión perdida?
+       └─ por curso con foto ─▶ offscreen/sync-course ─▶ fetch cortés + DOMParser + scanCourse
+                                  └─ resuelve solo lo desconocido ◀─┘
+          diff(foto anterior, nueva) ─▶ novedades (meta) ─▶ contador, notificación, "Nuevo" en la página
+                                     └─▶ auto-descarga (si el curso la tiene) ─▶ DownloadQueue
+```
+
+- Fotos en `snapshots` (IndexedDB), novedades en `meta` (`novelties:<curso>`). Diff puro en
+  `core/planning/snapshot-diff.ts`.
+- La primera foto la hace el usuario desde el panel del curso (ADR-022).
+
 ## Descarga masiva y UI de la página (M4)
 
 ```text

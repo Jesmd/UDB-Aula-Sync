@@ -16,7 +16,7 @@
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green">
 </p>
 
-> **Estado:** en desarrollo (hito M4: descarga masiva, popup y opciones; faltan las novedades automáticas). Uso personal. No se publica en la Chrome Web Store.
+> **Estado:** en desarrollo (hito M5: descarga masiva, novedades automáticas, popup y opciones). Uso personal. No se publica en la Chrome Web Store.
 
 ## Qué hará
 
@@ -34,7 +34,7 @@
   ```
 
 - Botones "Descargar todo" y "Solo nuevos", con un plan previo de lo que se va a bajar.
-- Aviso de material nuevo (contador en el icono y notificación). _Pendiente (M5)._
+- Aviso de material nuevo (contador en el icono y notificación), con descarga automática opcional por curso.
 
 Usa tu sesión ya iniciada en el navegador. No guarda contraseñas ni cookies y no envía datos a
 ningún servidor. Detalles en [docs/PRIVACY.md](docs/PRIVACY.md) y [docs/SECURITY.md](docs/SECURITY.md).

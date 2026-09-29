@@ -2,7 +2,8 @@
 
 - **Qué se guarda (en tu navegador):** ajustes, y desde M3 un índice con identificadores de curso y actividad,
   nombres, rutas locales y huellas de archivo (tamaño, fecha, revisión); desde M4, el nombre de cada curso
-  que abres y tus ajustes por curso. Nunca el HTML completo de las páginas.
+  que abres y tus ajustes por curso; desde M5, una foto de cada curso en seguimiento (ids, nombres y
+  disponibilidad de secciones y actividades) y la lista de novedades. Nunca el HTML completo de las páginas.
 - **Qué no se guarda:** contraseñas, cookies, `sesskey`, mensajes, participantes ni datos del perfil.
 - **Qué se envía:** nada a terceros. Las únicas peticiones van al Aula Digital, con tu sesión, para leer el
   curso y descargar sus archivos.

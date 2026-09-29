@@ -156,3 +156,16 @@ describe('options parsing', () => {
     );
   });
 });
+
+describe('sync summary text', () => {
+  it('explains each outcome', async () => {
+    const { summaryText } = await import('../../src/popup/components/SyncPanel');
+    const base = { courses: 2, novelties: 0, queued: 0, skipped: null, errorCode: null };
+    expect(summaryText(base)).toBe('syncNothingNew');
+    expect(summaryText({ ...base, novelties: 3, queued: 1 })).toBe('syncFound syncQueued');
+    expect(summaryText({ ...base, skipped: 'no_courses' })).toBe('syncNoCourses');
+    expect(summaryText({ ...base, skipped: 'offline' })).toBe('syncOffline');
+    expect(summaryText({ ...base, skipped: 'running' })).toBe('syncRunning');
+    expect(summaryText({ ...base, errorCode: 'session_expired' })).toBe('error_session_expired');
+  });
+});

@@ -1,3 +1,4 @@
+import { ACTIVE_STATES, FINAL_STATES } from '../core/queue/task';
 import { MOODLE_ROOT_URL } from '../shared/constants';
 import { consoleSink, createLogger, LogRing } from '../shared/logger';
 import { openDatabase } from '../storage/db';
@@ -48,6 +49,7 @@ const services: Promise<DownloadServices> = (async () => {
       if (event.type === 'session_expired') void sync.sessionLost();
       if (event.type === 'task' && event.task.state === 'hecha')
         void sync.downloaded(event.task.courseId, event.task.cmid);
+      if (event.type === 'task' && FINAL_STATES.has(event.task.state)) void sync.resumePending();
     },
     scheduleWake: scheduleQueueWake,
     pauseStore: {
@@ -77,6 +79,9 @@ const services: Promise<DownloadServices> = (async () => {
     },
     online: () => navigator.onLine,
     screenLocked: async () => (await chrome.idle.queryState(IDLE_SECONDS)) === 'locked',
+    busy: async () =>
+      !queue.paused &&
+      (await tasks.all()).some((t) => t.state === 'en_cola' || ACTIVE_STATES.has(t.state)),
     badge: setNoveltyBadge,
     notifyNovelties: (notices) => {
       const first = notices[0];

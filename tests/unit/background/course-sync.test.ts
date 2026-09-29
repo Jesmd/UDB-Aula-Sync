@@ -68,6 +68,7 @@ function setup() {
     download: vi.fn<CourseSyncDeps['download']>(() => Promise.resolve(true)),
     online: vi.fn<() => boolean>(() => true),
     screenLocked: vi.fn<() => Promise<boolean>>(() => Promise.resolve(false)),
+    busy: vi.fn<() => Promise<boolean>>(() => Promise.resolve(false)),
     badge: vi.fn<(n: number) => void>(),
     notifyNovelties: vi.fn(),
     notifySessionLost: vi.fn(),
@@ -214,6 +215,9 @@ describe('CourseSync', () => {
     t.deps.online.mockReturnValue(true);
     t.deps.screenLocked.mockResolvedValue(true);
     expect(await t.sync.run('alarm')).toMatchObject({ skipped: 'locked' });
+    t.deps.busy.mockResolvedValueOnce(true);
+    t.deps.screenLocked.mockResolvedValueOnce(false);
+    expect(await t.sync.run('alarm')).toMatchObject({ skipped: 'busy' });
     // A manual run ignores the lock (the user is there).
     expect(await t.sync.run('manual')).toMatchObject({ skipped: null });
     expect(await t.sync.resumePending()).toBeNull();
