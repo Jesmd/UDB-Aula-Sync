@@ -4,7 +4,7 @@ import { sendMessage } from '../../shared/browser-api';
 import { t } from '../../shared/i18n';
 import type { CourseMeta } from '../../storage/meta-repo';
 import { EMPTY_OVERRIDE, type CourseOverride } from '../../storage/settings-schema';
-import { ConfirmButton, parseExtensions, parseSizeMb, TextField, valid } from '../fields';
+import { ConfirmButton, parseExtensions, parseSizeMb, TextField, Toggle, valid } from '../fields';
 import type { SettingsProps } from '../use-settings';
 import { parseTemplateText } from './Paths';
 
@@ -101,6 +101,14 @@ export function CoursesPage({ settings, update }: SettingsProps) {
               parse={parseSizeMb}
               onCommit={(maxSizeMb) => {
                 setOverride(id, (c) => ({ ...c, maxSizeMb }));
+              }}
+            />
+            <Toggle
+              label={t('optAutoDownload')}
+              hint={t('optAutoDownloadHint')}
+              checked={o.autoDownload}
+              onChange={(autoDownload) => {
+                setOverride(id, (c) => ({ ...c, autoDownload }));
               }}
             />
             {!isEmpty(o) && (

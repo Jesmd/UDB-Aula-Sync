@@ -76,6 +76,7 @@ const SnapshotSchema = v.object({
       }),
     ),
     v.maxLength(400),
+    v.readonly(),
   ),
   items: v.pipe(
     v.array(
@@ -89,6 +90,7 @@ const SnapshotSchema = v.object({
       }),
     ),
     v.maxLength(5000),
+    v.readonly(),
   ),
 });
 
