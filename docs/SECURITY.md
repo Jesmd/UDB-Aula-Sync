@@ -18,6 +18,7 @@
 | Saneado de rutas (traversal, reservados de Windows, límites)     | hecho (M2)                 |
 | Lista blanca de apertura; nunca ejecutables, macros, comprimidos | hecho (M3)                 |
 | Sin credenciales, cookies ni sesskey guardados                   | por diseño; revisión en M7 |
+| Carpeta elegida solo en lectura; nunca se pide escritura         | hecho (M6)                 |
 
 Además, desde M3:
 
