@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import type { DiagnosticReport } from '../moodle/diagnostic';
 import { appError, type AppError } from './errors';
 import { err, ok, type Result } from './result';
 
@@ -34,10 +35,15 @@ const OffscreenRequest = v.variant('type', [
   }),
 ]);
 
-export const RuntimeMessage = v.union([BackgroundRequest, OffscreenRequest]);
+const ContentRequest = v.variant('type', [
+  v.object({ target: v.literal('content'), type: v.literal('content/diagnose') }),
+]);
+
+export const RuntimeMessage = v.union([BackgroundRequest, OffscreenRequest, ContentRequest]);
 
 export type BackgroundRequest = v.InferOutput<typeof BackgroundRequest>;
 export type OffscreenRequest = v.InferOutput<typeof OffscreenRequest>;
+export type ContentRequest = v.InferOutput<typeof ContentRequest>;
 export type RuntimeMessage = v.InferOutput<typeof RuntimeMessage>;
 export type MessageTarget = RuntimeMessage['target'];
 
@@ -66,6 +72,7 @@ export interface ResponseMap {
   'spike/fetch-offscreen': FetchProbe;
   'offscreen/ping': { readonly reply: string };
   'offscreen/fetch-probe': FetchProbe;
+  'content/diagnose': DiagnosticReport;
 }
 
 export type ResponseFor<M extends RuntimeMessage> = Result<ResponseMap[M['type']], AppError>;
