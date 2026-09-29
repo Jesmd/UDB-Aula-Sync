@@ -57,8 +57,9 @@ function main(): void {
       },
       () => undefined,
     );
-  chrome.storage.onChanged.addListener((_changes, area) => {
-    if (area === 'local') void refreshSettings();
+  chrome.storage.onChanged.addListener((changes, area) => {
+    // Only settings matter here (the worker's log lives in the same area).
+    if (area === 'local' && 'settings' in changes) void refreshSettings();
   });
 
   // One limiter for every request this page makes: at most 2 at once, spaced (spec §2).
