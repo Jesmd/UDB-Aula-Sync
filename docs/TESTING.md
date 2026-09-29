@@ -9,11 +9,18 @@ pnpm test:e2e    # build + Playwright contra el Moodle simulado
 
 - **Unitarias** (`tests/unit/`, Vitest): espejo de `src/core` y `src/moodle`. Umbral 90 % en `core/`.
   Las de UI usan `// @vitest-environment jsdom`.
-- **Fixtures** (`tests/fixtures/moodle/`): sintéticas, marcadas `TODO(verify-real-DOM)` hasta M1.
+- **Fixtures** (`tests/fixtures/moodle/`): sintéticas, marcadas `TODO(verify-real-DOM)`. Las reales,
+  anonimizadas con `scripts/sanitize-fixture.ts`, irán a `tests/fixtures/moodle/real/`.
+- **Contract tests** (`tests/unit/moodle/contract.test.ts`): cada adaptador cumple las mismas invariantes
+  sobre su fixture. Cada fixture nueva se añade como un caso más.
 - **Servidor simulado** (`tests/mock-moodle/`): HTTPS en `127.0.0.1:8443`. `state.requests` registra cada
   petición para comprobar límites y "cero peticiones con la sesión caída".
 - **E2E** (`tests/e2e/`): Chromium con la extensión de `dist/`. El host real se mapea al simulador y
   cualquier otro host falla (ADR-002). **Nunca** contra el sitio real.
+
+## Manual (M1)
+
+Ver "Checkpoint M1" en `docs/MOODLE-NOTES.md`: Diagnóstico en un curso de cada estructura.
 
 ## Manual (M0)
 

@@ -38,7 +38,7 @@ Popup / Opciones (Preact) ── mensajes ──▶            │ mensajes
 
 ## Mensajes
 
-Todo mensaje tiene `target` (`background` | `offscreen`) y `type`. El receptor valida con
+Todo mensaje tiene `target` (`background` | `offscreen` | `content`) y `type`. El receptor valida con
 `parseMessage()` y el router comprueba el remitente:
 
 - `extension-page`: páginas de la propia extensión (popup, opciones).
@@ -46,3 +46,18 @@ Todo mensaje tiene `target` (`background` | `offscreen`) y `type`. El receptor v
 - Cualquier otro remitente se rechaza.
 
 Cada tipo declara qué remitentes admite (`ALLOWED` en `router.ts`). Las respuestas son `Result`.
+Los mensajes `content/*` van del popup al content script con `chrome.tabs.sendMessage`. El content script
+solo acepta los que envía una página de la extensión.
+
+## Lectura del curso (M1)
+
+```text
+Document ──▶ detectLayout ──▶ adaptador (onetopic | topics | weeks | generic)
+                                 ├─ listSections  → SectionRef[] (número, nombre, padre, URL, disponible, destacada, renderizada)
+                                 └─ sectionActivities → Activity[] (cmid, tipo, nombre, URL, disponible, restringida)
+```
+
+- `parseCourse` / `parseSection` / `parseCoursePage` (`src/moodle/course.ts`) devuelven `Result`.
+  La página de login da `session_expired`; una página sin curso da `not_course_page`.
+- El módulo solo usa APIs de DOM estándar: funciona igual con el `document` vivo, con `DOMParser` en el
+  offscreen (puerto `HtmlParser`) y con jsdom en las pruebas.
