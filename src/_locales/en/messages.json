@@ -990,5 +990,45 @@
         "content": "$1"
       }
     }
+  },
+  "error_invalid_backup": {
+    "message": "The file is not a valid UDB Aula Sync backup."
+  },
+  "backupTitle": {
+    "message": "Backup"
+  },
+  "backupHint": {
+    "message": "Saves your settings and the index of what you downloaded to a JSON file, for another browser or after reinstalling. It does not include the queue, the folder permission or the log."
+  },
+  "backupExport": {
+    "message": "Export"
+  },
+  "backupImport": {
+    "message": "Import…"
+  },
+  "backupSaved": {
+    "message": "Saved: $COUNT$ indexed files, in $FOLDER$.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "folder": {
+        "content": "$2"
+      }
+    }
+  },
+  "backupImported": {
+    "message": "Imported: $FILES$ files, $SNAPSHOTS$ followed courses and $COURSES$ course names. Imported files can be opened after downloading them again or checking the folder.",
+    "placeholders": {
+      "files": {
+        "content": "$1"
+      },
+      "snapshots": {
+        "content": "$2"
+      },
+      "courses": {
+        "content": "$3"
+      }
+    }
   }
 }
