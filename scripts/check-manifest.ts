@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
 /**
  * Audits dist/manifest.json against the spec (§6). This list is deliberately separate
@@ -18,7 +19,7 @@ const ALLOWED_HOSTS = new Set(['https://www.udbvirtual.edu.sv/auladigital/*']);
 const ALLOWED_WAR_MATCHES = new Set(['https://www.udbvirtual.edu.sv/*']);
 const REQUIRED_CSP = ["script-src 'self'", "object-src 'self'"];
 
-interface Manifest {
+export interface Manifest {
   manifest_version?: number;
   permissions?: string[];
   optional_permissions?: string[];
@@ -68,10 +69,16 @@ export function checkManifest(manifest: Manifest): string[] {
   return problems;
 }
 
-const path = process.argv[2] ?? 'dist/manifest.json';
-const problems = checkManifest(JSON.parse(readFileSync(path, 'utf8')) as Manifest);
-if (problems.length > 0) {
-  console.error(`check-manifest: ${path}\n  - ${problems.join('\n  - ')}`);
-  process.exit(1);
+function main(path: string): number {
+  const problems = checkManifest(JSON.parse(readFileSync(path, 'utf8')) as Manifest);
+  if (problems.length > 0) {
+    console.error(`check-manifest: ${path}\n  - ${problems.join('\n  - ')}`);
+    return 1;
+  }
+  console.log(`check-manifest: ${path} OK`);
+  return 0;
 }
-console.log(`check-manifest: ${path} OK`);
+
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+  process.exit(main(process.argv[2] ?? 'dist/manifest.json'));
+}

@@ -49,6 +49,21 @@ Cada tipo declara qué remitentes admite (`ALLOWED` en `router.ts`). Las respues
 Los mensajes `content/*` van del popup al content script con `chrome.tabs.sendMessage`. El content script
 solo acepta los que envía una página de la extensión.
 
+## Resolución y rutas (M2)
+
+```text
+Activity (resource) ─▶ resolveResource ─▶ GET view.php?id=&redirect=1
+                         ├─ termina en pluginfile ─▶ cabeceras = sonda (cuerpo cancelado)
+                         ├─ HTML ─▶ findResourceFileUrl ─▶ probeHeaders (HEAD | GET cortado)
+                         └─ nada ─▶ readonly (solo_lectura)
+ResolvedFile + curso/sección/actividad ─▶ buildPath (plantilla + saneado + límites) ─▶ ruta relativa
+```
+
+- `src/core/` (puro): `text/` (saneado, Unicode, reservados, orden natural, relleno), `paths/` (plantilla,
+  código de curso, límites, `buildPath`), `http/` (Content-Disposition, Content-Type, URL `pluginfile`).
+- `src/moodle/resolver/`: todo `fetch` llega inyectado (`FetchLike`); el content script pasa el suyo
+  (mismo origen, con cookies) y las pruebas, el del servidor simulado.
+
 ## Lectura del curso (M1)
 
 ```text

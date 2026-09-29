@@ -1,8 +1,8 @@
 import { useState } from 'preact/hooks';
 import { sendToTab } from '../../shared/browser-api';
-import { MOODLE_ROOT_URL } from '../../shared/constants';
 import { t } from '../../shared/i18n';
 import type { DiagnosticReport } from '../../moodle/diagnostic';
+import { activeUdbTab, saveReport, stamp } from '../active-tab';
 
 type State =
   | { kind: 'idle' }
@@ -20,49 +20,26 @@ function summary(report: DiagnosticReport): string {
   ]);
 }
 
-function fileName(report: DiagnosticReport): string {
-  const stamp = report.generatedAt.replace(/[:.]/g, '-').slice(0, 19);
-  const course = 'error' in report.parsed ? 'pagina' : `curso-${report.parsed.course.id}`;
-  return `UDB/_diagnostico/diagnostico-${course}-${stamp}.json`;
-}
-
-async function save(json: string, path: string): Promise<void> {
-  const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
-  try {
-    await chrome.downloads.download({
-      url,
-      filename: path,
-      saveAs: false,
-      conflictAction: 'uniquify',
-    });
-  } finally {
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 60_000);
-  }
-}
-
 /** Structure-only report of the active Aula Digital tab (M1 human checkpoint). */
 export function DiagnosePage() {
   const [state, setState] = useState<State>({ kind: 'idle' });
 
   const run = async () => {
     setState({ kind: 'running' });
-    // Without the "tabs" permission, url is only visible for hosts we have access to.
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab?.id === undefined || tab.url?.startsWith(MOODLE_ROOT_URL) !== true) {
+    const tabId = await activeUdbTab();
+    if (tabId === null) {
       setState({ kind: 'error', message: t('popupDiagnoseNotUdb') });
       return;
     }
-    const result = await sendToTab(tab.id, { target: 'content', type: 'content/diagnose' });
+    const result = await sendToTab(tabId, { target: 'content', type: 'content/diagnose' });
     if (!result.ok) {
       setState({ kind: 'error', message: t('popupDiagnoseError') });
       return;
     }
-    const json = JSON.stringify(result.value, null, 2);
-    const path = fileName(result.value);
-    await save(json, path);
-    setState({ kind: 'done', report: result.value, json, path, copied: false });
+    const report = result.value;
+    const course = 'error' in report.parsed ? 'pagina' : `curso-${report.parsed.course.id}`;
+    const path = await saveReport(`diagnostico-${course}-${stamp(report.generatedAt)}`, report);
+    setState({ kind: 'done', report, json: JSON.stringify(report, null, 2), path, copied: false });
   };
 
   return (

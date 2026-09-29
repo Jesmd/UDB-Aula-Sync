@@ -8,7 +8,9 @@ import { SELECTORS } from './selectors';
  * subtrees, free text, form values and identifying URL parameters.
  */
 
-const DROP_ELEMENTS = 'script, style, noscript, template, link, svg, canvas, textarea';
+// [data-udbsync]: the extension's own injected UI.
+const DROP_ELEMENTS =
+  'script, style, noscript, template, link, svg, canvas, textarea, [data-udbsync]';
 
 const ALLOWED_ATTRIBUTES = new Set([
   'id',

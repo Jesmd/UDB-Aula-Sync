@@ -1,4 +1,5 @@
 import type { DiagnosticReport } from '../../src/moodle/diagnostic';
+import type { HypothesisReport } from '../../src/moodle/hypotheses';
 import { expect, test, UDB } from './fixtures';
 
 /**
@@ -59,4 +60,35 @@ test('Chromium parses every layout fixture like jsdom does', async ({ context, e
     expect('sections' in report.parsed && report.parsed.sections.length).toBe(sections);
     await course.close();
   }
+});
+
+test('content script checks hypotheses in the browser against the mock', async ({
+  context,
+  extensionId,
+}) => {
+  const course = await context.newPage();
+  await course.goto(`${UDB}/course/view.php?id=101&section=14`);
+  await expect(course.locator('#udbsync-root')).toBeAttached();
+
+  const ext = await context.newPage();
+  await ext.goto(`chrome-extension://${extensionId}/src/options/index.html`);
+  const report = await ext.evaluate(async () => {
+    const [tab] = await chrome.tabs.query({ url: 'https://www.udbvirtual.edu.sv/auladigital/*' });
+    const response = await chrome.tabs.sendMessage<unknown, { value: HypothesisReport }>(
+      tab?.id ?? -1,
+      {
+        target: 'content',
+        type: 'content/test-hypotheses',
+      },
+    );
+    return response.value;
+  });
+  expect(report.requests).toBeLessThanOrEqual(4);
+  expect(report.results.map((r) => r.status)).toEqual([
+    'confirmada',
+    'confirmada',
+    'confirmada',
+    'confirmada',
+    'confirmada',
+  ]);
 });
