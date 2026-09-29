@@ -6,6 +6,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### Añadido
 
+- M3: clic para descargar. Al pasar el cursor (400 ms) se resuelve el archivo; el clic lo guarda en su
+  carpeta y lo abre (lista blanca). Alt+clic solo descarga; Ctrl/Shift/clic central, comportamiento normal.
+- M3: índice local (IndexedDB) con huellas. Un archivo al día no se vuelve a bajar. Uno cambiado queda
+  "actualizado" y, por defecto, se guarda junto al anterior como "(rev N)".
+- M3: cola persistente con 2 descargas a la vez, espaciado, reintentos con backoff, verificación de tamaño y
+  tipo, pausa única si la sesión caduca, y reanudación tras reiniciar el service worker.
+- M3: avisos con "Abrir" y "Mostrar en carpeta"; aviso si la descarga no arranca (diálogo "Preguntar dónde
+  guardar").
 - M2: resolución de archivos. Cadena `redirect=1` → recurso embebido/enlace → solo lectura, sonda de
   cabeceras HEAD/GET, `mod_folder` con subcarpetas, Content-Disposition (`filename*`, UTF-8 sin codificar).
 - M2: rutas. Saneado de nombres (Windows, Unicode, límites 120/180), plantillas con tokens, código de

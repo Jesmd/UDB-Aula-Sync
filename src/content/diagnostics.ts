@@ -32,6 +32,7 @@ export function registerDiagnostics(): void {
       }
       return false;
     }
+    if (parsed.value.type !== 'content/test-hypotheses') return false;
     testHypotheses(document, location.href, {
       fetch: (i, init) => fetch(i, init),
       parseHtml: domParser,
