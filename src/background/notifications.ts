@@ -1,4 +1,6 @@
 import { MOODLE_ROOT_URL } from '../shared/constants';
+import { t } from '../shared/i18n';
+import type { NoveltyNotice } from './course-sync';
 import type { DownloadUpdateMessage } from '../shared/messages';
 import type { QueueEvent } from './sync-engine';
 
@@ -23,7 +25,7 @@ export function updateMessage(event: QueueEvent): DownloadUpdateMessage {
 
 /**
  * Reports queue events to the tab that asked. A lost session is told to every Aula
- * Digital tab, once (spec §3.4). M5 adds system notifications for background syncs.
+ * Digital tab, once (spec §3.4). System notifications are below.
  */
 export async function notifyTabs(event: QueueEvent): Promise<void> {
   const message = updateMessage(event);
@@ -35,4 +37,39 @@ export async function notifyTabs(event: QueueEvent): Promise<void> {
   }
   const tabId = event.task.originTabId;
   if (tabId !== null) await send(tabId);
+}
+
+export const NOVELTY_NOTIFICATION = 'udbsync-novelties';
+export const SESSION_NOTIFICATION = 'udbsync-session';
+
+/** "Estadística Aplicada: 3 · Redes: 1", longest first, at most 4 courses. */
+export function noveltySummary(notices: readonly NoveltyNotice[]): string {
+  const sorted = [...notices].sort((a, b) => b.count - a.count);
+  const shown = sorted.slice(0, 4).map((n) => `${n.name}: ${n.count}`);
+  const rest = sorted.length - shown.length;
+  return rest > 0 ? `${shown.join(' · ')} · +${rest}` : shown.join(' · ');
+}
+
+const icon = () => chrome.runtime.getURL('icons/icon-128.png');
+
+/** One grouped notification; a newer one replaces it (same id). */
+export function showNoveltyNotification(notices: readonly NoveltyNotice[]): void {
+  const total = notices.reduce((n, c) => n + c.count, 0);
+  void chrome.notifications.create(NOVELTY_NOTIFICATION, {
+    type: 'basic',
+    iconUrl: icon(),
+    title: t('notifyNewTitle', String(total)),
+    message: noveltySummary(notices),
+    priority: 0,
+  });
+}
+
+export function showSessionNotification(): void {
+  void chrome.notifications.create(SESSION_NOTIFICATION, {
+    type: 'basic',
+    iconUrl: icon(),
+    title: t('notifySessionTitle'),
+    message: t('notifySessionBody'),
+    priority: 1,
+  });
 }

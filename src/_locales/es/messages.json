@@ -789,5 +789,19 @@
   },
   "secGentle": {
     "message": "Pide pocas cosas a la vez (máximo 2) con pausas, y se detiene si la sesión expira."
+  },
+  "notifyNewTitle": {
+    "message": "UDB Aula Sync: $COUNT$ novedades",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifySessionTitle": {
+    "message": "Tu sesión del Aula Digital caducó"
+  },
+  "notifySessionBody": {
+    "message": "La búsqueda de novedades está en pausa. Inicia sesión en el Aula Digital y seguirá sola."
   }
 }

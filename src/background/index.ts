@@ -1,21 +1,37 @@
+import { MOODLE_ROOT_URL } from '../shared/constants';
 import { consoleSink, createLogger, LogRing } from '../shared/logger';
 import { openDatabase } from '../storage/db';
 import { createFilesRepo } from '../storage/files-repo';
 import { createMetaRepo } from '../storage/meta-repo';
 import { loadSettings } from '../storage/settings';
+import { createNoveltiesRepo, createSnapshotsRepo } from '../storage/snapshots-repo';
 import { createTasksRepo } from '../storage/tasks-repo';
-import { QUEUE_ALARM, scheduleQueueWake } from './alarms';
+import { ensureSyncAlarm, QUEUE_ALARM, scheduleQueueWake, SYNC_ALARM } from './alarms';
+import { setNoveltyBadge } from './badge';
+import { CourseSync } from './course-sync';
 import { createChromeDownloadBackend } from './download-manager';
-import { notifyTabs } from './notifications';
+import {
+  notifyTabs,
+  NOVELTY_NOTIFICATION,
+  SESSION_NOTIFICATION,
+  showNoveltyNotification,
+  showSessionNotification,
+} from './notifications';
+import { sendToOffscreen } from './offscreen-client';
+import { handleDownloadRequest } from './requests';
 import { createRouter, type DownloadServices } from './router';
 import { DownloadQueue } from './sync-engine';
 
-// The worker is ephemeral: no state here must survive a restart. The queue lives in
-// IndexedDB and recover() picks it up on every start.
+// The worker is ephemeral: no state here must survive a restart. The queue, the index,
+// snapshots and novelties live in IndexedDB; recover() picks the queue up on every start.
 const ring = new LogRing();
 const log = createLogger('bg', { ring, sinks: [consoleSink] });
 const backend = createChromeDownloadBackend();
 log.info('worker started');
+
+const NOTIFY_COURSE_KEY = 'notify:course';
+/** A locked screen skips the periodic sync (spec §3.4). */
+const IDLE_SECONDS = 60;
 
 const services: Promise<DownloadServices> = (async () => {
   const db = await openDatabase();
@@ -27,19 +43,64 @@ const services: Promise<DownloadServices> = (async () => {
     files,
     backend,
     log: log.child('queue'),
-    notify: (event) => void notifyTabs(event),
+    notify: (event) => {
+      void notifyTabs(event);
+      if (event.type === 'session_expired') void sync.sessionLost();
+      if (event.type === 'task' && event.task.state === 'hecha')
+        void sync.downloaded(event.task.courseId, event.task.cmid);
+    },
     scheduleWake: scheduleQueueWake,
     pauseStore: {
       get: () => meta.get<boolean>('queuePaused'),
       set: (paused) => meta.set('queuePaused', paused),
     },
   });
+  const requestDeps = { files, backend, queue, meta, settings: loadSettings };
+  // Queue events reach `sync` only after startup, once it exists.
+  const sync = new CourseSync({
+    snapshots: createSnapshotsRepo(db),
+    novelties: createNoveltiesRepo(meta),
+    files,
+    meta,
+    settings: loadSettings,
+    scan: (courseId, known, skipSections) =>
+      sendToOffscreen({
+        target: 'offscreen',
+        type: 'offscreen/sync-course',
+        courseId,
+        known: [...known],
+        skipSections: [...skipSections],
+      }),
+    download: async (payload) => {
+      const result = await handleDownloadRequest({ ...payload, open: false }, null, requestDeps);
+      return result.ok && result.value.action === 'queued';
+    },
+    online: () => navigator.onLine,
+    screenLocked: async () => (await chrome.idle.queryState(IDLE_SECONDS)) === 'locked',
+    badge: setNoveltyBadge,
+    notifyNovelties: (notices) => {
+      const first = notices[0];
+      if (first !== undefined) void meta.set(NOTIFY_COURSE_KEY, first.courseId);
+      showNoveltyNotification(notices);
+    },
+    notifySessionLost: showSessionNotification,
+    log: log.child('sync'),
+  });
   await queue.recover();
-  return { tasks, files, meta, backend, queue, settings: loadSettings };
+  await sync.refreshBadge();
+  await ensureSyncAlarm((await loadSettings()).syncIntervalHours);
+  return { tasks, files, meta, backend, queue, sync, settings: loadSettings };
 })();
 services.catch((cause: unknown) => {
   log.error(`startup failed: ${String(cause)}`);
 });
+
+const runSync = (trigger: 'alarm' | 'resume') => {
+  void services.then(async (s) => {
+    const summary = trigger === 'alarm' ? await s.sync.run('alarm') : await s.sync.resumePending();
+    if (summary !== null) log.info(`sync (${trigger}): ${JSON.stringify(summary)}`);
+  });
+};
 
 // MV3: every listener is registered synchronously at top level.
 chrome.runtime.onInstalled.addListener((details) => {
@@ -51,4 +112,33 @@ backend.onChanged((delta) => {
 });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === QUEUE_ALARM) void services.then((s) => s.queue.pump());
+  if (alarm.name === SYNC_ALARM) runSync('alarm');
+});
+// A sync put off by a locked screen or no network runs when that changes.
+chrome.idle.setDetectionInterval(IDLE_SECONDS);
+chrome.idle.onStateChanged.addListener((state) => {
+  if (state === 'active') runSync('resume');
+});
+self.addEventListener('online', () => {
+  runSync('resume');
+});
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local' || !('settings' in changes)) return;
+  void loadSettings().then((settings) => ensureSyncAlarm(settings.syncIntervalHours));
+});
+chrome.notifications.onClicked.addListener((id) => {
+  void chrome.notifications.clear(id);
+  if (id === SESSION_NOTIFICATION) {
+    void chrome.tabs.create({ url: MOODLE_ROOT_URL });
+  } else if (id === NOVELTY_NOTIFICATION) {
+    void services.then(async (s) => {
+      const courseId = await s.meta.get<number>(NOTIFY_COURSE_KEY);
+      await chrome.tabs.create({
+        url:
+          courseId === undefined
+            ? MOODLE_ROOT_URL
+            : `${MOODLE_ROOT_URL}course/view.php?id=${courseId}`,
+      });
+    });
+  }
 });

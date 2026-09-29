@@ -789,5 +789,19 @@
   },
   "secGentle": {
     "message": "It makes few requests at a time (2 at most) with pauses, and stops if the session expires."
+  },
+  "notifyNewTitle": {
+    "message": "UDB Aula Sync: $COUNT$ new items",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "notifySessionTitle": {
+    "message": "Your Aula Digital session expired"
+  },
+  "notifySessionBody": {
+    "message": "Checking for new material is paused. Log in to Aula Digital and it will continue on its own."
   }
 }
