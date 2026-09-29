@@ -103,3 +103,17 @@ test('a badge above the cursor shows when a file is ready to save', async ({ con
   await page.mouse.move(0, 0);
   await expect(badge).toHaveAttribute('data-visible', 'false');
 });
+
+test('a click without waiting for the hover still downloads and stays on the course', async ({
+  context,
+  downloadsDir,
+}) => {
+  const page = await context.newPage();
+  await page.goto(COURSE);
+  await expect(page.locator('#udbsync-root')).toBeAttached();
+  await page.locator('#module-2102 a.aalink').click({ modifiers: ['Alt'], delay: 0 });
+  const expected = join(downloadsDir, WEEK_DIR, 'Presentación Semana 12.pptx');
+  await expect.poll(() => existsSync(expected), { timeout: 15_000 }).toBe(true);
+  expect(page.url()).toBe(COURSE);
+  expect(context.pages().filter((p) => p.url().includes('pluginfile.php'))).toEqual([]);
+});

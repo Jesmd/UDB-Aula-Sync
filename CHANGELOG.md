@@ -31,6 +31,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### Corregido (M4)
 
+- Un clic hecho antes de que terminara la preparación del archivo abría la página de Moodle (o el PDF en
+  el visor del navegador). Ahora el clic espera la preparación y descarga; si no hay archivo real, sigue el
+  enlace.
 - Elementos ocultos de la UI inyectada (botón "Descargar" de la tarjeta, "Cancelar") se veían por el reset
   `all: unset`.
 
