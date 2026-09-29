@@ -75,6 +75,9 @@ export class DownloadsUi {
     const entry = this.#entry(answer.fileId, name);
     if (answer.action === 'queued') {
       entry.toast.update(t('dlStarting', name), { timeoutMs: 0 });
+    } else if (answer.status === 'ya_existe') {
+      // Adopted from the folder (M6): there is no browser download to open.
+      entry.toast.update(t('dlAdopted', name), { kind: 'success', timeoutMs: 6000 });
     } else if (answer.status === 'actualizado') {
       this.#saved(answer.fileId, entry, t('dlUpdateSkipped', name));
     } else {

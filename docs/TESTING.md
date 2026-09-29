@@ -23,8 +23,23 @@ pnpm test:e2e    # build + Playwright contra el Moodle simulado
 - **Novedades** (`sync-new.spec.ts`, `session-expired.spec.ts`): el simulador añade actividades y abre
   secciones (`/__test/activity`, `/__test/reveal`) y mide cuántas peticiones atiende a la vez
   (`maxInFlight`, nunca más de 2). La alarma se dispara creando `udbsync-sync` con `when` cercano.
+- **Carpeta** (`folder.spec.ts`): un directorio OPFS hace de carpeta elegida (ADR-027). Unitarias con
+  handles falsos en `tests/unit/fs-access/`.
 - **Accesibilidad**: `@axe-core/playwright` con WCAG 2.1 A/AA en popup, opciones y la UI inyectada
   (`popup-options.spec.ts`, `download-all.spec.ts`).
+
+## Manual (M6)
+
+1. `git pull && pnpm install && pnpm build` y recarga la extensión.
+2. En Brave, si Opciones > Carpeta dice que el navegador no permite elegir carpetas, activa
+   `brave://flags/#file-system-access-api` y reinicia.
+3. Opciones > Carpeta > "Elegir carpeta": elige `Descargas/UDB` (no Descargas). Debe decir "Con permiso de
+   lectura" y, tras "Comprobar ahora", el número de archivos.
+4. Borra un PDF ya descargado y pulsa "Comprobar ahora": debe aparecer en la lista de los que ya no están, y
+   en la página del curso con "Falta en disco". "Descargar todo" lo repone.
+5. Copia a mano un archivo del curso a su carpeta con el mismo nombre (sin el índice, por ejemplo tras
+   reinstalar la extensión) y haz clic: debe decir "ya estaba en tu carpeta" sin descargarlo.
+6. Cierra y abre el navegador: si pide permiso otra vez, "Autorizar de nuevo" lo recupera.
 
 ## Manual (M5)
 

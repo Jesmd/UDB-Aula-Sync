@@ -1,9 +1,10 @@
 import { IDBFactory } from 'fake-indexeddb';
+import { openDB } from 'idb';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createTask } from '../../../src/core/queue/task';
-import { openDatabase, type FileRecord } from '../../../src/storage/db';
+import { openDatabase, type FileRecord, type UdbSyncDb } from '../../../src/storage/db';
 import { createFilesRepo } from '../../../src/storage/files-repo';
-import { DB_VERSION, MIGRATIONS } from '../../../src/storage/migrations';
+import { DB_VERSION, MIGRATIONS, runMigrations } from '../../../src/storage/migrations';
 import {
   courseSettings,
   DEFAULT_SETTINGS,
@@ -39,11 +40,35 @@ const record = (id: string, relativePath: string, courseId = 1): FileRecord => (
 });
 
 describe('database', () => {
+  it('upgrades a version 1 database to the current one without losing data (M6)', async () => {
+    const v1 = await openDB<UdbSyncDb>('udbsync-test-v1', 1, {
+      upgrade: (db, o, n, tx) => {
+        runMigrations(db, o, n, tx);
+      },
+    });
+    await v1.put('files', record('a', 'UDB/a.pdf'));
+    await v1.put('meta', { key: 'queuePaused', value: true });
+    v1.close();
+    const db = await openDatabase('udbsync-test-v1');
+    expect(db.version).toBe(DB_VERSION);
+    expect(await db.get('files', 'a')).toMatchObject({ relativePath: 'UDB/a.pdf' });
+    expect(await db.get('meta', 'queuePaused')).toEqual({ key: 'queuePaused', value: true });
+    await db.put('handles', { kind: 'directory', name: 'UDB' }, 'base');
+    expect(await db.get('handles', 'base')).toEqual({ kind: 'directory', name: 'UDB' });
+    db.close();
+  });
+
   it('creates every store at the current version', async () => {
     const db = await openDatabase('udbsync-test-a');
     expect(db.version).toBe(DB_VERSION);
     expect(DB_VERSION).toBe(MIGRATIONS.length);
-    expect([...db.objectStoreNames].sort()).toEqual(['files', 'meta', 'snapshots', 'tasks']);
+    expect([...db.objectStoreNames].sort()).toEqual([
+      'files',
+      'handles',
+      'meta',
+      'snapshots',
+      'tasks',
+    ]);
     db.close();
   });
 

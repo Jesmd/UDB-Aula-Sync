@@ -16,7 +16,7 @@
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green">
 </p>
 
-> **Estado:** en desarrollo (hito M5: descarga masiva, novedades automáticas, popup y opciones). Uso personal. No se publica en la Chrome Web Store.
+> **Estado:** en desarrollo (hito M6: descarga masiva, novedades automáticas, verificación de carpeta opcional, popup y opciones). Uso personal. No se publica en la Chrome Web Store.
 
 ## Qué hará
 

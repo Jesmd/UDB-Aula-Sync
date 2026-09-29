@@ -19,6 +19,10 @@ export const MIGRATIONS: readonly Migration[] = [
     db.createObjectStore('snapshots', { keyPath: 'courseId' });
     db.createObjectStore('meta', { keyPath: 'key' });
   },
+  // 1 -> 2: folder handle for the optional folder verifier (M6).
+  (db) => {
+    db.createObjectStore('handles');
+  },
 ];
 
 export const DB_VERSION = MIGRATIONS.length;
