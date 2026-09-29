@@ -1,0 +1,48 @@
+{
+  "extName": { "message": "UDB Aula Sync" },
+  "extDescription": {
+    "message": "Descarga y organiza el material de tus cursos del Aula Digital UDB en carpetas por curso y sección."
+  },
+  "toastReady": { "message": "UDB Aula Sync está activo en esta página." },
+  "toastClose": { "message": "Cerrar aviso" },
+  "popupTitle": { "message": "UDB Aula Sync" },
+  "popupStatusChecking": { "message": "Comprobando el servicio en segundo plano…" },
+  "popupStatusOk": {
+    "message": "Servicio activo (versión $VERSION$).",
+    "placeholders": { "version": { "content": "$1" } }
+  },
+  "popupStatusError": { "message": "El servicio en segundo plano no responde." },
+  "popupOpenOptions": { "message": "Abrir opciones" },
+  "optionsTitle": { "message": "Opciones de UDB Aula Sync" },
+  "optionsPending": { "message": "Esta sección estará disponible en un hito posterior." },
+  "tabGeneral": { "message": "General" },
+  "tabPaths": { "message": "Rutas" },
+  "tabNames": { "message": "Nombres" },
+  "tabSync": { "message": "Sincronización" },
+  "tabSecurity": { "message": "Seguridad" },
+  "tabDiagnostics": { "message": "Diagnóstico" },
+  "diagIntro": {
+    "message": "Pruebas de compatibilidad del navegador. Cada botón hace como máximo una petición al Aula Digital y solo cuando lo pulsas."
+  },
+  "diagOffscreen": { "message": "Probar documento offscreen" },
+  "diagDownloadOpen": { "message": "Probar descarga y apertura" },
+  "diagFetchSession": { "message": "Probar sesión en segundo plano (H3)" },
+  "diagExportLogs": { "message": "Exportar registro" },
+  "diagResult": { "message": "Resultado" },
+  "diagRunning": { "message": "Ejecutando…" },
+  "error_unknown": { "message": "Error inesperado." },
+  "error_invalid_message": { "message": "Mensaje interno no válido." },
+  "error_unsupported_message": { "message": "Acción no disponible." },
+  "error_session_expired": {
+    "message": "Tu sesión del Aula Digital caducó. Inicia sesión de nuevo."
+  },
+  "error_network": { "message": "Error de red." },
+  "error_http_status": { "message": "El servidor respondió con un error." },
+  "error_rate_limited": { "message": "El servidor pidió esperar. Se reintentará más tarde." },
+  "error_not_downloadable": { "message": "Este material no tiene un archivo descargable." },
+  "error_download_interrupted": { "message": "La descarga se interrumpió." },
+  "error_open_blocked": { "message": "El navegador no permitió abrir el archivo." },
+  "error_offscreen_unavailable": { "message": "No se pudo crear el documento en segundo plano." },
+  "error_storage": { "message": "Error al guardar los datos locales." },
+  "error_unsafe_path": { "message": "La ruta de destino no es segura." }
+}
