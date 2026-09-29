@@ -13,7 +13,7 @@ Ninguna se da por hecha en el código.
 | --- | ---------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | H1  | `mod/resource/view.php?id=X&redirect=1` redirige a `pluginfile.php`                            | confirmada    | Curso 49946, cmid 2229872, 2026-09-29: termina en `pluginfile.php` (Brave, "Probar hipótesis")                                              |
 | H2  | La URL de recurso lleva revisión: `/pluginfile.php/<ctx>/mod_resource/content/<rev>/<archivo>` | parcial       | El segmento existe pero vale **0** (curso 49946). No sirve sola para detectar cambios: la huella debe usar tamaño, `Last-Modified` y `ETag` |
-| H3  | `fetch` desde service worker/offscreen envía la cookie de sesión                               | sin verificar | Pendiente de Opciones > Diagnóstico en Brave (M0)                                                                                           |
+| H3  | `fetch` desde service worker/offscreen envía la cookie de sesión                               | confirmada    | Brave, 2026-09-29: worker y offscreen reciben 200 en `/auladigital/my/` sin redirigir al login (`sessionSent: true`)                        |
 | H4  | `pluginfile.php` acepta HEAD                                                                   | confirmada    | HEAD 200 con `Content-Length` 341955, `application/pdf` y nombre en Content-Disposition (curso 49946)                                       |
 | H5  | Sección Onetopic: `course/view.php?id=<id>&section=<n>`; pestañas atenuadas = no disponibles   | parcial       | URL confirmada (curso 49946): 10 pestañas, sufijo `#tabs-tree-start`. Pestañas atenuadas sin verificar (0 en ese curso)                     |
 | H6  | `mod_folder` muestra un árbol con un enlace `pluginfile` por archivo (sin revisión fiable)     | sin verificar | Sin carpetas en el curso probado. Confirmada solo contra el simulador                                                                       |
@@ -61,19 +61,20 @@ Hallazgos del sitio real (2026-09-29):
 ## Compatibilidad del navegador (M0)
 
 Brave (2026-09-29): la carpeta de Descargas del usuario está en otra unidad (`D:\UNIVERSIDAD`) y la
-descarga a `UDB/_prueba/` funcionó. Pendiente: "Probar sesión en segundo plano" (H3).
+descarga a `UDB/_prueba/` funcionó. "Probar sesión en segundo plano" (H3) confirmó la sesión en worker y
+offscreen.
 
 Ejecutar en Brave (perfil dedicado, sesión iniciada en el Aula Digital):
 Opciones > Diagnóstico. Copiar aquí el JSON de cada botón.
 
-| Prueba                                             | Brave         | Chrome        | Edge          |
-| -------------------------------------------------- | ------------- | ------------- | ------------- |
-| Documento offscreen (DOM_PARSER)                   | sin verificar | sin verificar | sin verificar |
-| Descarga con `chrome.downloads` a subcarpeta       | confirmada    | sin verificar | sin verificar |
-| `downloads.open` desde página (gesto)              | confirmada    | sin verificar | sin verificar |
-| `downloads.open` desde worker (justo tras un clic) | confirmada    | sin verificar | sin verificar |
-| Sesión en `fetch` del worker (H3)                  | sin verificar | sin verificar | sin verificar |
-| Sesión en `fetch` del offscreen (H3)               | sin verificar | sin verificar | sin verificar |
+| Prueba                                             | Brave      | Chrome        | Edge          |
+| -------------------------------------------------- | ---------- | ------------- | ------------- |
+| Documento offscreen (DOM_PARSER)                   | confirmada | sin verificar | sin verificar |
+| Descarga con `chrome.downloads` a subcarpeta       | confirmada | sin verificar | sin verificar |
+| `downloads.open` desde página (gesto)              | confirmada | sin verificar | sin verificar |
+| `downloads.open` desde worker (justo tras un clic) | confirmada | sin verificar | sin verificar |
+| Sesión en `fetch` del worker (H3)                  | confirmada | sin verificar | sin verificar |
+| Sesión en `fetch` del offscreen (H3)               | confirmada | sin verificar | sin verificar |
 
 Cómo leer el resultado de H3: `sessionSent: true` y `finalUrl` en `/auladigital/my/` indican que la cookie
 viajó. `finalUrl` en `/login/index.php` indica que no (plan B: hacer esas peticiones desde el content script).
