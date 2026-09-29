@@ -140,3 +140,19 @@ describe('buildPlan', () => {
     ).toBe(true);
   });
 });
+
+describe('filters', () => {
+  it('leaves out excluded extensions and files over the size limit', async () => {
+    const { filterReason, isSkippedSection } =
+      await import('../../../../src/core/planning/filters');
+    const filters = { excludedExtensions: ['zip'], maxSizeMb: 1 };
+    expect(filterReason({ extension: 'ZIP', size: 1 }, filters)).toBe('extension');
+    expect(filterReason({ extension: 'pdf', size: 2 * 1024 * 1024 }, filters)).toBe('size');
+    expect(filterReason({ extension: 'pdf', size: null }, filters)).toBeNull();
+    expect(
+      filterReason({ extension: '', size: 10 }, { excludedExtensions: [], maxSizeMb: null }),
+    ).toBeNull();
+    expect(isSkippedSection(' recursos bibliograficos ', ['Recursos Bibliográficos'])).toBe(true);
+    expect(isSkippedSection('Semana 1', ['Recursos Bibliográficos'])).toBe(false);
+  });
+});
