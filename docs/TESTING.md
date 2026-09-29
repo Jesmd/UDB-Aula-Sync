@@ -18,7 +18,24 @@ pnpm test:e2e    # build + Playwright contra el Moodle simulado
 - **Integración** (`tests/unit/moodle/resolver.test.ts`, `hypotheses.test.ts`): el servidor simulado en
   HTTP y puerto libre (`startMockMoodle({ port: 0, tls: false })`); `fetch` de Node y jsdom como parser.
 - **E2E** (`tests/e2e/`): Chromium con la extensión de `dist/`. El host real se mapea al simulador y
-  cualquier otro host falla (ADR-002). **Nunca** contra el sitio real.
+  cualquier otro host falla (ADR-002). **Nunca** contra el sitio real. El simulador se reinicia antes de
+  cada prueba.
+- **Accesibilidad**: `@axe-core/playwright` con WCAG 2.1 A/AA en popup, opciones y la UI inyectada
+  (`popup-options.spec.ts`, `download-all.spec.ts`).
+
+## Manual (M4)
+
+1. `git pull && pnpm install && pnpm build` y recarga la extensión en Brave.
+2. En un curso, pulsa "Descargas del curso" (abajo a la derecha) y luego "Descargar esta sección". Revisa el
+   plan y que los archivos lleguen a `Descargas/UDB/<curso>/...`. Las carpetas del curso conservan subcarpetas.
+3. "Descargar todo el curso" en un curso con pestañas atenuadas: no debe pedir esas pestañas. Si el plan pasa
+   de 100 archivos o 200 MB, pide confirmación.
+4. Vuelve a pulsar "Solo nuevos": debe decir que no hay nada que descargar.
+5. Junto a cada archivo aparece su estado. Con Tab sobre un archivo aparece la tarjeta; Esc la cierra.
+6. Opciones > General > "Tarjeta de detalles": al pasar el cursor aparece la tarjeta.
+7. Opciones > Cursos: escribe "Recursos Bibliográficos" en secciones a omitir y repite "Todo": la sección
+   aparece como omitida.
+8. Popup: estado de la cola, pausar y reanudar durante una descarga larga, búsqueda y "Abrir".
 
 ## Manual (M3)
 

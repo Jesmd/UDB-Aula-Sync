@@ -232,3 +232,69 @@ enmarcada en el aviso. Su clic ocurre en contexto de extensión y llama a `chrom
 
 **Consecuencias.** Abrir tras una descarga nueva requiere un clic en "Abrir". Un archivo ya descargado se
 intenta abrir al hacer clic en el enlace y, si el navegador lo impide, el aviso trae el mismo botón.
+
+## ADR-017 Ajustes v2
+
+**Contexto.** M4 añade modo del cursor, etiquetas de estado, filtros, intervalo de novedades y ajustes por
+curso.
+
+**Decisión.** `settings-schema.ts` pasa a `version: 2`.
+
+- Campos nuevos: `hoverDetails` (`simple` | `tarjeta`), `showStatusBadges`, `filters`
+  (`excludedExtensions`, `maxSizeMb`), `syncIntervalHours` (1–48) y `courses` (por id).
+- Cada curso puede cambiar plantilla, secciones a omitir, extensiones excluidas y tamaño máximo. `null` o
+  vacío hereda el valor general. `courseSettings()` combina ambos.
+- `normalizeSettings()` valida campo por campo: un valor roto vuelve al predeterminado sin perder los demás.
+  Así también migra los datos v1.
+- Opciones guarda al instante y solo valores válidos. Un campo inválido muestra el error y no se guarda.
+
+**Consecuencias.** `autoDownload` ya existe en el esquema, pero no se muestra hasta M5. Los filtros solo
+aplican a "Descargar todo" y "Solo nuevos". Un clic sobre un archivo siempre lo descarga.
+
+## ADR-018 Panel del curso en lugar de `section-button.ts`
+
+**Contexto.** El árbol del §7 preveía `content/ui/section-button.ts`: un botón "Descargar sección" junto a
+cada sección. En onetopic solo se ve una pestaña a la vez, y un botón por sección metía nodos dentro de la
+página de Moodle.
+
+**Decisión.** Se elimina `section-button.ts`. Un botón flotante "Descargas del curso" abre un panel
+(`course-panel.ts`) en el host Shadow DOM con cuatro acciones: sección visible, todo el curso, solo nuevos y
+reintentar fallidos. El panel también muestra el progreso y el plan.
+
+**Consecuencias.** No se toca el DOM de Moodle, salvo el host de la UI. "Sección" significa las secciones que
+muestra la página actual.
+
+## ADR-019 Modos de descarga masiva y plan
+
+**Decisión.**
+
+- **Todo**: descarga `nuevo`, `actualizado` y `perdido_local`.
+- **Solo nuevos**: descarga solo `nuevo`. Las actualizaciones esperan a "Todo" o a un clic.
+- Antes de descargar hay un simulacro (`download/preview`) por archivo. El plan cuenta nuevos,
+  actualizados, faltantes, sin cambios, solo lectura, omitidos, errores y secciones omitidas.
+- Por debajo de 100 archivos y 200 MB empieza sin preguntar. Por encima pide confirmación.
+- El escaneo pide cada pestaña disponible una sola vez (máximo 200 páginas). Nunca pide pestañas atenuadas
+  ni restringidas. Una sesión caducada lo detiene todo antes de descargar nada.
+- Las descargas del lote no muestran un aviso por archivo; el panel resume el progreso.
+
+## ADR-020 Detalles al pasar el cursor
+
+**Decisión.** Por defecto (`simple`), el cursor muestra una etiqueta pequeña. En modo `tarjeta` muestra la
+tarjeta de detalles: tipo, nombre real, tamaño, destino, estado, "Descargar", "Copiar ruta" y, si ya está
+descargado, "Abrir" y "Mostrar en carpeta" (el mismo iframe del ADR-016). Con el teclado, el foco sobre un
+archivo abre la tarjeta en ambos modos; Esc la cierra.
+
+**Consecuencias.** La tarjeta y las etiquetas de estado se dibujan en un segundo host con coordenadas del
+documento. La página no se desplaza. Desde el teclado, los botones de la tarjeta no están en el orden de
+tabulación de la página; Enter sobre el enlace descarga igual.
+
+## ADR-021 Un único limitador en el content script
+
+**Contexto.** La resolución al pasar el cursor y el escaneo del curso piden al mismo servidor.
+
+**Decisión.** Todas las peticiones del content script pasan por un solo `createRateLimiter`: máximo 2 a la
+vez, con 300–800 ms entre peticiones. `ResolveCache` usa por dentro un limitador sin límite, porque el
+`fetch` que recibe ya está limitado.
+
+**Consecuencias.** Pasar el cursor durante un escaneo espera turno. Nunca hay más de 2 peticiones
+simultáneas desde la página.
