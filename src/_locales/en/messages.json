@@ -188,9 +188,6 @@
   "optionsTitle": {
     "message": "UDB Aula Sync options"
   },
-  "optionsPending": {
-    "message": "This section will be available in a later milestone."
-  },
   "tabGeneral": {
     "message": "General"
   },
@@ -482,5 +479,315 @@
   },
   "cardUnknown": {
     "message": "unknown"
+  },
+  "popupQueueTitle": {
+    "message": "Downloads"
+  },
+  "queueEmpty": {
+    "message": "No pending downloads."
+  },
+  "queueCounts": {
+    "message": "$WAITING$ queued · $ACTIVE$ in progress · $FAILED$ failed",
+    "placeholders": {
+      "waiting": {
+        "content": "$1"
+      },
+      "active": {
+        "content": "$2"
+      },
+      "failed": {
+        "content": "$3"
+      }
+    }
+  },
+  "queueCurrent": {
+    "message": "Now: $FILE$",
+    "placeholders": {
+      "file": {
+        "content": "$1"
+      }
+    }
+  },
+  "queuePausedUser": {
+    "message": "Paused."
+  },
+  "queuePausedSession": {
+    "message": "Paused: your Aula Digital session expired. Log in again and press Resume."
+  },
+  "queuePause": {
+    "message": "Pause"
+  },
+  "queueResume": {
+    "message": "Resume"
+  },
+  "queueCancel": {
+    "message": "Cancel pending"
+  },
+  "queueCancelSure": {
+    "message": "Sure? Press again"
+  },
+  "queueRetry": {
+    "message": "Retry failed"
+  },
+  "popupCoursesTitle": {
+    "message": "Courses"
+  },
+  "coursesEmpty": {
+    "message": "Nothing downloaded yet. Open an Aula Digital course and use \"Course downloads\"."
+  },
+  "courseNoFiles": {
+    "message": "No downloads"
+  },
+  "courseInfo": {
+    "message": "$COUNT$ files · last: $DATE$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "date": {
+        "content": "$2"
+      }
+    }
+  },
+  "popupSearchTitle": {
+    "message": "Search downloaded files"
+  },
+  "searchLabel": {
+    "message": "Name, course or folder"
+  },
+  "searchNone": {
+    "message": "No results."
+  },
+  "popupDiagTitle": {
+    "message": "Diagnostics"
+  },
+  "tabCourses": {
+    "message": "Courses"
+  },
+  "optSaved": {
+    "message": "Changes saved."
+  },
+  "optSaveError": {
+    "message": "Could not save the changes."
+  },
+  "optInterceptClicks": {
+    "message": "Download when clicking a course file"
+  },
+  "optInterceptClicksHint": {
+    "message": "Saves the file into its folder instead of opening the Aula Digital viewer. Ctrl+click or middle click still open the normal link."
+  },
+  "optOpenAfter": {
+    "message": "Open the file when the download finishes"
+  },
+  "optOpenAfterHint": {
+    "message": "Only safe types (PDF, Office, images, text). Executables, scripts, macro files and archives are never opened."
+  },
+  "optHoverDetails": {
+    "message": "When hovering over a file"
+  },
+  "optHoverSimple": {
+    "message": "Simple indicator"
+  },
+  "optHoverSimpleHint": {
+    "message": "a small label next to the pointer"
+  },
+  "optHoverCard": {
+    "message": "Details card"
+  },
+  "optHoverCardHint": {
+    "message": "type, size, status and where it will be saved"
+  },
+  "optStatusBadges": {
+    "message": "Show the status next to each file"
+  },
+  "optStatusBadgesHint": {
+    "message": "New, Downloaded, Updated, Read only… computed from your local index."
+  },
+  "optResetTitle": {
+    "message": "Reset"
+  },
+  "optResetHint": {
+    "message": "Goes back to the initial values, including per-course settings. Your files and the index are not touched."
+  },
+  "optReset": {
+    "message": "Reset settings"
+  },
+  "optResetSure": {
+    "message": "Sure? Press again"
+  },
+  "optPathsIntro": {
+    "message": "Everything is saved inside the browser's Downloads folder."
+  },
+  "optPreview": {
+    "message": "Example:"
+  },
+  "optBase": {
+    "message": "Base folder"
+  },
+  "optBaseHint": {
+    "message": "Inside Downloads. It can have subfolders, for example UDB/2026."
+  },
+  "optErrBase": {
+    "message": "Enter 1 to 80 characters."
+  },
+  "optTemplate": {
+    "message": "Path template"
+  },
+  "optTemplateHint": {
+    "message": "Separate folders with /. It must end with {archivo}. Available: $TOKENS$",
+    "placeholders": {
+      "tokens": {
+        "content": "$1"
+      }
+    }
+  },
+  "optErrTemplate": {
+    "message": "Invalid template: check the braces and that it ends with {archivo}."
+  },
+  "optIncludeParent": {
+    "message": "Folder for the parent tab"
+  },
+  "optIncludeParentHint": {
+    "message": "In courses with two-level tabs (Unidad 1 › Semana 3)."
+  },
+  "optGroupByCycle": {
+    "message": "Group by cycle"
+  },
+  "optGroupByCycleHint": {
+    "message": "Adds a folder such as 2026-C02 after the base when the course code says so."
+  },
+  "optPadNumbers": {
+    "message": "Pad numbers with zeros"
+  },
+  "optPadNumbersHint": {
+    "message": "Semana 3 → Semana 03, so they sort correctly."
+  },
+  "optOrderPrefix": {
+    "message": "Order prefix on sections"
+  },
+  "optOrderPrefixHint": {
+    "message": "04 - Semana 3: folders follow the course order."
+  },
+  "optFileNaming": {
+    "message": "Saved file name"
+  },
+  "optNamingActivity": {
+    "message": "Activity name"
+  },
+  "optNamingOriginal": {
+    "message": "Original file name"
+  },
+  "optNamingBoth": {
+    "message": "Both"
+  },
+  "optNamingFolderNote": {
+    "message": "Files inside a course folder always keep their original name."
+  },
+  "optUpdatePolicy": {
+    "message": "If a file changed on Aula Digital"
+  },
+  "optPolicyKeep": {
+    "message": "Keep both versions"
+  },
+  "optPolicyKeepHint": {
+    "message": "the new one is saved with \"(rev N)\"; you keep your notes"
+  },
+  "optPolicyOverwrite": {
+    "message": "Replace the file"
+  },
+  "optPolicySkip": {
+    "message": "Do not download the new version"
+  },
+  "optFiltersTitle": {
+    "message": "Filters for \"Download all\""
+  },
+  "optFiltersHint": {
+    "message": "Filtered files show as Skipped. Clicking a file always downloads it."
+  },
+  "optExcluded": {
+    "message": "Extensions not to download"
+  },
+  "optExcludedHint": {
+    "message": "Comma separated, for example: mp4, zip"
+  },
+  "optErrExtensions": {
+    "message": "Use letter and digit extensions separated by commas (40 at most)."
+  },
+  "optMaxSize": {
+    "message": "Maximum size (MB)"
+  },
+  "optMaxSizeHint": {
+    "message": "Empty = no limit."
+  },
+  "optErrSize": {
+    "message": "Enter a whole number from 1 to 10000, or leave it empty."
+  },
+  "optNewsTitle": {
+    "message": "New material"
+  },
+  "optInterval": {
+    "message": "Check for new material every (hours)"
+  },
+  "optIntervalHint": {
+    "message": "From 1 to 48. Automatic checks arrive in the next version."
+  },
+  "optErrInterval": {
+    "message": "Enter a whole number from 1 to 48."
+  },
+  "optCoursesIntro": {
+    "message": "Settings for a single course. Empty fields use the general value."
+  },
+  "optCoursesEmpty": {
+    "message": "Courses you open with the extension active will show up here."
+  },
+  "optCourseCustom": {
+    "message": "customized"
+  },
+  "optCourseInherit": {
+    "message": "Empty = use the general value."
+  },
+  "optSkipSections": {
+    "message": "Tabs or sections not to download"
+  },
+  "optSkipSectionsHint": {
+    "message": "One per line, for example: Recursos Bibliográficos. Case and accents are ignored."
+  },
+  "optCourseReset": {
+    "message": "Remove this course's settings"
+  },
+  "secHostTitle": {
+    "message": "Where it acts"
+  },
+  "secHost": {
+    "message": "Only on $URL$. It cannot read or change other sites.",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "secOpenTitle": {
+    "message": "What it opens automatically"
+  },
+  "secOpen": {
+    "message": "When a download finishes it only opens these types:"
+  },
+  "secNeverOpen": {
+    "message": "Executables, scripts, macro documents (docm, xlsm, pptm) and archives are never opened automatically: they are shown in their folder."
+  },
+  "secDataTitle": {
+    "message": "Your data"
+  },
+  "secNoPasswords": {
+    "message": "It does not log in for you or store passwords, cookies or tokens: it uses your open session."
+  },
+  "secNoServers": {
+    "message": "It sends no data to any server and has no analytics. The index stays in this browser."
+  },
+  "secReadOnly": {
+    "message": "Material Aula Digital only shows in its viewer stays \"Read only\"; it is not captured."
+  },
+  "secGentle": {
+    "message": "It makes few requests at a time (2 at most) with pauses, and stops if the session expires."
   }
 }
