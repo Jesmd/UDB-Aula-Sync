@@ -298,3 +298,55 @@ vez, con 300–800 ms entre peticiones. `ResolveCache` usa por dentro un limitad
 
 **Consecuencias.** Pasar el cursor durante un escaneo espera turno. Nunca hay más de 2 peticiones
 simultáneas desde la página.
+
+## ADR-022 Seguimiento de cursos y primera sincronización a mano
+
+**Contexto.** El §2 exige que la primera sincronización de un curso sea siempre manual.
+
+**Decisión.** Un curso entra en seguimiento solo cuando el usuario usa "Descargar todo el curso" o "Solo
+nuevos" en su página. Ese escaneo completo guarda la foto del curso (`snapshot/save`). "Descargar esta
+sección" no cuenta. La búsqueda periódica y "Sincronizar ahora" solo revisan cursos con foto.
+
+**Consecuencias.** Un curso nuevo del ciclo no se vigila hasta que el usuario lo abre y lo descarga una vez.
+La foto guarda ids, nombres y disponibilidad, nunca HTML (`snapshots` en IndexedDB).
+
+## ADR-023 Qué cuenta como novedad
+
+**Decisión.**
+
+- Un recurso o carpeta disponible que no estaba en la foto, o que estaba pero no se podía abrir.
+- Una sección atenuada o restringida que se abre. Cuenta como una novedad propia solo si no trae nada
+  descargable; si trae archivos, cuentan los archivos.
+- No cuentan: renombres, actividades borradas, foros, tareas ni archivos que ya están en el índice.
+- Una novedad dura hasta que se descarga o el usuario pulsa "Marcar como visto".
+- **No** se revisa si cambió un archivo ya conocido. Haría 2 peticiones por archivo en cada búsqueda
+  (unas 400 en un curso de 19 semanas). Los cambios de un archivo se detectan con "Descargar todo" o al
+  pasar el cursor.
+
+**Consecuencias.** Cada búsqueda cuesta 1 petición por pestaña disponible más 2 por actividad nueva.
+
+## ADR-024 Búsqueda en segundo plano
+
+**Decisión.**
+
+- Alarma `udbsync-sync` cada `syncIntervalHours` (6 h por defecto). Se recrea solo si cambia el periodo.
+- No corre sin red (`navigator.onLine`), con la pantalla bloqueada (`chrome.idle`) ni con descargas en
+  curso. Queda pendiente y corre al desbloquear, al volver la red o al terminar las descargas.
+- El worker no tiene DOM: pide cada curso al documento offscreen (`offscreen/sync-course`), que descarga y
+  parsea con el mismo `moodle/scan.ts` del content script. Los cursos van de uno en uno.
+- Todas las peticiones de segundo plano pasan por un limitador (2 a la vez, 300–800 ms) con reintento
+  ante 429 y 5xx que respeta `Retry-After` (`core/http/polite-fetch.ts`). El content script usa el mismo.
+- Una notificación agrupada por búsqueda, contador en el icono y marca "Nuevo" en la página.
+- "Descargar novedades automáticamente" (por curso, apagado por defecto) encola solo las novedades y nunca
+  las abre.
+
+**Consecuencias.** La página y el segundo plano tienen limitadores separados. Si el usuario escanea un curso
+justo durante una búsqueda periódica podría haber hasta 4 peticiones a la vez; es raro y breve. Depende de
+H3 (la cookie de sesión viaja en el `fetch` del offscreen), aún sin verificar en Brave.
+
+## ADR-025 Sesión caducada en segundo plano
+
+**Decisión.** Si una búsqueda llega al login, se detiene en esa petición y muestra una sola notificación.
+La cola de descargas comparte el mismo aviso. Desde entonces la búsqueda periódica no hace ninguna
+petición hasta que una página del Aula Digital (que no sea el login) carga con la extensión activa.
+"Sincronizar ahora" sí lo intenta, porque lo pidió el usuario.
