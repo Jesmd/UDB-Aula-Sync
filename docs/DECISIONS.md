@@ -87,3 +87,31 @@ origen `https://www.udbvirtual.edu.sv/*` (origen completo, no la ruta).
 
 **Decisión.** `src/shared/browser-api.ts` concentra las llamadas `chrome.*` compartidas (mensajería,
 manifest). Facilita un posible port a Firefox; Firefox sigue fuera del alcance.
+
+## ADR-008 El Diagnóstico exporta HTML saneado
+
+**Contexto.** El checkpoint de M1 necesita la estructura real del sitio sin datos personales.
+
+**Decisión.** Un único saneador (`src/moodle/sanitize.ts`) sirve al Diagnóstico y a
+`scripts/sanitize-fixture.ts`. Sobre una copia del documento:
+
+- elimina scripts, estilos, SVG y subárboles personales (menú de usuario, mensajes, pie con el nombre);
+- conserva etiquetas, clases seguras y atributos de una lista blanca, además de los `id` con forma conocida (`section-N`, `module-N`…);
+- conserva el texto solo en nombres (encabezados, secciones, actividades, pestañas, migas); el resto pasa a `[texto]`;
+- en las URL deja la ruta y los valores numéricos de `id`/`section`/`redirect`, quita `sesskey` y los tokens, y reemplaza las rutas de usuario por `[personal]`;
+- borra los correos también dentro del texto conservado.
+
+El informe incluye además el resultado de `parseCoursePage`, para comparar lo detectado con la realidad.
+
+**Consecuencias.** Un informe se convierte en una fixture real con un comando. Una prueba verifica que el
+HTML saneado da exactamente el mismo resultado de análisis que el original.
+
+## ADR-009 Diagnóstico desde el popup sin permiso `tabs`
+
+**Contexto.** El popup necesita saber qué pestaña está activa. `tabs` y `activeTab` no están en la lista del §6.
+
+**Decisión.** `chrome.tabs.query` sin `tabs` devuelve la URL solo de pestañas con permiso de host
+(el Aula Digital), que es justo lo que hace falta. `chrome.tabs.sendMessage` no requiere permiso.
+El content script solo responde a remitentes de la propia extensión que no son pestañas.
+
+**Consecuencias.** Sin permisos nuevos. En cualquier otra pestaña el popup muestra "Abre un curso".

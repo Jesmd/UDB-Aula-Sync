@@ -18,6 +18,22 @@ Ninguna se da por hecha en el código.
 | H5  | Sección Onetopic: `course/view.php?id=<id>&section=<n>`; pestañas atenuadas = no disponibles   | sin verificar |           |
 | H6  | `mod_folder` muestra un árbol con un enlace `pluginfile` por archivo (sin revisión fiable)     | sin verificar |           |
 
+## Checkpoint M1: Diagnóstico en el sitio real
+
+1. Abre un curso de cada estructura: A (pestañas), A con semanas atenuadas y B (página de temas).
+2. En cada uno: icono de la extensión > **Diagnóstico de esta página**. Se guarda
+   `Descargas/UDB/_diagnostico/diagnostico-curso-<id>-<fecha>.json`.
+3. Revisa el archivo y envíalo. Contiene solo estructura: sin scripts, sin menú de usuario, mensajes,
+   correos ni `sesskey`; el texto libre se sustituye por `[texto]`.
+4. Con cada informe: `pnpm exec tsx scripts/sanitize-fixture.ts <informe.json> tests/fixtures/moodle/real/<nombre>.html`,
+   añadir el caso al contract test y ajustar `selectors.ts`.
+
+| Estructura             | Informe recibido | Selectores ajustados |
+| ---------------------- | ---------------- | -------------------- |
+| A (Onetopic 2 niveles) | no               | no                   |
+| A (pestañas atenuadas) | no               | no                   |
+| B (temas)              | no               | no                   |
+
 ## Compatibilidad del navegador (M0)
 
 Ejecutar en Brave (perfil dedicado, sesión iniciada en el Aula Digital):
