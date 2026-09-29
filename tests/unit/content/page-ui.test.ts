@@ -111,6 +111,7 @@ describe('StatusPills and PageStatus', () => {
           { fileId: 'a', cmid: 2102, relativePath: 'x', downloadedAt: 1, localExists: true },
           { fileId: 'b', cmid: 2103, relativePath: 'y', downloadedAt: 1, localExists: false },
         ],
+        novelties: [2104, 2102],
       },
     });
     await status.load(101);
@@ -120,7 +121,7 @@ describe('StatusPills and PageStatus', () => {
       courseId: 101,
     });
     const byCmid = pillsByCmid;
-    expect(byCmid()).toEqual({ 2102: 'descargado', 2103: 'perdido_local' });
+    expect(byCmid()).toEqual({ 2102: 'descargado', 2103: 'perdido_local', 2104: 'nuevo' });
 
     const preview: DownloadPreviewResponse = {
       fileId: 'c',
@@ -381,6 +382,8 @@ describe('BulkRunner against the mock server', () => {
     ).toBe(false);
     expect(panel.element.textContent).toContain('bulkDone|4|1');
     expect(bulk.running).toBe(false);
+    // A section is not the whole course: no snapshot, the course is not tracked yet.
+    expect(send.mock.calls.some(([m]) => m.type === 'snapshot/save')).toBe(false);
   });
 
   it('stops before any download when the session is lost', async () => {
