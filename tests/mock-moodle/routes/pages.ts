@@ -1,8 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { COURSES } from '../seeds/courses';
 import { redirect, sendHtml, type Route } from './types';
 
 const BASE = '/auladigital';
 const LOGIN = `${BASE}/login/index.php`;
+const FIXTURES = 'tests/fixtures/moodle';
 
 const escapeHtml = (text: string): string =>
   text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -59,7 +62,8 @@ export const pageRoutes: readonly Route[] = [
         sendHtml(res, page('Error', '<p>Curso no encontrado</p>'), 404);
         return;
       }
-      sendHtml(res, page(course.fullName, `<h1>${escapeHtml(course.fullName)}</h1>`));
+      // Onetopic fixtures render one tab; any ?section= gets the same page for now (M5 adds per-tab pages).
+      sendHtml(res, readFileSync(join(FIXTURES, course.fixture), 'utf8'));
     },
   },
 ];
