@@ -50,6 +50,26 @@ export const SELECTORS = {
 
   loginForm: ['form#login', 'form[action*="/login/index.php"]'],
 
+  /**
+   * mod/resource/view.php when it does not redirect: the file is embedded or linked.
+   * Moodle 3.10 resourcelib: object/iframe/embed/img for embed, .resourceworkaround link
+   * for "open"/"popup" display. TODO(verify-real-DOM).
+   */
+  resourceFile: [
+    'object[data*="/pluginfile.php/"]',
+    'iframe#resourceobject[src*="/pluginfile.php/"]',
+    'iframe[src*="/pluginfile.php/"]',
+    'embed[src*="/pluginfile.php/"]',
+    'img.resourceimage[src*="/pluginfile.php/"]',
+    'video source[src*="/pluginfile.php/"]',
+    'audio source[src*="/pluginfile.php/"]',
+    '.resourceworkaround a[href*="/pluginfile.php/"]',
+    '.resourcecontent a[href*="/pluginfile.php/"]',
+    '[role="main"] a[href*="/pluginfile.php/"][href*="/mod_resource/content/"]',
+  ],
+  /** mod_folder files: every link into the folder's file area (tree markup not needed). */
+  folderFileLink: ['a[href*="/pluginfile.php/"][href*="/mod_folder/content/"]'],
+
   /** Subtrees never exported by Diagnostics: personal data or noise. */
   personal: [
     '.usermenu',
