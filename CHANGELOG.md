@@ -6,6 +6,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ### Añadido
 
+- M2: resolución de archivos. Cadena `redirect=1` → recurso embebido/enlace → solo lectura, sonda de
+  cabeceras HEAD/GET, `mod_folder` con subcarpetas, Content-Disposition (`filename*`, UTF-8 sin codificar).
+- M2: rutas. Saneado de nombres (Windows, Unicode, límites 120/180), plantillas con tokens, código de
+  curso, relleno numérico, sufijo por colisión.
+- M2: botón "Probar hipótesis (H1, H2, H4-H6)" en el popup, con consentimiento y como máximo 4 peticiones.
+- M2: el Moodle simulado sirve recursos, `pluginfile` con revisiones, carpetas, 429 y sesión caducada.
+- M1 (checkpoint): fixtures reales saneadas de onetopic (49946) y temas (50454); el adaptador onetopic
+  sigue el marcado real.
 - M1: lectura del curso. Detección de estructura (onetopic, topics, weeks, genérica), adaptadores con
   suite de contrato común, `parseCourse`, `parseSection` y clasificación de actividades por `modtype_*`.
 - M1: Diagnóstico de la página desde el popup (informe JSON solo con estructura) y
