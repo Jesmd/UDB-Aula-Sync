@@ -1,0 +1,161 @@
+{
+  "extName": {
+    "message": "UDB Aula Sync"
+  },
+  "extDescription": {
+    "message": "Downloads and organizes your UDB Aula Digital course material into folders by course and section."
+  },
+  "toastReady": {
+    "message": "UDB Aula Sync is active on this page."
+  },
+  "toastClose": {
+    "message": "Close notice"
+  },
+  "popupTitle": {
+    "message": "UDB Aula Sync"
+  },
+  "popupStatusChecking": {
+    "message": "Checking the background service…"
+  },
+  "popupStatusOk": {
+    "message": "Service active (version $VERSION$).",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupStatusError": {
+    "message": "The background service does not respond."
+  },
+  "popupOpenOptions": {
+    "message": "Open options"
+  },
+  "popupDiagnose": {
+    "message": "Diagnose this page"
+  },
+  "popupDiagnoseNotUdb": {
+    "message": "Open an Aula Digital course in the active tab and try again."
+  },
+  "popupDiagnoseError": {
+    "message": "Could not read the page. Reload it and try again."
+  },
+  "popupDiagnoseSummary": {
+    "message": "Layout $LAYOUT$: $SECTIONS$ sections, $ACTIVITIES$ activities.",
+    "placeholders": {
+      "layout": {
+        "content": "$1"
+      },
+      "sections": {
+        "content": "$2"
+      },
+      "activities": {
+        "content": "$3"
+      }
+    }
+  },
+  "popupDiagnoseSaved": {
+    "message": "Saved to Downloads/$PATH$.",
+    "placeholders": {
+      "path": {
+        "content": "$1"
+      }
+    }
+  },
+  "popupDiagnosePrivacy": {
+    "message": "It only contains the page structure: your name, messages, emails and session keys are removed. Review it before sharing."
+  },
+  "popupDiagnoseCopy": {
+    "message": "Copy to clipboard"
+  },
+  "popupDiagnoseCopied": {
+    "message": "Copied."
+  },
+  "optionsTitle": {
+    "message": "UDB Aula Sync options"
+  },
+  "optionsPending": {
+    "message": "This section will be available in a later milestone."
+  },
+  "tabGeneral": {
+    "message": "General"
+  },
+  "tabPaths": {
+    "message": "Paths"
+  },
+  "tabNames": {
+    "message": "Names"
+  },
+  "tabSync": {
+    "message": "Sync"
+  },
+  "tabSecurity": {
+    "message": "Security"
+  },
+  "tabDiagnostics": {
+    "message": "Diagnostics"
+  },
+  "diagIntro": {
+    "message": "Browser compatibility checks. Each button sends at most one request to Aula Digital, and only when you press it."
+  },
+  "diagOffscreen": {
+    "message": "Test offscreen document"
+  },
+  "diagDownloadOpen": {
+    "message": "Test download and open"
+  },
+  "diagFetchSession": {
+    "message": "Test background session (H3)"
+  },
+  "diagExportLogs": {
+    "message": "Export log"
+  },
+  "diagResult": {
+    "message": "Result"
+  },
+  "diagRunning": {
+    "message": "Running…"
+  },
+  "error_unknown": {
+    "message": "Unexpected error."
+  },
+  "error_invalid_message": {
+    "message": "Invalid internal message."
+  },
+  "error_unsupported_message": {
+    "message": "Action not available."
+  },
+  "error_session_expired": {
+    "message": "Your Aula Digital session expired. Sign in again."
+  },
+  "error_not_course_page": {
+    "message": "This page is not an Aula Digital course."
+  },
+  "error_network": {
+    "message": "Network error."
+  },
+  "error_http_status": {
+    "message": "The server returned an error."
+  },
+  "error_rate_limited": {
+    "message": "The server asked to wait. It will retry later."
+  },
+  "error_not_downloadable": {
+    "message": "This item has no downloadable file."
+  },
+  "error_download_interrupted": {
+    "message": "The download was interrupted."
+  },
+  "error_open_blocked": {
+    "message": "The browser did not allow opening the file."
+  },
+  "error_offscreen_unavailable": {
+    "message": "Could not create the background document."
+  },
+  "error_storage": {
+    "message": "Could not save local data."
+  },
+  "error_unsafe_path": {
+    "message": "The destination path is not safe."
+  }
+}
