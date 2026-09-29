@@ -1,3 +1,4 @@
+import { errorMessage } from '../shared/error-text';
 import { buildPlan, type PlanItem } from '../core/planning/sync-plan';
 import { sendMessage } from '../shared/browser-api';
 import { t } from '../shared/i18n';
@@ -93,7 +94,7 @@ export class BulkRunner {
     if (this.running) return;
     const page = this.deps.context.get();
     if (!page.ok) {
-      this.deps.panel.setStatus(t(`error_${page.error.code}`));
+      this.deps.panel.setStatus(errorMessage(page.error.code));
       return;
     }
     const abort = new AbortController();
@@ -246,9 +247,7 @@ export class BulkRunner {
   }
 
   #fail(code: string): void {
-    this.deps.panel.setStatus(
-      code === 'cancelled' ? t('panelCancel') : t(`error_${code}` as Parameters<typeof t>[0]),
-    );
+    this.deps.panel.setStatus(code === 'cancelled' ? t('panelCancel') : errorMessage(code));
     this.deps.panel.setBusy(false);
   }
 }

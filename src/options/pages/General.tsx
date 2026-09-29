@@ -1,5 +1,6 @@
 import { t } from '../../shared/i18n';
 import { DEFAULT_SETTINGS } from '../../storage/settings-schema';
+import { BackupSection } from '../Backup';
 import { Choice, ConfirmButton, Toggle } from '../fields';
 import type { SettingsProps } from '../use-settings';
 
@@ -41,6 +42,7 @@ export function GeneralPage({ settings, update }: SettingsProps) {
           update((s) => ({ ...s, showStatusBadges }));
         }}
       />
+      <BackupSection settings={settings} update={update} />
       <h2>{t('optResetTitle')}</h2>
       <p class="muted">{t('optResetHint')}</p>
       <ConfirmButton

@@ -1,7 +1,8 @@
+import { errorMessage } from '../shared/error-text';
 import { taskId } from '../core/queue/task';
 import { UI_PREFIX } from '../shared/constants';
 import { sendMessage } from '../shared/browser-api';
-import { t, type MessageKey } from '../shared/i18n';
+import { t } from '../shared/i18n';
 import type {
   DownloadRequestMessage,
   DownloadRequestResponse,
@@ -11,7 +12,7 @@ import type { UiRoot } from './ui/root';
 import { showToast, type ToastHandle } from './ui/toast';
 
 /** Text for an error code, from _locales ("error_<code>"). */
-const errorText = (code: string | null) => t(`error_${code ?? 'unknown'}` as MessageKey);
+const errorText = errorMessage;
 
 export const OPEN_PAGE = 'src/open/index.html';
 

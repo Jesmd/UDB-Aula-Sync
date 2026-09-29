@@ -1,7 +1,9 @@
 import { extensionVersion } from '../shared/browser-api';
 import { MOODLE_ROOT_URL } from '../shared/constants';
 import { appError, type AppError } from '../shared/errors';
+import { mergeLogs } from '../shared/log-store';
 import { exportLogs, type Logger, type LogRing } from '../shared/logger';
+import type { LogEntry } from '../shared/types';
 import { parseMessage, type BackgroundRequest, type ResponseFor } from '../shared/messages';
 import { err, ok, type Result } from '../shared/result';
 import type { TasksRepo } from '../storage/tasks-repo';
@@ -76,6 +78,8 @@ export interface DownloadServices extends RequestDeps {
 export interface RouterDeps {
   readonly log: Logger;
   readonly ring: LogRing;
+  /** Log entries kept across worker restarts (optional in tests). */
+  readonly persisted?: () => Promise<readonly LogEntry[]>;
   /** Resolves once the database is open; absent in tests that do not need it. */
   readonly downloads?: () => Promise<DownloadServices>;
 }
@@ -187,7 +191,9 @@ async function handle(
       if (downloads !== undefined && !isLoginUrl(message.url)) await downloads.sync.sessionAlive();
       return ok({ accepted: true } as const);
     case 'logs/export':
-      return ok({ text: exportLogs(deps.ring.snapshot()) });
+      return ok({
+        text: exportLogs(mergeLogs((await deps.persisted?.()) ?? [], deps.ring.snapshot())),
+      });
     case 'spike/offscreen':
       return spikeOffscreen();
     case 'spike/open-via-worker':

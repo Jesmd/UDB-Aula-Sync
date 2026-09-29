@@ -990,5 +990,45 @@
         "content": "$1"
       }
     }
+  },
+  "error_invalid_backup": {
+    "message": "El archivo no es una copia de UDB Aula Sync válida."
+  },
+  "backupTitle": {
+    "message": "Copia de seguridad"
+  },
+  "backupHint": {
+    "message": "Guarda tus ajustes y el índice de lo descargado en un archivo JSON, para otro navegador o tras reinstalar. No incluye la cola, el permiso de la carpeta ni el registro."
+  },
+  "backupExport": {
+    "message": "Exportar"
+  },
+  "backupImport": {
+    "message": "Importar…"
+  },
+  "backupSaved": {
+    "message": "Guardada: $COUNT$ archivos del índice, en $FOLDER$.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      },
+      "folder": {
+        "content": "$2"
+      }
+    }
+  },
+  "backupImported": {
+    "message": "Importado: $FILES$ archivos, $SNAPSHOTS$ cursos en seguimiento y $COURSES$ nombres de curso. Los archivos importados se podrán abrir tras volver a descargarlos o al comprobar la carpeta.",
+    "placeholders": {
+      "files": {
+        "content": "$1"
+      },
+      "snapshots": {
+        "content": "$2"
+      },
+      "courses": {
+        "content": "$3"
+      }
+    }
   }
 }
