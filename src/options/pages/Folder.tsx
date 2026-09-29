@@ -1,3 +1,4 @@
+import { errorMessage } from '../../shared/error-text';
 import { useEffect, useState } from 'preact/hooks';
 import {
   createHandleStore,
@@ -51,13 +52,13 @@ export function FolderPage({ settings }: SettingsProps) {
     setMessage(t('folderChecking'));
     const result = await sendMessage({ target: 'background', type: 'folder/check' });
     setCheck(result.ok ? result.value : null);
-    setMessage(result.ok ? '' : t(`error_${result.error.code}`));
+    setMessage(result.ok ? '' : errorMessage(result.error.code));
   };
 
   const pick = async () => {
     const picked = await pickFolder(window);
     if (!picked.ok) {
-      if (picked.error.code !== 'cancelled') setMessage(t(`error_${picked.error.code}`));
+      if (picked.error.code !== 'cancelled') setMessage(errorMessage(picked.error.code));
       return;
     }
     const { handles, meta } = await stores();
