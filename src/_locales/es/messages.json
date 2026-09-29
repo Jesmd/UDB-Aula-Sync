@@ -95,6 +95,24 @@
   "dlShow": {
     "message": "Mostrar en carpeta"
   },
+  "dlOpenUnavailable": {
+    "message": "Archivo no disponible."
+  },
+  "dlOpenFailed": {
+    "message": "No se pudo abrir."
+  },
+  "badgeResolving": {
+    "message": "Preparando…"
+  },
+  "badgeReady": {
+    "message": "Clic para guardar"
+  },
+  "badgeReadOnly": {
+    "message": "Solo lectura"
+  },
+  "badgeError": {
+    "message": "No disponible"
+  },
   "popupTitle": {
     "message": "UDB Aula Sync"
   },

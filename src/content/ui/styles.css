@@ -43,9 +43,11 @@
 }
 
 .udbsync-toast {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  /* Text and close on the first row, actions below: long paths stay readable. */
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 6px 8px;
   padding: 10px 12px;
   border: 1px solid var(--udbsync-border);
   border-left: 4px solid var(--udbsync-accent);
@@ -99,9 +101,24 @@
 }
 
 .udbsync-toast__actions {
+  grid-column: 1 / -1;
+  grid-row: 2;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.udbsync-toast__close {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.udbsync-toast__frame {
+  width: 100%;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  color-scheme: light dark;
 }
 
 .udbsync-toast__actions:empty {
@@ -127,4 +144,80 @@
 .udbsync-toast__action:focus-visible {
   outline: 2px solid var(--udbsync-accent);
   outline-offset: 2px;
+}
+
+/* Cursor badge: a small label above the pointer on a downloadable file. */
+.udbsync-cursor-badge {
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px 4px 7px;
+  border-radius: 999px;
+  background: var(--udbsync-accent);
+  color: var(--udbsync-bg);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.25);
+  opacity: 0;
+  transform: translate(-50%, calc(-100% - 14px)) scale(0.85);
+  transition:
+    opacity 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.udbsync-cursor-badge[data-visible='true'] {
+  opacity: 1;
+  transform: translate(-50%, calc(-100% - 14px)) scale(1);
+}
+
+.udbsync-cursor-badge[data-state='readonly'],
+.udbsync-cursor-badge[data-state='error'] {
+  background: var(--udbsync-border);
+  color: var(--udbsync-fg);
+}
+
+.udbsync-cursor-badge__icon {
+  display: inline-block;
+  width: 14px;
+  text-align: center;
+}
+
+.udbsync-cursor-badge[data-state='ready'] .udbsync-cursor-badge__icon {
+  animation: udbsync-bob 900ms ease-in-out infinite;
+}
+
+.udbsync-cursor-badge[data-state='resolving'] .udbsync-cursor-badge__icon {
+  width: 10px;
+  height: 10px;
+  border: 2px solid currentcolor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: udbsync-spin 700ms linear infinite;
+}
+
+@keyframes udbsync-bob {
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes udbsync-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .udbsync-cursor-badge,
+  .udbsync-cursor-badge[data-visible='true'] {
+    transition: none;
+  }
+  .udbsync-cursor-badge .udbsync-cursor-badge__icon {
+    animation: none !important;
+  }
 }
