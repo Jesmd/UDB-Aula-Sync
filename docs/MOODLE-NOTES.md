@@ -60,17 +60,20 @@ Hallazgos del sitio real (2026-09-29):
 
 ## Compatibilidad del navegador (M0)
 
+Brave (2026-09-29): la carpeta de Descargas del usuario está en otra unidad (`D:\UNIVERSIDAD`) y la
+descarga a `UDB/_prueba/` funcionó. Pendiente: "Probar sesión en segundo plano" (H3).
+
 Ejecutar en Brave (perfil dedicado, sesión iniciada en el Aula Digital):
 Opciones > Diagnóstico. Copiar aquí el JSON de cada botón.
 
-| Prueba                                       | Brave         | Chrome        | Edge          |
-| -------------------------------------------- | ------------- | ------------- | ------------- |
-| Documento offscreen (DOM_PARSER)             | sin verificar | sin verificar | sin verificar |
-| Descarga con `chrome.downloads` a subcarpeta | confirmada    | sin verificar | sin verificar |
-| `downloads.open` desde página (gesto)        | sin verificar | sin verificar | sin verificar |
-| `downloads.open` desde worker (sin gesto)    | sin verificar | sin verificar | sin verificar |
-| Sesión en `fetch` del worker (H3)            | sin verificar | sin verificar | sin verificar |
-| Sesión en `fetch` del offscreen (H3)         | sin verificar | sin verificar | sin verificar |
+| Prueba                                             | Brave         | Chrome        | Edge          |
+| -------------------------------------------------- | ------------- | ------------- | ------------- |
+| Documento offscreen (DOM_PARSER)                   | sin verificar | sin verificar | sin verificar |
+| Descarga con `chrome.downloads` a subcarpeta       | confirmada    | sin verificar | sin verificar |
+| `downloads.open` desde página (gesto)              | confirmada    | sin verificar | sin verificar |
+| `downloads.open` desde worker (justo tras un clic) | confirmada    | sin verificar | sin verificar |
+| Sesión en `fetch` del worker (H3)                  | sin verificar | sin verificar | sin verificar |
+| Sesión en `fetch` del offscreen (H3)               | sin verificar | sin verificar | sin verificar |
 
 Cómo leer el resultado de H3: `sessionSent: true` y `finalUrl` en `/auladigital/my/` indican que la cookie
 viajó. `finalUrl` en `/login/index.php` indica que no (plan B: hacer esas peticiones desde el content script).
