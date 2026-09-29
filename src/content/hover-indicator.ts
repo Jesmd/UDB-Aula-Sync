@@ -23,7 +23,8 @@ function stateOf(cache: ResolveCache, cmid: number): BadgeState | null {
 
 /**
  * Shows the cursor badge on downloadable files after the same 400 ms hover delay the
- * resolver uses, so a pointer merely passing by triggers nothing (spec §3.1).
+ * resolver uses, so a pointer merely passing by triggers nothing (spec §3.1). Keyboard
+ * focus gets the details card instead (details.ts).
  */
 export function installHoverIndicator(deps: HoverIndicatorDeps): () => void {
   let current: number | null = null;
@@ -71,28 +72,17 @@ export function installHoverIndicator(deps: HoverIndicatorDeps): () => void {
     if (current !== null) deps.badge.move(point.x, point.y);
   };
 
-  const out = (event: MouseEvent | FocusEvent) => {
+  const out = (event: MouseEvent) => {
     const link = (event.target as Element | null)?.closest(RESOURCE_LINK);
     const related = event.relatedTarget as Node | null;
     if (link != null && related !== null && link.contains(related)) return;
     if (link != null) stop();
   };
 
-  const focus = (event: FocusEvent) => {
-    const cmid = activityCmid(event);
-    const link = (event.target as Element | null)?.closest(RESOURCE_LINK);
-    if (cmid === null || link == null) return;
-    const rect = link.getBoundingClientRect();
-    point = { x: rect.left + Math.min(rect.width / 2, 120), y: rect.top };
-    begin(cmid);
-  };
-
   const options = { capture: true } as const;
   deps.doc.addEventListener('mouseover', over, options);
   deps.doc.addEventListener('mousemove', move, options);
   deps.doc.addEventListener('mouseout', out, options);
-  deps.doc.addEventListener('focusin', focus, options);
-  deps.doc.addEventListener('focusout', out, options);
   // A click starts the download: the toast takes over.
   deps.doc.addEventListener('click', stop, options);
   return () => {
@@ -100,8 +90,6 @@ export function installHoverIndicator(deps: HoverIndicatorDeps): () => void {
     deps.doc.removeEventListener('mouseover', over, options);
     deps.doc.removeEventListener('mousemove', move, options);
     deps.doc.removeEventListener('mouseout', out, options);
-    deps.doc.removeEventListener('focusin', focus, options);
-    deps.doc.removeEventListener('focusout', out, options);
     deps.doc.removeEventListener('click', stop, options);
   };
 }
