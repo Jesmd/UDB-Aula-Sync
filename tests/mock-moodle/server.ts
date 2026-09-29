@@ -44,9 +44,25 @@ function freshState(): MockState {
   };
 }
 
+/** Puts the state back to the seeds, in place (routes keep their reference). */
+export function resetState(state: MockState): void {
+  const fresh = freshState();
+  state.loggedIn = true;
+  state.requests.length = 0;
+  state.resources.clear();
+  for (const [k, v] of fresh.resources) state.resources.set(k, v);
+  state.folders.clear();
+  for (const [k, v] of fresh.folders) state.folders.set(k, v);
+}
+
 function handler(state: MockState) {
   return (req: IncomingMessage, res: ServerResponse) => {
     const url = new URL(req.url ?? '/', `https://${MOCK_HOST}`);
+    // Test control (E2E runs the mock in another process): never counted as site traffic.
+    if (url.pathname.startsWith('/__test/')) {
+      handleControl(state, url, res);
+      return;
+    }
     state.requests.push(`${req.method ?? '?'} ${url.pathname}${url.search}`);
     for (const route of routes) {
       if (route.method !== 'ANY' && route.method !== req.method) continue;
@@ -63,6 +79,50 @@ function handler(state: MockState) {
     res.writeHead(404, { 'content-type': 'text/plain' });
     res.end('not found');
   };
+}
+
+const int = (value: string | null) =>
+  value !== null && /^\d+$/.test(value) ? Number(value) : undefined;
+
+/**
+ * /__test/state, /__test/reset, /__test/session?loggedIn=0|1,
+ * /__test/resource?cmid=&revision=&size=&lastModified=&throttleMs=
+ */
+function handleControl(state: MockState, url: URL, res: ServerResponse): void {
+  const json = (body: unknown) => {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(body));
+  };
+  switch (url.pathname) {
+    case '/__test/state':
+      json({ loggedIn: state.loggedIn, requests: state.requests });
+      return;
+    case '/__test/reset':
+      resetState(state);
+      json({ ok: true });
+      return;
+    case '/__test/session':
+      state.loggedIn = url.searchParams.get('loggedIn') !== '0';
+      json({ ok: true });
+      return;
+    case '/__test/resource': {
+      const seed = state.resources.get(int(url.searchParams.get('cmid')) ?? -1);
+      if (seed === undefined) break;
+      const revision = int(url.searchParams.get('revision'));
+      const size = int(url.searchParams.get('size'));
+      const throttleMs = int(url.searchParams.get('throttleMs'));
+      const lastModified = url.searchParams.get('lastModified');
+      if (revision !== undefined) seed.revision = revision;
+      if (size !== undefined) seed.size = size;
+      if (throttleMs !== undefined) seed.throttleMs = throttleMs;
+      if (lastModified !== null) seed.lastModified = lastModified;
+      json(seed);
+      return;
+    }
+    default:
+      break;
+  }
+  res.writeHead(404).end();
 }
 
 export async function startMockMoodle(options: MockOptions = {}): Promise<MockMoodle> {

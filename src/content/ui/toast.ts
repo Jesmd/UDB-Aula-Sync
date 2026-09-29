@@ -8,11 +8,20 @@ export interface ToastOptions {
   /** 0 keeps the toast until the user closes it. */
   readonly timeoutMs?: number;
   readonly closeLabel: string;
+  /** Buttons such as "Abrir" or "Mostrar en carpeta"; their clicks are user gestures. */
+  readonly actions?: readonly ToastAction[];
+}
+
+export interface ToastAction {
+  readonly label: string;
+  readonly onClick: () => void;
 }
 
 export interface ToastHandle {
   readonly element: HTMLElement;
   dismiss(): void;
+  /** Replaces text, kind, actions and timeout (progress -> result). */
+  update(message: string, options: Omit<ToastOptions, 'closeLabel'>): void;
 }
 
 const REGION_CLASS = `${UI_PREFIX}toasts`;
@@ -35,11 +44,12 @@ export function showToast(root: UiRoot, message: string, options: ToastOptions):
 
   const toast = doc.createElement('div');
   toast.className = `${UI_PREFIX}toast`;
-  toast.dataset.kind = options.kind ?? 'info';
 
   const text = doc.createElement('span');
   text.className = `${UI_PREFIX}toast__text`;
-  text.textContent = message;
+
+  const actions = doc.createElement('span');
+  actions.className = `${UI_PREFIX}toast__actions`;
 
   const close = doc.createElement('button');
   close.type = 'button';
@@ -47,7 +57,7 @@ export function showToast(root: UiRoot, message: string, options: ToastOptions):
   close.setAttribute('aria-label', options.closeLabel);
   close.textContent = '×';
 
-  toast.append(text, close);
+  toast.append(text, actions, close);
   region.append(toast);
 
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -57,8 +67,34 @@ export function showToast(root: UiRoot, message: string, options: ToastOptions):
   };
   close.addEventListener('click', dismiss);
 
-  const timeoutMs = options.timeoutMs ?? 5000;
-  if (timeoutMs > 0) timer = setTimeout(dismiss, timeoutMs);
+  const render = (content: string, next: ToastOptions): void => {
+    toast.dataset.kind = next.kind ?? 'info';
+    text.textContent = content;
+    actions.replaceChildren(
+      ...(next.actions ?? []).map((action) => {
+        const button = doc.createElement('button');
+        button.type = 'button';
+        button.className = `${UI_PREFIX}toast__action`;
+        button.textContent = action.label;
+        button.addEventListener('click', () => {
+          action.onClick();
+        });
+        return button;
+      }),
+    );
+    if (timer !== undefined) clearTimeout(timer);
+    timer = undefined;
+    const timeoutMs = next.timeoutMs ?? 5000;
+    if (timeoutMs > 0) timer = setTimeout(dismiss, timeoutMs);
+  };
+  render(message, options);
 
-  return { element: toast, dismiss };
+  return {
+    element: toast,
+    dismiss,
+    update: (content, next) => {
+      if (!toast.isConnected) region.append(toast);
+      render(content, { ...next, closeLabel: options.closeLabel });
+    },
+  };
 }
