@@ -1,3 +1,4 @@
+import { errorMessage } from '../../shared/error-text';
 import { parseTemplate } from '../../core/paths/template';
 import { t } from '../../shared/i18n';
 import { invalid, TextField, Toggle, valid } from '../fields';
@@ -23,7 +24,7 @@ export function PathsPage({ settings, update }: SettingsProps) {
       <p>
         {t('optPreview')}{' '}
         <code data-testid="path-preview">
-          {preview.ok ? preview.value : t(`error_${preview.error.code}`)}
+          {preview.ok ? preview.value : errorMessage(preview.error.code)}
         </code>
       </p>
       <TextField

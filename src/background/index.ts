@@ -1,5 +1,6 @@
 import { ACTIVE_STATES, FINAL_STATES } from '../core/queue/task';
 import { MOODLE_ROOT_URL } from '../shared/constants';
+import { chromeLogStorage, PersistentLog } from '../shared/log-store';
 import { consoleSink, createLogger, LogRing } from '../shared/logger';
 import { openDatabase } from '../storage/db';
 import { createFilesRepo } from '../storage/files-repo';
@@ -28,7 +29,8 @@ import { DownloadQueue } from './sync-engine';
 // The worker is ephemeral: no state here must survive a restart. The queue, the index,
 // snapshots and novelties live in IndexedDB; recover() picks the queue up on every start.
 const ring = new LogRing();
-const log = createLogger('bg', { ring, sinks: [consoleSink] });
+const persistentLog = new PersistentLog(chromeLogStorage);
+const log = createLogger('bg', { ring, sinks: [consoleSink, persistentLog.sink] });
 const backend = createChromeDownloadBackend();
 log.info('worker started');
 
@@ -143,7 +145,14 @@ const runSync = (trigger: 'alarm' | 'resume') => {
 chrome.runtime.onInstalled.addListener((details) => {
   log.info(`installed (${details.reason})`);
 });
-chrome.runtime.onMessage.addListener(createRouter({ log, ring, downloads: () => services }));
+chrome.runtime.onMessage.addListener(
+  createRouter({
+    log,
+    ring,
+    persisted: () => persistentLog.entries(),
+    downloads: () => services,
+  }),
+);
 backend.onChanged((delta) => {
   void services.then((s) => s.queue.handleChanged(delta));
 });
