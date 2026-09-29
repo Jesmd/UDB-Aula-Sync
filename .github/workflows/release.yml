@@ -1,0 +1,39 @@
+name: Release
+
+# Publishes release/udb-aula-sync-<version>.zip on GitHub Releases, so installing needs
+# no build tools. Runs when a v* tag is pushed, or by hand from the Actions tab.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm zip
+      - run: pnpm exec tsx scripts/release-notes.ts
+      - name: Publish the zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          tag="v$version"
+          zip="release/udb-aula-sync-$version.zip"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            gh release upload "$tag" "$zip" --clobber
+          else
+            gh release create "$tag" "$zip" --target "$GITHUB_SHA" \
+              --title "UDB Aula Sync $version" --notes-file release/notes.md
+          fi
