@@ -64,8 +64,17 @@ async function handle(message: OffscreenRequest): Promise<ResponseFor<OffscreenR
   }
 }
 
+export function fromWorker(sender: chrome.runtime.MessageSender): boolean {
+  return (
+    sender.id === chrome.runtime.id &&
+    sender.tab === undefined &&
+    (sender.url ?? '').startsWith(chrome.runtime.getURL(''))
+  );
+}
+
 chrome.runtime.onMessage.addListener((raw, sender, sendResponse) => {
-  if (sender.id !== chrome.runtime.id) return false;
+  // Only the worker talks to this document: not a content script, not a page.
+  if (!fromWorker(sender)) return false;
   const parsed = parseMessage(raw);
   if (!parsed.ok || parsed.value.target !== 'offscreen') return false;
   handle(parsed.value).then(sendResponse, (cause: unknown) => {

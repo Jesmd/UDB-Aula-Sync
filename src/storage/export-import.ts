@@ -1,5 +1,6 @@
 import * as v from 'valibot';
 import { SNAPSHOT_VERSION, type CourseSnapshot } from '../core/planning/snapshot-diff';
+import { MOODLE_ROOT_URL } from '../shared/constants';
 import { appError, type AppError } from '../shared/errors';
 import { err, ok, type Result } from '../shared/result';
 import type { FileRecord } from './db';
@@ -43,7 +44,11 @@ const FileRecordSchema = v.object({
     etag: nullableText(200),
     contentType: nullableText(200),
   }),
-  url: v.pipe(text(2048), v.url()),
+  url: v.pipe(
+    text(2048),
+    v.url(),
+    v.check((u) => u.startsWith(`${MOODLE_ROOT_URL}pluginfile.php/`), 'not a file of this Moodle'),
+  ),
   relativePath: safeRelativePath,
   localPath: nullableText(1000),
   downloadId: v.nullable(int()),
