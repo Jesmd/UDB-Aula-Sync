@@ -40,6 +40,11 @@ export interface QueueDeps {
   /** How long a download may sit at 0 bytes before the save-dialog notice. */
   readonly stallMs?: number;
   readonly setTimer?: (fn: () => void, ms: number) => void;
+  /** Persists the user's pause across worker restarts. */
+  readonly pauseStore?: {
+    get(): Promise<boolean | undefined>;
+    set(paused: boolean): Promise<void>;
+  };
 }
 
 const defaultSleep = (ms: number) =>
@@ -56,7 +61,10 @@ export class DownloadQueue {
   readonly #deps: QueueDeps;
   readonly #now: () => number;
   #chain: Promise<void> = Promise.resolve();
-  #paused = false;
+  /** Lost session: lifted by the next user request that resolved (the session works again). */
+  #sessionPaused = false;
+  /** "Pausar" in the popup; persisted so a worker restart keeps it. */
+  #userPaused = false;
   #lastStartAt = 0;
 
   constructor(deps: QueueDeps) {
@@ -65,7 +73,12 @@ export class DownloadQueue {
   }
 
   get paused(): boolean {
-    return this.#paused;
+    return this.#sessionPaused || this.#userPaused;
+  }
+
+  get pausedBy(): 'user' | 'session' | null {
+    if (this.#userPaused) return 'user';
+    return this.#sessionPaused ? 'session' : null;
   }
 
   /** Runs `job` after everything queued before it; errors are logged, never break the chain. */
@@ -104,7 +117,7 @@ export class DownloadQueue {
    */
   enqueue(input: NewTask, userInitiated = true): Promise<Task> {
     return this.#serial(async () => {
-      if (userInitiated) this.#paused = false;
+      if (userInitiated) this.#sessionPaused = false;
       const fresh = createTask(input, this.#now());
       const existing = await this.#deps.tasks.get(fresh.id);
       if (existing !== undefined && !FINAL_STATES.has(existing.state)) return existing;
@@ -120,7 +133,7 @@ export class DownloadQueue {
 
   async #pumpNow(): Promise<void> {
     const all = await this.#deps.tasks.all();
-    if (!this.#paused) {
+    if (!this.paused) {
       for (const task of runnable(
         all,
         this.#now(),
@@ -130,7 +143,7 @@ export class DownloadQueue {
       }
     }
     this.#deps.scheduleWake(
-      this.#paused ? null : nextWakeAt(await this.#deps.tasks.all(), this.#now()),
+      this.paused ? null : nextWakeAt(await this.#deps.tasks.all(), this.#now()),
     );
   }
 
@@ -235,8 +248,8 @@ export class DownloadQueue {
 
   async #fail(task: Task, error: AppError): Promise<void> {
     await this.#apply(task, { type: 'failed', error });
-    if (error.code === 'session_expired' && !this.#paused) {
-      this.#paused = true;
+    if (error.code === 'session_expired' && !this.#sessionPaused) {
+      this.#sessionPaused = true;
       this.#deps.notify({ type: 'session_expired' });
     }
   }
@@ -244,6 +257,7 @@ export class DownloadQueue {
   /** After a worker restart: follow downloads still known to the browser, requeue the rest. */
   recover(): Promise<void> {
     return this.#serial(async () => {
+      this.#userPaused = (await this.#deps.pauseStore?.get()) === true;
       for (const step of recoveryPlan(await this.#deps.tasks.all())) {
         if (step.kind === 'requeue') {
           await this.#apply(step.task, { type: 'requeue' });
@@ -263,12 +277,47 @@ export class DownloadQueue {
     });
   }
 
+  /** "Pausar": running downloads finish; nothing new starts until resume(). */
+  pause(): Promise<void> {
+    return this.#serial(async () => {
+      this.#userPaused = true;
+      await this.#deps.pauseStore?.set(true);
+      this.#deps.scheduleWake(null);
+    });
+  }
+
+  resume(): Promise<void> {
+    return this.#serial(async () => {
+      this.#userPaused = false;
+      this.#sessionPaused = false;
+      await this.#deps.pauseStore?.set(false);
+      await this.#pumpNow();
+    });
+  }
+
+  /** "Cancelar": queued and running downloads stop; files already saved stay. */
+  cancelAll(): Promise<number> {
+    return this.#serial(async () => {
+      let cancelled = 0;
+      for (const task of await this.#deps.tasks.all()) {
+        if (FINAL_STATES.has(task.state)) continue;
+        const done = await this.#apply(task, { type: 'cancel' });
+        if (done.state !== 'omitida') continue;
+        cancelled += 1;
+        if (task.downloadId !== null && task.state === 'descargando')
+          await this.#deps.backend.cancel(task.downloadId);
+      }
+      this.#deps.scheduleWake(null);
+      return cancelled;
+    });
+  }
+
   /** "Reintentar fallidos". */
   retryFailed(): Promise<number> {
     return this.#serial(async () => {
       const failed = (await this.#deps.tasks.all()).filter((t) => t.state === 'fallida');
       for (const task of failed) await this.#apply(task, { type: 'retry' });
-      this.#paused = false;
+      this.#sessionPaused = false;
       await this.#pumpNow();
       return failed.length;
     });

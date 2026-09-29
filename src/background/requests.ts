@@ -1,14 +1,27 @@
-import { parsePluginfileUrl } from '../core/http/pluginfile-url';
-import { buildPath, withVersionSuffix, type PathInput } from '../core/paths/build-path';
-import { fingerprintOf } from '../core/planning/fingerprint';
-import { reconcile } from '../core/planning/reconcile';
+import { parsePluginfileUrl, type PluginfileRef } from '../core/http/pluginfile-url';
+import {
+  buildPath,
+  withVersionSuffix,
+  type PathInput,
+  type PathSettings,
+} from '../core/paths/build-path';
+import { filterReason } from '../core/planning/filters';
+import { fingerprintOf, type Fingerprint } from '../core/planning/fingerprint';
+import { reconcile, type Decision } from '../core/planning/reconcile';
 import { taskId } from '../core/queue/task';
 import { MOODLE_ROOT_URL } from '../shared/constants';
 import { appError, type AppError } from '../shared/errors';
-import type { DownloadRequestMessage, DownloadRequestResponse } from '../shared/messages';
+import type {
+  DownloadPreviewResponse,
+  DownloadPayload,
+  DownloadRequestResponse,
+  FileStatusEntry,
+} from '../shared/messages';
 import { err, ok, type Result } from '../shared/result';
+import type { FileRecord } from '../storage/db';
 import type { FilesRepo } from '../storage/files-repo';
-import type { Settings } from '../storage/settings-schema';
+import type { MetaRepo } from '../storage/meta-repo';
+import { courseSettings, type Settings } from '../storage/settings-schema';
 import type { DownloadBackend } from './download-manager';
 import { safeOpen } from './safe-open';
 import type { DownloadQueue } from './sync-engine';
@@ -18,14 +31,17 @@ export interface RequestDeps {
   readonly backend: DownloadBackend;
   readonly queue: DownloadQueue;
   readonly settings: () => Promise<Settings>;
+  /** Remembers course names for the popup; optional in tests. */
+  readonly meta?: MetaRepo;
   /** Download files only from the Moodle this build targets. */
   readonly moodleRoot?: string;
+  readonly now?: () => number;
 }
 
 /** Relative path for a new file; adds " (cmid)" when another file already owns the path. */
 async function freshPath(
-  message: DownloadRequestMessage,
-  settings: Settings,
+  message: DownloadPayload,
+  paths: PathSettings,
   files: FilesRepo,
   id: string,
 ) {
@@ -33,25 +49,34 @@ async function freshPath(
     course: message.course,
     section: message.section,
     activity: { cmid: message.cmid, name: message.activityName },
-    file: { originalName: message.file.originalName, extension: message.file.extension },
+    file: {
+      originalName: message.file.originalName,
+      extension: message.file.extension,
+      ...(message.folderPath === null ? {} : { folderPath: message.folderPath }),
+    },
   };
-  const first = buildPath(input, settings.paths);
+  const first = buildPath(input, paths);
   if (!first.ok) return first;
   const owners = await files.findByPath(first.value.relativePath);
   if (owners.every((r) => r.id === id)) return first;
-  return buildPath({ ...input, collision: true }, settings.paths);
+  return buildPath({ ...input, collision: true }, paths);
 }
 
-/**
- * A click on a resolved file: compare with the index and the local copy, then open what
- * is already here or queue the download. Runs inside the click's user gesture, so
- * opening an up-to-date file works directly (ADR-004).
- */
-export async function handleDownloadRequest(
-  message: DownloadRequestMessage,
-  originTabId: number | null,
+interface Assessment {
+  readonly id: string;
+  readonly ref: PluginfileRef;
+  readonly fingerprint: Fingerprint;
+  readonly existing: FileRecord | undefined;
+  readonly localExists: boolean | null;
+  readonly decision: Decision;
+  readonly settings: Settings;
+}
+
+/** Compares the file with the index and the local copy under the user's update policy. */
+async function assess(
+  message: DownloadPayload,
   deps: RequestDeps,
-): Promise<Result<DownloadRequestResponse, AppError>> {
+): Promise<Result<Assessment, AppError>> {
   const ref = parsePluginfileUrl(message.file.url);
   if (ref === null || !message.file.url.startsWith(deps.moodleRoot ?? MOODLE_ROOT_URL)) {
     return err(appError('not_downloadable', 'not a pluginfile URL of this Moodle'));
@@ -62,7 +87,6 @@ export async function handleDownloadRequest(
   const existing = await deps.files.get(id);
   const local = existing?.downloadId == null ? null : await deps.backend.get(existing.downloadId);
   const localExists = existing === undefined ? null : local === null ? null : local.exists;
-
   const decision = reconcile(
     existing === undefined
       ? null
@@ -71,47 +95,112 @@ export async function handleDownloadRequest(
     localExists,
     settings.updatePolicy,
   );
+  return ok({ id, ref, fingerprint, existing, localExists, decision, settings });
+}
 
-  if (decision.action === 'skip') {
-    const openId = message.open && localExists !== false ? (existing?.downloadId ?? null) : null;
+async function targetPath(
+  message: DownloadPayload,
+  a: Assessment,
+  files: FilesRepo,
+): Promise<Result<string, AppError>> {
+  if (a.decision.action === 'skip') return ok(a.existing?.relativePath ?? '');
+  if (a.existing !== undefined && a.decision.versionSuffix === null) {
+    // Same file again (lost locally or overwritten): keep its place.
+    return ok(a.existing.relativePath);
+  }
+  const built = await freshPath(
+    message,
+    courseSettings(a.settings, message.courseId).paths,
+    files,
+    a.id,
+  );
+  if (!built.ok) return built;
+  return ok(
+    a.decision.versionSuffix === null
+      ? built.value.relativePath
+      : withVersionSuffix(built.value.relativePath, a.decision.versionSuffix),
+  );
+}
+
+async function rememberCourse(message: DownloadPayload, deps: RequestDeps): Promise<void> {
+  await deps.meta?.putCourse({
+    id: message.courseId,
+    fullName: message.course.fullName,
+    shortName: message.course.shortName,
+    lastSeen: (deps.now ?? Date.now)(),
+  });
+}
+
+/**
+ * Dry run for the plan (spec §3.3): what a download would do, without doing it. Bulk
+ * filters (extensions, size) apply here; a click on a single file ignores them.
+ */
+export async function previewDownload(
+  message: DownloadPayload,
+  deps: RequestDeps,
+): Promise<Result<DownloadPreviewResponse, AppError>> {
+  const assessed = await assess(message, deps);
+  if (!assessed.ok) return assessed;
+  const a = assessed.value;
+  const path = await targetPath(message, a, deps.files);
+  if (!path.ok) return path;
+  const omitted = filterReason(message.file, courseSettings(a.settings, message.courseId).filters);
+  return ok({
+    fileId: a.id,
+    status: omitted === null ? a.decision.status : 'omitido',
+    willDownload: omitted === null && a.decision.action === 'download',
+    relativePath: path.value,
+    size: message.file.size,
+    omitted,
+  });
+}
+
+/**
+ * A request to download one file (a click, or one item of a confirmed plan): open what
+ * is already here and up to date, or queue the download. Inside a click, opening an
+ * up-to-date file may work directly; otherwise the toast offers "Abrir" (ADR-016).
+ */
+export async function handleDownloadRequest(
+  message: DownloadPayload,
+  originTabId: number | null,
+  deps: RequestDeps,
+): Promise<Result<DownloadRequestResponse, AppError>> {
+  const assessed = await assess(message, deps);
+  if (!assessed.ok) return assessed;
+  const a = assessed.value;
+  await rememberCourse(message, deps);
+
+  if (a.decision.action === 'skip') {
+    const openId =
+      message.open && a.localExists !== false ? (a.existing?.downloadId ?? null) : null;
     const outcome =
       openId === null ? null : await safeOpen(deps.backend, openId, message.file.extension);
     return ok({
-      status: decision.status,
+      status: a.decision.status,
       action: outcome === null ? 'skipped' : 'opened',
-      fileId: id,
-      relativePath: existing?.relativePath ?? null,
+      fileId: a.id,
+      relativePath: a.existing?.relativePath ?? null,
       outcome,
     });
   }
 
-  let relativePath: string;
-  if (existing !== undefined && decision.versionSuffix === null) {
-    // Same file again (lost locally or overwritten): keep its place.
-    relativePath = existing.relativePath;
-  } else {
-    const built = await freshPath(message, settings, deps.files, id);
-    if (!built.ok) return built;
-    relativePath =
-      decision.versionSuffix === null
-        ? built.value.relativePath
-        : withVersionSuffix(built.value.relativePath, decision.versionSuffix);
-  }
-
+  const path = await targetPath(message, a, deps.files);
+  if (!path.ok) return path;
+  const { decision, existing } = a;
   await deps.queue.enqueue({
     courseId: message.courseId,
     cmid: message.cmid,
-    fileKey: ref.fileKey,
+    fileKey: a.ref.fileKey,
     request: {
       url: message.file.url,
-      relativePath,
+      relativePath: path.value,
       conflictAction: decision.conflictAction,
       extension: message.file.extension,
       expectedSize: message.file.size,
       expectedType: message.file.contentType,
       open: message.open,
     },
-    fingerprint,
+    fingerprint: a.fingerprint,
     reason: decision.status,
     versions:
       existing === undefined
@@ -121,10 +210,36 @@ export async function handleDownloadRequest(
           : existing.versions + 1,
     originTabId,
   });
-  return ok({ status: decision.status, action: 'queued', fileId: id, relativePath, outcome: null });
+  return ok({
+    status: decision.status,
+    action: 'queued',
+    fileId: a.id,
+    relativePath: path.value,
+    outcome: null,
+  });
 }
 
-/** Open or show a file the index knows, from a toast button (fresh user gesture). */
+/** Index state of a course's files for the page badges; local presence checked with the browser. */
+export async function courseFileStatuses(
+  courseId: number,
+  deps: Pick<RequestDeps, 'files' | 'backend'>,
+): Promise<FileStatusEntry[]> {
+  const records = await deps.files.listByCourse(courseId);
+  return Promise.all(
+    records.map(async (r) => {
+      const local = r.downloadId === null ? null : await deps.backend.get(r.downloadId);
+      return {
+        fileId: r.id,
+        cmid: r.cmid,
+        relativePath: r.relativePath,
+        downloadedAt: r.downloadedAt,
+        localExists: local === null ? null : local.exists,
+      };
+    }),
+  );
+}
+
+/** Open or show a file the index knows (popup or framed buttons: fresh user gesture). */
 export async function openKnownFile(
   fileId: string,
   mode: 'open' | 'show',
@@ -136,12 +251,12 @@ export async function openKnownFile(
     const shown = await deps.backend.show(record.downloadId);
     return shown.ok ? ok('shown') : err(shown.error);
   }
-  const extension = record.relativePath.split('.').pop() ?? '';
+  const name = record.relativePath.split('/').pop() ?? '';
   return ok(
     await safeOpen(
       deps.backend,
       record.downloadId,
-      record.relativePath.includes('.') ? extension : '',
+      name.includes('.') ? (name.split('.').pop() ?? '') : '',
     ),
   );
 }

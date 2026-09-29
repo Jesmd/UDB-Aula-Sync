@@ -53,6 +53,13 @@ export class FakeDownloads implements DownloadBackend {
     return Promise.resolve(ok(undefined));
   }
 
+  readonly cancelled: number[] = [];
+
+  cancel(id: number) {
+    this.cancelled.push(id);
+    return Promise.resolve();
+  }
+
   removeFile(id: number) {
     this.removed.push(id);
     return Promise.resolve();

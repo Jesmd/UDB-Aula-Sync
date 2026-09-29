@@ -5,7 +5,14 @@ import { exportLogs, type Logger, type LogRing } from '../shared/logger';
 import { parseMessage, type BackgroundRequest, type ResponseFor } from '../shared/messages';
 import { err, ok, type Result } from '../shared/result';
 import type { TasksRepo } from '../storage/tasks-repo';
-import { handleDownloadRequest, openKnownFile, type RequestDeps } from './requests';
+import type { MetaRepo } from '../storage/meta-repo';
+import {
+  courseFileStatuses,
+  handleDownloadRequest,
+  openKnownFile,
+  previewDownload,
+  type RequestDeps,
+} from './requests';
 import {
   spikeFetchOffscreen,
   spikeFetchWorker,
@@ -44,11 +51,16 @@ const ALLOWED: Record<BackgroundRequest['type'], readonly SenderKind[]> = {
   'queue/list': ['extension-page'],
   // The framed "Abrir" page (src/open) is an extension page.
   'files/get': ['extension-page'],
-  'queue/retry-failed': ['extension-page'],
+  // Also from the course panel on the page.
+  'queue/retry-failed': ['extension-page', 'udb-content'],
+  'download/preview': ['udb-content'],
+  'files/status': ['udb-content'],
+  'queue/control': ['extension-page', 'udb-content'],
 };
 
 export interface DownloadServices extends RequestDeps {
   readonly tasks: TasksRepo;
+  readonly meta: MetaRepo;
 }
 
 export interface RouterDeps {
@@ -79,6 +91,20 @@ async function handle(
     case 'download/request':
       if (downloads === undefined) return err(appError('unsupported_message', message.type));
       return handleDownloadRequest(message, tabId, downloads);
+    case 'download/preview':
+      if (downloads === undefined) return err(appError('unsupported_message', message.type));
+      return previewDownload(message, downloads);
+    case 'files/status':
+      if (downloads === undefined) return err(appError('unsupported_message', message.type));
+      return ok({ files: await courseFileStatuses(message.courseId, downloads) });
+    case 'queue/control': {
+      if (downloads === undefined) return err(appError('unsupported_message', message.type));
+      let cancelled = 0;
+      if (message.action === 'pause') await downloads.queue.pause();
+      else if (message.action === 'resume') await downloads.queue.resume();
+      else cancelled = await downloads.queue.cancelAll();
+      return ok({ paused: downloads.queue.paused, cancelled });
+    }
     case 'download/open':
     case 'download/show': {
       if (downloads === undefined) return err(appError('unsupported_message', message.type));
@@ -97,7 +123,9 @@ async function handle(
       return ok({
         tasks: await downloads.tasks.all(),
         files: await downloads.files.listAll(),
+        courses: await downloads.meta.courses(),
         paused: downloads.queue.paused,
+        pausedBy: downloads.queue.pausedBy,
       });
     case 'queue/retry-failed':
       if (downloads === undefined) return err(appError('unsupported_message', message.type));
