@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { JSDOM } from 'jsdom';
@@ -7,7 +7,8 @@ import { describe, expect, it } from 'vitest';
 import { parseCourse } from '../../../src/moodle/course';
 import { buildDiagnosticReport } from '../../../src/moodle/diagnostic';
 import { sanitizeDocument, sanitizeUrl } from '../../../src/moodle/sanitize';
-import { courseUrl, loadFixture } from '../../helpers/fixtures';
+import { sanitizeFixture } from '../../../scripts/sanitize-fixture';
+import { courseUrl, loadFixture, readFixture } from '../../helpers/fixtures';
 
 const URL_101 = courseUrl(101, 14);
 const PERSONAL = [
@@ -111,29 +112,52 @@ describe('buildDiagnosticReport', () => {
 });
 
 describe('scripts/sanitize-fixture.ts', () => {
-  const run = (...args: string[]) =>
-    execFileSync('pnpm', ['exec', 'tsx', 'scripts/sanitize-fixture.ts', ...args], {
-      encoding: 'utf8',
-      stdio: 'pipe',
-    });
-
-  it('sanitizes a saved page and a diagnostic report', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'udbsync-fixture-'));
-    const out1 = join(dir, 'page.html');
-    run('tests/fixtures/moodle/layouts/topics.html', out1, '--url', courseUrl(103));
-    const page = readFileSync(out1, 'utf8');
-    expect(page).toContain('Source URL: /auladigital/course/view.php?id=103');
+  it('sanitizes a saved page', () => {
+    const page = sanitizeFixture(
+      readFixture('layouts/topics.html'),
+      false,
+      courseUrl(103),
+      new Date(0),
+    ).html;
+    expect(page).toContain(
+      'sanitized by scripts/sanitize-fixture.ts on 1970-01-01. Source URL: /auladigital/course/view.php?id=103',
+    );
     for (const text of PERSONAL) expect(page).not.toContain(text);
+  });
 
+  it('sanitizes a diagnostic report and rejects other JSON', () => {
     const report = buildDiagnosticReport(
       loadFixture('layouts/topics.html', courseUrl(103)),
       courseUrl(103),
       '0.1.0',
     );
-    const json = join(dir, 'diag.json');
-    writeFileSync(json, JSON.stringify(report));
-    const out2 = join(dir, 'from-report.html');
-    run(json, out2);
-    expect(readFileSync(out2, 'utf8')).toContain('Topología_Jerárquica_Guía2');
+    expect(sanitizeFixture(JSON.stringify(report), true).html).toContain(
+      'Topología_Jerárquica_Guía2',
+    );
+    expect(() => sanitizeFixture('{"kind":"other"}', true)).toThrow(
+      'not a UDB Aula Sync diagnostic report',
+    );
+  });
+
+  // One real process run; spawning tsx takes seconds on CI runners.
+  it('works from the command line', { timeout: 30_000 }, () => {
+    const dir = mkdtempSync(join(tmpdir(), 'udbsync-fixture-'));
+    const out = join(dir, 'page.html');
+    execFileSync(
+      'pnpm',
+      [
+        'exec',
+        'tsx',
+        'scripts/sanitize-fixture.ts',
+        'tests/fixtures/moodle/layouts/topics.html',
+        out,
+        '--url',
+        courseUrl(103),
+      ],
+      {
+        stdio: 'pipe',
+      },
+    );
+    expect(readFileSync(out, 'utf8')).toContain('Source URL: /auladigital/course/view.php?id=103');
   });
 });

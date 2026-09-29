@@ -2,6 +2,7 @@ import { render } from 'preact';
 import { t } from '../shared/i18n';
 import '../ui/page.css';
 import { DiagnosePage } from './components/DiagnosePage';
+import { HypothesesPanel } from './components/HypothesesPanel';
 import { ServiceStatus } from './components/ServiceStatus';
 
 function Popup() {
@@ -13,6 +14,7 @@ function Popup() {
         {t('popupOpenOptions')}
       </button>
       <DiagnosePage />
+      <HypothesesPanel />
     </main>
   );
 }
