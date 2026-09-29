@@ -9,14 +9,20 @@ Ninguna se da por hecha en el código.
 
 ## Hipótesis
 
-| Id  | Hipótesis                                                                                      | Estado        | Evidencia                                                                                                 |
-| --- | ---------------------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------- |
-| H1  | `mod/resource/view.php?id=X&redirect=1` redirige a `pluginfile.php`                            | sin verificar |                                                                                                           |
-| H2  | La URL de recurso lleva revisión: `/pluginfile.php/<ctx>/mod_resource/content/<rev>/<archivo>` | sin verificar |                                                                                                           |
-| H3  | `fetch` desde service worker/offscreen envía la cookie de sesión                               | sin verificar |                                                                                                           |
-| H4  | `pluginfile.php` acepta HEAD                                                                   | sin verificar |                                                                                                           |
-| H5  | Sección Onetopic: `course/view.php?id=<id>&section=<n>`; pestañas atenuadas = no disponibles   | parcial       | URL confirmada (curso 49946, 2026-09-29), con sufijo `#tabs-tree-start`. Pestañas atenuadas sin verificar |
-| H6  | `mod_folder` muestra un árbol con un enlace `pluginfile` por archivo (sin revisión fiable)     | sin verificar |                                                                                                           |
+| Id  | Hipótesis                                                                                      | Estado        | Evidencia                                                                                                                       |
+| --- | ---------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| H1  | `mod/resource/view.php?id=X&redirect=1` redirige a `pluginfile.php`                            | sin verificar | Implementada con respaldo (recurso embebido/enlace). Confirmada solo contra el simulador. Probar con Popup > "Probar hipótesis" |
+| H2  | La URL de recurso lleva revisión: `/pluginfile.php/<ctx>/mod_resource/content/<rev>/<archivo>` | sin verificar | Parser de `pluginfile` con revisión (`mod_resource`/`mod_folder` `content`). Confirmada solo contra el simulador                |
+| H3  | `fetch` desde service worker/offscreen envía la cookie de sesión                               | sin verificar | Pendiente de Opciones > Diagnóstico en Brave (M0)                                                                               |
+| H4  | `pluginfile.php` acepta HEAD                                                                   | sin verificar | HEAD con respaldo a GET cortado tras las cabeceras. Confirmada solo contra el simulador                                         |
+| H5  | Sección Onetopic: `course/view.php?id=<id>&section=<n>`; pestañas atenuadas = no disponibles   | parcial       | URL confirmada (curso 49946, 2026-09-29), con sufijo `#tabs-tree-start`. Pestañas atenuadas sin verificar                       |
+| H6  | `mod_folder` muestra un árbol con un enlace `pluginfile` por archivo (sin revisión fiable)     | sin verificar | La estructura se toma de la ruta `pluginfile` (no del árbol). Confirmada solo contra el simulador                               |
+
+## Checkpoint M2: hipótesis en el sitio real
+
+En un curso con recursos (y, si es posible, una carpeta): icono de la extensión > **Probar hipótesis
+(H1, H2, H4-H6)** > Continuar. Hace como máximo 4 peticiones, con pausas, y guarda
+`Descargas/UDB/_diagnostico/hipotesis-<fecha>.json`. Copiar aquí el resultado de cada hipótesis.
 
 ## Checkpoint M1: Diagnóstico en el sitio real
 

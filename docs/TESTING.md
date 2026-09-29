@@ -15,8 +15,14 @@ pnpm test:e2e    # build + Playwright contra el Moodle simulado
   sobre su fixture. Cada fixture nueva se añade como un caso más.
 - **Servidor simulado** (`tests/mock-moodle/`): HTTPS en `127.0.0.1:8443`. `state.requests` registra cada
   petición para comprobar límites y "cero peticiones con la sesión caída".
+- **Integración** (`tests/unit/moodle/resolver.test.ts`, `hypotheses.test.ts`): el servidor simulado en
+  HTTP y puerto libre (`startMockMoodle({ port: 0, tls: false })`); `fetch` de Node y jsdom como parser.
 - **E2E** (`tests/e2e/`): Chromium con la extensión de `dist/`. El host real se mapea al simulador y
   cualquier otro host falla (ADR-002). **Nunca** contra el sitio real.
+
+## Manual (M2)
+
+Ver "Checkpoint M2" en `docs/MOODLE-NOTES.md`: "Probar hipótesis" en un curso con recursos y carpeta.
 
 ## Manual (M1)
 
