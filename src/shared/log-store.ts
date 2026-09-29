@@ -11,7 +11,7 @@ export interface LogStorage {
 
 export const chromeLogStorage: LogStorage = {
   load: async () => {
-    const stored = (await chrome.storage.local.get(KEY))[KEY] as unknown;
+    const stored: unknown = (await chrome.storage.local.get(KEY))[KEY];
     return Array.isArray(stored) ? (stored as LogEntry[]) : [];
   },
   save: async (entries) => {

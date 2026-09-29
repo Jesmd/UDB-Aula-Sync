@@ -2,7 +2,7 @@ import { errorMessage } from '../shared/error-text';
 import { taskId } from '../core/queue/task';
 import { UI_PREFIX } from '../shared/constants';
 import { sendMessage } from '../shared/browser-api';
-import { t, type MessageKey } from '../shared/i18n';
+import { t } from '../shared/i18n';
 import type {
   DownloadRequestMessage,
   DownloadRequestResponse,
