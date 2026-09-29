@@ -71,6 +71,18 @@
   "popupDiagnoseCopied": {
     "message": "Copiado."
   },
+  "popupHypotheses": {
+    "message": "Probar hipótesis (H1, H2, H4-H6)"
+  },
+  "popupHypothesesConsent": {
+    "message": "Hará como máximo 4 peticiones al Aula Digital desde esta página, con pausas entre ellas. Solo lee cabeceras: no descarga archivos."
+  },
+  "popupContinue": {
+    "message": "Continuar"
+  },
+  "popupCancel": {
+    "message": "Cancelar"
+  },
   "optionsTitle": {
     "message": "Opciones de UDB Aula Sync"
   },
@@ -157,5 +169,8 @@
   },
   "error_unsafe_path": {
     "message": "La ruta de destino no es segura."
+  },
+  "error_invalid_template": {
+    "message": "La plantilla de rutas no es válida."
   }
 }

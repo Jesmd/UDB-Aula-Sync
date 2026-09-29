@@ -71,6 +71,18 @@
   "popupDiagnoseCopied": {
     "message": "Copied."
   },
+  "popupHypotheses": {
+    "message": "Test hypotheses (H1, H2, H4-H6)"
+  },
+  "popupHypothesesConsent": {
+    "message": "It sends at most 4 requests to Aula Digital from this page, with pauses between them. It reads headers only: no file is downloaded."
+  },
+  "popupContinue": {
+    "message": "Continue"
+  },
+  "popupCancel": {
+    "message": "Cancel"
+  },
   "optionsTitle": {
     "message": "UDB Aula Sync options"
   },
@@ -157,5 +169,8 @@
   },
   "error_unsafe_path": {
     "message": "The destination path is not safe."
+  },
+  "error_invalid_template": {
+    "message": "The path template is not valid."
   }
 }
