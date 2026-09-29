@@ -41,6 +41,9 @@ function freshState(): MockState {
     // structuredClone: tests may mutate their own copy without leaking into others.
     resources: new Map(RESOURCES.map((r) => [r.cmid, structuredClone(r)])),
     folders: new Map(FOLDERS.map((f) => [f.cmid, structuredClone(f)])),
+    pageEdits: new Map(),
+    inFlight: 0,
+    maxInFlight: 0,
   };
 }
 
@@ -53,6 +56,17 @@ export function resetState(state: MockState): void {
   for (const [k, v] of fresh.resources) state.resources.set(k, v);
   state.folders.clear();
   for (const [k, v] of fresh.folders) state.folders.set(k, v);
+  state.pageEdits.clear();
+  state.maxInFlight = state.inFlight;
+}
+
+function editsFor(state: MockState, courseId: number) {
+  let edits = state.pageEdits.get(courseId);
+  if (edits === undefined) {
+    edits = { activities: [], revealed: [] };
+    state.pageEdits.set(courseId, edits);
+  }
+  return edits;
 }
 
 function handler(state: MockState) {
@@ -64,6 +78,14 @@ function handler(state: MockState) {
       return;
     }
     state.requests.push(`${req.method ?? '?'} ${url.pathname}${url.search}`);
+    // Page assets (theme images, icons) come from the browser itself, not the extension.
+    if (!/\/(theme\/image\.php|pluginfile\.php\/\d+\/user\/)|favicon/.test(url.pathname)) {
+      state.inFlight += 1;
+      state.maxInFlight = Math.max(state.maxInFlight, state.inFlight);
+      res.once('close', () => {
+        state.inFlight -= 1;
+      });
+    }
     for (const route of routes) {
       if (route.method !== 'ANY' && route.method !== req.method) continue;
       const match = route.path.exec(url.pathname);
@@ -86,7 +108,9 @@ const int = (value: string | null) =>
 
 /**
  * /__test/state, /__test/reset, /__test/session?loggedIn=0|1,
- * /__test/resource?cmid=&revision=&size=&lastModified=&throttleMs=&mode=
+ * /__test/resource?cmid=&revision=&size=&lastModified=&throttleMs=&mode=,
+ * /__test/activity?course=&section=&cmid=&name= (a new PDF resource on the course page),
+ * /__test/reveal?course=&section= (a restricted section opens)
  */
 function handleControl(state: MockState, url: URL, res: ServerResponse): void {
   const json = (body: unknown) => {
@@ -95,7 +119,7 @@ function handleControl(state: MockState, url: URL, res: ServerResponse): void {
   };
   switch (url.pathname) {
     case '/__test/state':
-      json({ loggedIn: state.loggedIn, requests: state.requests });
+      json({ loggedIn: state.loggedIn, requests: state.requests, maxInFlight: state.maxInFlight });
       return;
     case '/__test/reset':
       resetState(state);
@@ -120,6 +144,36 @@ function handleControl(state: MockState, url: URL, res: ServerResponse): void {
       if (mode === 'redirect' || mode === 'embed' || mode === 'workaround' || mode === 'readonly')
         seed.mode = mode;
       json(seed);
+      return;
+    }
+    case '/__test/activity': {
+      const course = int(url.searchParams.get('course'));
+      const section = int(url.searchParams.get('section'));
+      const cmid = int(url.searchParams.get('cmid'));
+      const name = url.searchParams.get('name') ?? 'Nuevo';
+      if (course === undefined || section === undefined || cmid === undefined) break;
+      editsFor(state, course).activities.push({ section, cmid, name });
+      state.resources.set(cmid, {
+        cmid,
+        mode: 'redirect',
+        contextId: 20_000 + cmid,
+        revision: 1,
+        fileName: `${name}.pdf`,
+        contentType: 'application/pdf',
+        size: 7_000,
+        lastModified: 'Tue, 22 Sep 2026 10:00:00 GMT',
+        disposition: 'utf8-raw',
+        head: true,
+      });
+      json({ ok: true });
+      return;
+    }
+    case '/__test/reveal': {
+      const course = int(url.searchParams.get('course'));
+      const section = int(url.searchParams.get('section'));
+      if (course === undefined || section === undefined) break;
+      editsFor(state, course).revealed.push(section);
+      json({ ok: true });
       return;
     }
     default:
