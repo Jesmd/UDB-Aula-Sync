@@ -16,7 +16,7 @@
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green">
 </p>
 
-> **Estado:** en desarrollo (hito M6: descarga masiva, novedades automáticas, verificación de carpeta opcional, popup y opciones). Uso personal. No se publica en la Chrome Web Store.
+> **Estado:** en desarrollo (versión 1.0.0). Uso personal. No se publica en la Chrome Web Store.
 
 ## Qué hará
 
@@ -41,31 +41,46 @@ ningún servidor. Detalles en [docs/PRIVACY.md](docs/PRIVACY.md) y [docs/SECURIT
 
 ## Instalación (cargar descomprimida)
 
-1. Requisitos: Node 22 y pnpm 10.
-2. Compila:
+No se publica en la Chrome Web Store: se carga en modo desarrollador.
 
-   ```sh
-   pnpm install
-   pnpm build
-   ```
+**Desde el zip** (sin herramientas):
 
-3. Abre `brave://extensions` (o `chrome://extensions`, `edge://extensions`).
-4. Activa el **Modo desarrollador**.
-5. Pulsa **Cargar descomprimida** y elige la carpeta `dist/`.
+1. Descomprime `udb-aula-sync-1.0.0.zip` en una carpeta que no vayas a borrar, por ejemplo
+   `Documentos\UDB-Aula-Sync`.
+2. Abre `brave://extensions` (o `chrome://extensions`, `edge://extensions`).
+3. Activa el **Modo desarrollador** (arriba a la derecha).
+4. Pulsa **Cargar descomprimida** y elige la carpeta donde está `manifest.json`.
 
-Primer uso: usa un perfil con "Preguntar dónde guardar cada archivo" **desactivado** y confirma
-cuál es tu carpeta de descargas.
+**Desde el código:**
+
+1. Requisitos: Node 22 y pnpm 10. En PowerShell de Windows usa `pnpm.cmd` si `pnpm` da un error de
+   ejecución de scripts.
+2. `pnpm install` y `pnpm build`. Carga la carpeta `dist/` como en el paso 4. `pnpm zip` genera el zip en
+   `release/`.
+
+**Actualizar:** reemplaza los archivos (o `git pull` y `pnpm build`) y pulsa el botón de recargar de la
+extensión en `brave://extensions`. No hace falta quitarla: los ajustes y el índice se conservan.
+
+**Primer uso:**
+
+1. Desactiva "Preguntar dónde guardar cada archivo" en los ajustes de descargas del navegador y confirma
+   cuál es tu carpeta de descargas.
+2. Inicia sesión en el Aula Digital y abre un curso: aparece "UDB Aula Sync está activo" y el botón
+   "Descargas del curso".
+3. Pulsa "Descargar todo el curso" una vez por curso: desde entonces la extensión busca novedades sola.
+4. Opcional: Opciones > Carpeta (en Brave, activa antes `brave://flags/#file-system-access-api`).
+5. Opciones > General > "Exportar" guarda una copia de tus ajustes y del índice.
 
 ## Desarrollo
 
-| Comando         | Qué hace                                                 |
-| --------------- | -------------------------------------------------------- |
-| `pnpm dev`      | Compila en modo observación a `dist/`                    |
-| `pnpm build`    | Compila y audita el manifest                             |
-| `pnpm check`    | Typecheck, lint, formato y tests unitarios con cobertura |
-| `pnpm test:e2e` | Compila y ejecuta Playwright contra el Moodle simulado   |
-| `pnpm mock`     | Arranca el Moodle simulado en `https://127.0.0.1:8443`   |
-| `pnpm zip`      | Empaqueta `dist/` en `release/`                          |
+| Comando         | Qué hace                                                   |
+| --------------- | ---------------------------------------------------------- |
+| `pnpm dev`      | Compila en modo observación a `dist/`                      |
+| `pnpm build`    | Compila, audita el manifest y el tamaño del content script |
+| `pnpm check`    | Typecheck, lint, formato y tests unitarios con cobertura   |
+| `pnpm test:e2e` | Compila y ejecuta Playwright contra el Moodle simulado     |
+| `pnpm mock`     | Arranca el Moodle simulado en `https://127.0.0.1:8443`     |
+| `pnpm zip`      | Empaqueta `dist/` en `release/`                            |
 
 Documentación técnica: [arquitectura](docs/ARCHITECTURE.md), [decisiones](docs/DECISIONS.md),
 [notas de Moodle](docs/MOODLE-NOTES.md), [estructuras de curso](docs/LAYOUTS.md) y [pruebas](docs/TESTING.md).
