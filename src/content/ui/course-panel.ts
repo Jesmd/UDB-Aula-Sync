@@ -168,7 +168,10 @@ export class CoursePanel {
     const table = this.#doc.createElement('table');
     for (const [label, count] of plan.rows) {
       const tr = table.insertRow();
-      tr.insertCell().textContent = label;
+      const th = this.#doc.createElement('th');
+      th.scope = 'row';
+      th.textContent = label;
+      tr.append(th);
       tr.insertCell().textContent = String(count);
     }
     const total = this.#doc.createElement('p');

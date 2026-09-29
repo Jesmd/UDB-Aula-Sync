@@ -1,3 +1,8 @@
+/* Rules like "all: unset" beat the UA [hidden] style: keep hidden things hidden. */
+[hidden] {
+  display: none !important;
+}
+
 :host {
   all: initial;
   position: fixed;
@@ -282,10 +287,6 @@
   animation: udbsync-in 140ms ease-out;
 }
 
-.udbsync-card[hidden] {
-  display: none;
-}
-
 .udbsync-card__title {
   margin: 0 0 6px;
   font-size: 14px;
@@ -357,10 +358,6 @@
   pointer-events: auto;
 }
 
-.udbsync-panel[hidden] {
-  display: none;
-}
-
 .udbsync-panel h2 {
   margin: 0 0 4px;
   font-size: 15px;
@@ -414,8 +411,11 @@
   border-collapse: collapse;
 }
 
+.udbsync-plan th,
 .udbsync-plan td {
   padding: 1px 0;
+  font-weight: normal;
+  text-align: left;
 }
 
 .udbsync-plan td:last-child {
