@@ -1,6 +1,7 @@
 import { render } from 'preact';
 import { t } from '../shared/i18n';
 import '../ui/page.css';
+import { DiagnosePage } from './components/DiagnosePage';
 import { ServiceStatus } from './components/ServiceStatus';
 
 function Popup() {
@@ -11,6 +12,7 @@ function Popup() {
       <button type="button" onClick={() => void chrome.runtime.openOptionsPage()}>
         {t('popupOpenOptions')}
       </button>
+      <DiagnosePage />
     </main>
   );
 }

@@ -23,6 +23,20 @@ export async function sendMessage<M extends RuntimeMessage>(message: M): Promise
   }
 }
 
+/** Sends a message to the content script of one tab (no "tabs" permission needed). */
+export async function sendToTab<M extends RuntimeMessage>(
+  tabId: number,
+  message: M,
+): Promise<ResponseFor<M>> {
+  try {
+    const response: unknown = await chrome.tabs.sendMessage(tabId, message);
+    if (isResult(response)) return response as ResponseFor<M>;
+    return err(appError('invalid_message', 'malformed response'));
+  } catch (cause) {
+    return err(appError('unknown', cause instanceof Error ? cause.message : String(cause)));
+  }
+}
+
 export function extensionVersion(): string {
   return chrome.runtime.getManifest().version;
 }
