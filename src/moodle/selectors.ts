@@ -2,8 +2,9 @@
  * The ONLY place with DOM selectors. Each entry lists alternatives, most specific first;
  * the first alternative that matches wins.
  *
- * Source: synthetic fixtures modeled on Moodle 3.10 core renderers and format_onetopic.
- * TODO(verify-real-DOM): confirm every entry with the Diagnostics report from the real site.
+ * Verified against real Diagnostics reports (tests/fixtures/moodle/real/): course page
+ * structure, sections, activities, Onetopic tab rows (topics 50454, onetopic 49946).
+ * TODO(verify-real-DOM): dimmed tabs, restricted/hidden sections and activities, weeks.
  */
 export const SELECTORS = {
   /** Main course area. Everything course-specific is searched inside it. */
@@ -40,8 +41,12 @@ export const SELECTORS = {
 
   /** Onetopic tab rows inside courseContent. */
   tabRow: ['ul.nav-tabs', '.tabtree ul', 'ul.nav'],
-  /** Direct tab label of a tab <li> (not the nested row). */
+  /** Direct tab label of a tab <li> (not the nested row). Verified: a.nav-link (49946). */
   tabLabel: [':scope > a', ':scope > .nav-link', ':scope > span'],
+  /** Name inside a tab label. Verified: innertab > span.sectionname (49946). */
+  tabName: ['.sectionname'],
+  /** Breadcrumb entry of the page being shown. Verified (49946). */
+  breadcrumbCurrent: ['.breadcrumb a[aria-current="page"]', '.breadcrumb [aria-current="page"] a'],
 
   loginForm: ['form#login', 'form[action*="/login/index.php"]'],
 
@@ -62,7 +67,11 @@ export const SELECTORS = {
   ],
 } as const satisfies Record<string, readonly string[]>;
 
-/** Class names (not selectors) checked on tab links and their <li>. */
+/**
+ * Class names (not selectors) checked on a tab link, its <li> and the link's descendants
+ * (Onetopic puts them on <innertab>). Verified: active on a.nav-link, marker on innertab.
+ * TODO(verify-real-DOM): dimmed tab classes.
+ */
 export const TAB_CLASSES = {
   active: ['active', 'selected'],
   dimmed: ['dimmed', 'disabled', 'dimmed_text'],
