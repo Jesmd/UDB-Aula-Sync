@@ -76,17 +76,25 @@ export interface InterceptorDeps {
   readonly openAfterDownload: () => boolean;
   readonly onDownload: (message: DownloadRequestMessage, activity: Activity) => void;
   readonly onReadOnly?: (activity: Activity) => void;
+  /** Follows the link after all (read-only or unresolvable file). Tests replace it. */
+  readonly navigate?: (url: string) => void;
   readonly hoverDelayMs?: number;
 }
 
 /**
  * Click-to-download (spec §3.2). Hover or keyboard focus resolves the file after 400 ms;
- * a plain click on a resolved file downloads it instead of opening Moodle's page.
+ * a plain click downloads the file instead of opening Moodle's page. A click that comes
+ * before the resolution waits for it; if there is no real file, the link is followed.
  * Ctrl/Cmd/Shift/middle click keep the native behavior; Alt+click only downloads.
- * Anything unresolved or read-only also keeps the native behavior.
  */
 export function installInterceptor(deps: InterceptorDeps): () => void {
   const timers = new Map<number, ReturnType<typeof setTimeout>>();
+  const waiting = new Set<number>();
+  const navigate =
+    deps.navigate ??
+    ((url: string) => {
+      deps.doc.defaultView?.location.assign(url);
+    });
 
   const activityOf = (event: Event): Activity | null => {
     const page = deps.context.get();
@@ -127,22 +135,36 @@ export function installInterceptor(deps: InterceptorDeps): () => void {
     if (!page.ok) return;
     const activity = activityFromEvent(event, page.value);
     if (activity === null) return;
+    const open = !event.altKey && deps.openAfterDownload();
     const resolution = deps.cache.peek(activity.cmid);
     if (resolution === null) {
-      // Not resolved yet: Moodle opens its page, and the next click can download.
-      void deps.cache.get(activity.cmid);
+      // Clicked before the hover finished resolving: hold the click and wait.
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (waiting.has(activity.cmid)) return;
+      waiting.add(activity.cmid);
+      const href = (event.target as Element).closest(RESOURCE_LINK)?.getAttribute('href') ?? null;
+      const url = href === null ? null : new URL(href, deps.doc.baseURI).href;
+      void deps.cache.get(activity.cmid).then((result) => {
+        waiting.delete(activity.cmid);
+        const message =
+          result.ok && result.value.kind === 'file'
+            ? buildDownloadRequest(page.value, activity, result.value.file, open)
+            : null;
+        if (message !== null) {
+          deps.onDownload(message, activity);
+          return;
+        }
+        if (result.ok && result.value.kind === 'readonly') deps.onReadOnly?.(activity);
+        if (url !== null) navigate(url);
+      });
       return;
     }
     if (resolution.kind === 'readonly') {
       deps.onReadOnly?.(activity);
       return;
     }
-    const message = buildDownloadRequest(
-      page.value,
-      activity,
-      resolution.file,
-      !event.altKey && deps.openAfterDownload(),
-    );
+    const message = buildDownloadRequest(page.value, activity, resolution.file, open);
     if (message === null) return;
     event.preventDefault();
     event.stopImmediatePropagation();

@@ -43,6 +43,7 @@ let resolver: ReturnType<typeof vi.fn<(cmid: number) => Promise<{ ok: true; valu
 let cache: ResolveCache;
 let onDownload: Mock<InterceptorDeps['onDownload']>;
 let onReadOnly: Mock<(activity: Activity) => void>;
+let navigate: Mock<(url: string) => void>;
 let enabled: boolean;
 let uninstall: () => void;
 
@@ -63,6 +64,7 @@ beforeEach(() => {
   );
   onDownload = vi.fn<InterceptorDeps['onDownload']>();
   onReadOnly = vi.fn<(activity: Activity) => void>();
+  navigate = vi.fn<(url: string) => void>();
   enabled = true;
   uninstall = installInterceptor({
     doc,
@@ -72,6 +74,7 @@ beforeEach(() => {
     openAfterDownload: () => true,
     onDownload,
     onReadOnly,
+    navigate,
     hoverDelayMs: 400,
   });
 });
@@ -117,13 +120,17 @@ describe('interceptor', () => {
     expect(resolver).toHaveBeenCalledWith(2102);
   });
 
-  it('keeps the native click until the file is resolved, then downloads', async () => {
+  it('a click before the resolution waits for it, then downloads (once)', async () => {
     const first = click(2102);
-    expect(first.defaultPrevented).toBe(false);
+    expect(first.defaultPrevented).toBe(true);
+    expect(click(2102).defaultPrevented).toBe(true); // double click while waiting
     expect(onDownload).not.toHaveBeenCalled();
     await settle();
+    expect(onDownload).toHaveBeenCalledTimes(1);
+    expect(navigate).not.toHaveBeenCalled();
     const second = click(2102);
     expect(second.defaultPrevented).toBe(true);
+    expect(onDownload).toHaveBeenCalledTimes(2);
     const [message, activity] = onDownload.mock.calls[0] as [unknown, { name: string }];
     expect(parseMessage(message).ok).toBe(true);
     expect(message).toMatchObject({
@@ -132,6 +139,14 @@ describe('interceptor', () => {
       section: { name: 'Semana 12', parent: 'Desarrollo', numberWidth: 2 },
     });
     expect(activity.name).toBe('Presentación Semana 12');
+  });
+
+  it('an early click on a read-only file follows the link after resolving', async () => {
+    expect(click(2104).defaultPrevented).toBe(true);
+    await settle();
+    expect(onReadOnly).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith(link(2104).href);
+    expect(onDownload).not.toHaveBeenCalled();
   });
 
   it('Alt+click downloads without opening; Ctrl/Shift/middle clicks stay native', async () => {
