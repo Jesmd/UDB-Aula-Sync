@@ -151,3 +151,19 @@ export function buildPath(
   const segments = [...fitted.value, fileName];
   return ok({ segments, relativePath: joinRelative(segments) });
 }
+
+/**
+ * "conservar ambas": puts a suffix such as " (rev 2)" before the extension of the file
+ * name in an already built path, staying within the segment limit.
+ */
+export function withVersionSuffix(
+  relativePath: string,
+  suffix: string,
+  limits: PathLimits = PATH_LIMITS,
+): string {
+  const segments = relativePath.split('/');
+  const fileName = segments.pop() ?? '';
+  const { base, extension } = splitExtension(fileName);
+  const renamed = sanitizeFileName({ base, extension, suffix }, limits.segment);
+  return joinRelative([...segments, renamed]);
+}
