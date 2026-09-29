@@ -66,7 +66,17 @@ content script probablemente no se propaga al service worker.
 M0 añade en Opciones > Diagnóstico una prueba: abrir desde la página (con gesto) y desde el worker (sin gesto).
 La ruta toast del content script → worker se comprueba en M3.
 
-**Consecuencias.** Resultado pendiente de ejecutar en Brave; se registra en `MOODLE-NOTES.md`.
+**Resultado (Brave, 2026-09-29).** La descarga a una subcarpeta funciona. `downloads.open` funcionó desde la
+página y desde el worker, pero la prueba del worker se hizo justo después de un clic, así que no demuestra
+que el worker pueda abrir sin gesto.
+
+**Decisión final (M3).**
+
+- Un archivo ya descargado y al día se abre al momento, dentro del gesto del clic.
+- Un archivo nuevo se abre al terminar la descarga. Si el navegador lo impide (`blocked`), el aviso muestra
+  "Abrir" y "Mostrar en carpeta"; su clic da un gesto nuevo al worker.
+- Solo se abren tipos de la lista blanca. El resto (ejecutables, macros, comprimidos, formatos raros) se
+  muestra en su carpeta (`downloads.show`).
 
 ## ADR-005 Versión mínima de Chrome 116
 
@@ -149,3 +159,58 @@ archivo. El limitador y los reintentos llegan en M3 y envuelven al `fetch` inyec
 - Moodle envía UTF-8 sin codificar en `filename=`, que JS lee como Latin-1; se re-decodifica cuando los bytes forman UTF-8 válido. `filename*` tiene prioridad.
 - Colisión: sufijo estable " (<cmid>)".
 - Archivos de `mod_folder`: se conserva el nombre original, bajo una carpeta con el nombre de la actividad y sus subcarpetas.
+
+## ADR-013 Cola de descargas persistente
+
+**Contexto.** El service worker puede morir en cualquier momento. Una descarga de Chrome sigue viva aunque
+el worker muera.
+
+**Decisión.**
+
+- Cada tarea se guarda en IndexedDB antes de cada acción. Estados: `en_cola` → `descargando` →
+  `verificando` → `hecha` | `fallida` | `omitida`.
+- Todo el trabajo (peticiones nuevas y eventos de `chrome.downloads`) pasa por una única cadena de
+  promesas, para que nunca se intercale.
+- `recover()` corre en cada arranque del worker:
+  - sigue las descargas que el navegador conoce: las terminadas se verifican, las interrumpidas fallan;
+  - reencola lo demás.
+- Los reintentos esperan con backoff y `Retry-After`, y despiertan al worker con `chrome.alarms`.
+- Límites: 2 descargas a la vez y 300-800 ms entre inicios.
+- Verificación al terminar:
+  - el archivo existe;
+  - el tamaño coincide con `Content-Length`;
+  - no es HTML si se esperaba otra cosa. Moodle manda la página de login cuando la sesión caducó; esa
+    página se borra, porque la escribió la extensión, y la cola se pausa.
+- Con la sesión caducada se avisa una sola vez. El siguiente clic resuelto la reanuda.
+- La resolución la hace el content script (mismo origen, con cookies); el worker recibe la tarea ya resuelta.
+  Así M3 no depende de H3.
+
+**Consecuencias.** El E2E `sw-restart` mata el worker con 2 descargas en curso y 1 en cola, y comprueba que
+terminan las 3 sin duplicados.
+
+## ADR-014 Política de actualización por defecto: conservar ambas
+
+**Contexto.** Un estudiante puede haber anotado el PDF. "Sobrescribir" perdería esas notas.
+
+**Decisión.** Por defecto `conservar_ambas`: la versión nueva se guarda como "<nombre> (rev N).<ext>".
+
+- "omitir" no descarga nada y abre la copia existente.
+- "sobrescribir" reemplaza solo la descarga anterior de la propia extensión.
+- Un archivo nuevo nunca pisa uno con el mismo nombre que la extensión no descargó (`uniquify`).
+
+## ADR-015 Descargas en E2E y nombres con acentos
+
+**Contexto.**
+
+- Playwright intercepta las descargas (nombres GUID en su carpeta) e ignora la ruta que pide la extensión.
+- En Linux con locale POSIX, Chromium rechaza nombres no ASCII ("Invalid filename").
+
+**Decisión.**
+
+- El E2E crea un perfil con `download.default_directory` apuntando a una carpeta temporal.
+- Devuelve las descargas a Chromium con `Browser.setDownloadBehavior({ behavior: 'default' })`.
+- Lanza Chromium con `LANG=C.UTF-8`.
+- En la extensión, "Invalid filename" se trata como `file_rejected`: es final y no se reintenta.
+
+**Consecuencias.** En Windows y macOS no aplica. En un Linux sin locale UTF-8 los nombres con acentos
+fallarían con un mensaje claro. Si hiciera falta, se añadiría una opción de transliteración.

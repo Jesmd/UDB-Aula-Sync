@@ -49,6 +49,23 @@ Cada tipo declara qué remitentes admite (`ALLOWED` en `router.ts`). Las respues
 Los mensajes `content/*` van del popup al content script con `chrome.tabs.sendMessage`. El content script
 solo acepta los que envía una página de la extensión.
 
+## Descargas (M3)
+
+```text
+content script                                   service worker
+ hover/foco 400 ms ─▶ ResolveCache (12 h, limitador)
+ clic ─▶ preventDefault (solo si ya está resuelto)
+      ─▶ download/request ───────────────────────▶ reconcile(índice, huella, archivo local, política)
+                                                    ├─ al día ─▶ abrir ya (gesto del clic)
+                                                    └─ descargar ─▶ buildPath ─▶ DownloadQueue (IndexedDB)
+ toasts ◀── content/download-update ◀──────────── chrome.downloads.onChanged ─▶ verificar ─▶ índice ─▶ abrir
+```
+
+- Índice `files` (IndexedDB): clave `curso:cmid:fileKey`, huella, ruta relativa, ruta local, `downloadId`,
+  versiones. Tareas en `tasks`. Esquema versionado (`storage/migrations.ts`).
+- Ajustes en `chrome.storage.local`, validados con valibot campo por campo (`storage/settings-schema.ts`).
+- `DownloadBackend` (`background/download-manager.ts`) envuelve `chrome.downloads`; las pruebas usan uno falso.
+
 ## Resolución y rutas (M2)
 
 ```text
