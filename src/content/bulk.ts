@@ -4,6 +4,7 @@ import { t } from '../shared/i18n';
 import type { DownloadPreviewResponse, DownloadUpdateMessage } from '../shared/messages';
 import type { HtmlParser } from '../moodle/html-parser';
 import { payloadFor } from '../moodle/payload';
+import { snapshotFromScan } from '../moodle/snapshot';
 import type { FetchLike } from '../moodle/resolver/head-probe';
 import { resolveItems, scanCourse, type FoundFile, type ScanScope } from '../moodle/scan';
 import { courseSettings, type Settings } from '../storage/settings-schema';
@@ -146,6 +147,14 @@ export class BulkRunner {
         this.#fail(scan.error.code);
         return;
       }
+      // A whole-course scan by hand is the course's first sync (spec §2, §3.4): from now
+      // on the background checks it for novelties.
+      if (scope.kind === 'course')
+        void sendMessage({
+          target: 'background',
+          type: 'snapshot/save',
+          snapshot: snapshotFromScan(scan.value, Date.now()),
+        });
       const resolved = await resolveItems(scan.value.items, this.deps.url(), deps);
       if (!resolved.ok) {
         this.#fail(resolved.error.code);
