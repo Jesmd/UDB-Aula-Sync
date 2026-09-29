@@ -18,8 +18,7 @@ Popup / Opciones (Preact) ── mensajes ──▶            │ mensajes
                                         └───────────────────────────┘
 ```
 
-- **Service worker.** Sin estado en memoria que deba sobrevivir. Cola y progreso irán a IndexedDB o
-  `chrome.storage.session` (M3).
+- **Service worker.** Sin estado en memoria que deba sobrevivir. Cola, índice y pausa viven en IndexedDB.
 - **Offscreen.** Uno por extensión, creado con candado (`offscreen-client.ts`, `getContexts` + promesa).
 - **Content script.** Mismo origen que Moodle; parsea la página visible. Comparte `moodle/` con el offscreen
   mediante un puerto `HtmlParser` (M1).
@@ -48,6 +47,26 @@ Todo mensaje tiene `target` (`background` | `offscreen` | `content`) y `type`. E
 Cada tipo declara qué remitentes admite (`ALLOWED` en `router.ts`). Las respuestas son `Result`.
 Los mensajes `content/*` van del popup al content script con `chrome.tabs.sendMessage`. El content script
 solo acepta los que envía una página de la extensión.
+
+## Descarga masiva y UI de la página (M4)
+
+```text
+content script                                         service worker
+ panel ─▶ scanCourse (pestañas disponibles, 1 vez c/u)
+       ─▶ resolveItems (recursos + carpetas; sesión caída = alto)
+       ─▶ download/preview por archivo ──────────────▶ reconcile + filtros del curso (sin descargar)
+       ─▶ buildPlan ─▶ plan (confirmar si > 100 archivos o 200 MB)
+       ─▶ download/request por archivo elegido ──────▶ DownloadQueue
+ progreso ◀── content/download-update ◀──────────── (el panel resume; sin avisos por archivo)
+ etiquetas ◀── files/status al cargar + previews + descargas
+```
+
+- Dos hosts Shadow DOM: `#udbsync-root` (fijo: avisos, panel) y `#udbsync-overlay` (absoluto, coordenadas del
+  documento: etiquetas de estado, tarjeta). Ninguno desplaza el contenido de Moodle.
+- Un solo limitador para todo `fetch` del content script (ADR-021).
+- Ajustes v2 y ajustes por curso: `courseSettings()` (ADR-017). Nombres de curso en `meta` para el popup.
+- Popup: `queue/list` cada 1,5 s; pausar/reanudar/cancelar con `queue/control`. "Abrir" llama a
+  `chrome.downloads` dentro del clic (ADR-016).
 
 ## Descargas (M3)
 
