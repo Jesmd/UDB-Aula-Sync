@@ -140,6 +140,8 @@ const BackgroundRequest = v.variant('type', [
     type: v.literal('novelties/clear'),
     courseId: v.nullable(positiveInt),
   }),
+  /** Options: scan the chosen folder now and report (M6). */
+  v.object({ target: v.literal('background'), type: v.literal('folder/check') }),
 ]);
 
 const OffscreenRequest = v.variant('type', [
@@ -157,6 +159,8 @@ const OffscreenRequest = v.variant('type', [
     known: v.pipe(v.array(positiveInt), v.maxLength(5000)),
     skipSections: v.pipe(v.array(text(120)), v.maxLength(60)),
   }),
+  /** Read the chosen folder (M6, read-only). */
+  v.object({ target: v.literal('offscreen'), type: v.literal('offscreen/folder-scan') }),
 ]);
 
 const ContentRequest = v.variant('type', [
@@ -229,6 +233,8 @@ export interface ResponseMap {
   'snapshot/save': { readonly novelties: number };
   'sync/run': SyncSummary;
   'novelties/clear': { readonly cleared: true };
+  'offscreen/folder-scan': FolderScanResult;
+  'folder/check': FolderCheck;
   'content/diagnose': DiagnosticReport;
   'content/test-hypotheses': HypothesisReport;
   'content/download-update': { readonly shown: boolean };
@@ -259,6 +265,25 @@ export interface ResponseMap {
     /** Activities new since the last sync (the "NUEVO" mark). */
     readonly novelties: readonly number[];
   };
+}
+
+/** The chosen folder as the offscreen document read it: [path, size, lastModified]. */
+export interface FolderScanResult {
+  readonly rootName: string;
+  readonly takenAt: number;
+  readonly truncated: boolean;
+  readonly files: readonly (readonly [string, number, number])[];
+}
+
+export interface FolderCheck {
+  readonly rootName: string;
+  readonly files: number;
+  readonly truncated: boolean;
+  /** The folder's name is the last part of the base folder setting. */
+  readonly matchesBase: boolean;
+  /** Indexed files under the base that are not in the folder. */
+  readonly missing: number;
+  readonly missingSample: readonly string[];
 }
 
 /** What the offscreen document found for one course. */
