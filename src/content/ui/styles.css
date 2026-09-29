@@ -97,3 +97,34 @@
     animation: none;
   }
 }
+
+.udbsync-toast__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.udbsync-toast__actions:empty {
+  display: none;
+}
+
+.udbsync-toast__action {
+  all: unset;
+  cursor: pointer;
+  padding: 2px 8px;
+  border: 1px solid var(--udbsync-accent);
+  border-radius: 4px;
+  color: var(--udbsync-accent);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.udbsync-toast__action:hover {
+  background: var(--udbsync-accent);
+  color: var(--udbsync-bg);
+}
+
+.udbsync-toast__action:focus-visible {
+  outline: 2px solid var(--udbsync-accent);
+  outline-offset: 2px;
+}
