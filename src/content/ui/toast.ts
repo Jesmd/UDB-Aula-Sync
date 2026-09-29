@@ -8,8 +8,10 @@ export interface ToastOptions {
   /** 0 keeps the toast until the user closes it. */
   readonly timeoutMs?: number;
   readonly closeLabel: string;
-  /** Buttons such as "Abrir" or "Mostrar en carpeta"; their clicks are user gestures. */
+  /** Buttons handled by the content script. */
   readonly actions?: readonly ToastAction[];
+  /** An element shown in the actions area, e.g. the framed "Abrir" page (ADR-016). */
+  readonly embed?: HTMLElement;
 }
 
 export interface ToastAction {
@@ -70,18 +72,20 @@ export function showToast(root: UiRoot, message: string, options: ToastOptions):
   const render = (content: string, next: ToastOptions): void => {
     toast.dataset.kind = next.kind ?? 'info';
     text.textContent = content;
-    actions.replaceChildren(
-      ...(next.actions ?? []).map((action) => {
-        const button = doc.createElement('button');
-        button.type = 'button';
-        button.className = `${UI_PREFIX}toast__action`;
-        button.textContent = action.label;
-        button.addEventListener('click', () => {
-          action.onClick();
-        });
-        return button;
-      }),
-    );
+    const buttons = (next.actions ?? []).map((action) => {
+      const button = doc.createElement('button');
+      button.type = 'button';
+      button.className = `${UI_PREFIX}toast__action`;
+      button.textContent = action.label;
+      button.addEventListener('click', () => {
+        action.onClick();
+      });
+      return button;
+    });
+    // Moving an iframe reloads it: keep the same embed in place across updates.
+    const keepEmbed = next.embed?.parentNode === actions && buttons.length === 0;
+    if (!keepEmbed)
+      actions.replaceChildren(...buttons, ...(next.embed === undefined ? [] : [next.embed]));
     if (timer !== undefined) clearTimeout(timer);
     timer = undefined;
     const timeoutMs = next.timeoutMs ?? 5000;

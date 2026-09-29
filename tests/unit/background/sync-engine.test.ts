@@ -215,4 +215,57 @@ describe('DownloadQueue', () => {
     expect(byCmid[3]?.state).toBe('descargando');
     expect(backend.started).toHaveLength(3);
   });
+
+  it('pauses and resumes on request, remembering the pause across restarts', async () => {
+    const stored: { value?: boolean } = {};
+    const pauseStore = {
+      get: () => Promise.resolve(stored.value),
+      set: (p: boolean) => {
+        stored.value = p;
+        return Promise.resolve();
+      },
+    };
+    const make = () =>
+      new DownloadQueue({
+        tasks,
+        files,
+        backend,
+        log: createLogger('test'),
+        notify: (e) => events.push(e),
+        scheduleWake: (at) => wakes.push(at),
+        now: () => now,
+        sleep: () => Promise.resolve(),
+        setTimer: () => undefined,
+        pauseStore,
+      });
+    const queue = make();
+    await queue.pause();
+    await queue.enqueue(input(1));
+    expect(backend.started).toHaveLength(0);
+    expect([queue.paused, queue.pausedBy]).toEqual([true, 'user']);
+    const restarted = make();
+    await restarted.recover();
+    expect(restarted.pausedBy).toBe('user');
+    expect(backend.started).toHaveLength(0);
+    await restarted.resume();
+    expect(backend.started).toHaveLength(1);
+    expect(restarted.pausedBy).toBeNull();
+  });
+
+  it('cancels queued and running downloads, keeping finished ones', async () => {
+    const queue = makeQueue();
+    for (const cmid of [1, 2, 3]) await queue.enqueue(input(cmid));
+    await queue.handleChanged(backend.complete(1));
+    expect(await queue.cancelAll()).toBe(2);
+    // 3 started when 1 finished: both running downloads are cancelled in the browser.
+    expect(backend.cancelled).toEqual([2, 3]);
+    expect(await states()).toEqual([
+      [1, 'hecha'],
+      [2, 'omitida'],
+      [3, 'omitida'],
+    ]);
+    // The browser's interrupt for the cancelled download is ignored.
+    await queue.handleChanged(backend.interrupt(2, 'USER_CANCELED'));
+    expect((await tasks.get('7:2:mod_resource/content/f2.pdf'))?.state).toBe('omitida');
+  });
 });

@@ -1,6 +1,7 @@
 import { consoleSink, createLogger, LogRing } from '../shared/logger';
 import { openDatabase } from '../storage/db';
 import { createFilesRepo } from '../storage/files-repo';
+import { createMetaRepo } from '../storage/meta-repo';
 import { loadSettings } from '../storage/settings';
 import { createTasksRepo } from '../storage/tasks-repo';
 import { QUEUE_ALARM, scheduleQueueWake } from './alarms';
@@ -20,6 +21,7 @@ const services: Promise<DownloadServices> = (async () => {
   const db = await openDatabase();
   const tasks = createTasksRepo(db);
   const files = createFilesRepo(db);
+  const meta = createMetaRepo(db);
   const queue = new DownloadQueue({
     tasks,
     files,
@@ -27,9 +29,13 @@ const services: Promise<DownloadServices> = (async () => {
     log: log.child('queue'),
     notify: (event) => void notifyTabs(event),
     scheduleWake: scheduleQueueWake,
+    pauseStore: {
+      get: () => meta.get<boolean>('queuePaused'),
+      set: (paused) => meta.set('queuePaused', paused),
+    },
   });
   await queue.recover();
-  return { tasks, files, backend, queue, settings: loadSettings };
+  return { tasks, files, meta, backend, queue, settings: loadSettings };
 })();
 services.catch((cause: unknown) => {
   log.error(`startup failed: ${String(cause)}`);

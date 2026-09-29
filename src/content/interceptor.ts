@@ -63,6 +63,7 @@ export function buildDownloadRequest(
       etag: file.etag,
       contentType: file.contentType,
     },
+    folderPath: null,
     open,
   };
 }

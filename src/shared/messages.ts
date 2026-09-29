@@ -3,6 +3,7 @@ import type { DiagnosticReport } from '../moodle/diagnostic';
 import type { HypothesisReport } from '../moodle/hypotheses';
 import type { Task } from '../core/queue/task';
 import type { FileRecord } from '../storage/db';
+import type { CourseMeta } from '../storage/meta-repo';
 import type { FileStatus } from './types';
 import { appError, type AppError } from './errors';
 import { err, ok, type Result } from './result';
@@ -32,9 +33,8 @@ const ResolvedFilePayload = v.object({
   contentType: nullableText(200),
 });
 
-const DownloadRequestMessage = v.object({
+const downloadEntries = {
   target: v.literal('background'),
-  type: v.literal('download/request'),
   courseId: positiveInt,
   cmid: positiveInt,
   course: v.object({ fullName: text(300), shortName: nullableText(60) }),
@@ -46,15 +46,39 @@ const DownloadRequestMessage = v.object({
   }),
   activityName: text(300),
   file: ResolvedFilePayload,
+  /** mod_folder: subfolders inside the folder; null for a resource. */
+  folderPath: v.nullable(v.pipe(v.array(text(200)), v.maxLength(20))),
   open: v.boolean(),
+};
+
+const DownloadRequestMessage = v.object({
+  ...downloadEntries,
+  type: v.literal('download/request'),
+});
+/** Same payload, dry run: the plan (spec §3.3). */
+const DownloadPreviewMessage = v.object({
+  ...downloadEntries,
+  type: v.literal('download/preview'),
 });
 
 const BackgroundRequest = v.variant('type', [
   v.object({ target: v.literal('background'), type: v.literal('ping') }),
   DownloadRequestMessage,
+  DownloadPreviewMessage,
   v.object({ target: v.literal('background'), type: v.literal('download/open'), fileId }),
+  v.object({
+    target: v.literal('background'),
+    type: v.literal('files/status'),
+    courseId: positiveInt,
+  }),
+  v.object({
+    target: v.literal('background'),
+    type: v.literal('queue/control'),
+    action: v.picklist(['pause', 'resume', 'cancel']),
+  }),
   v.object({ target: v.literal('background'), type: v.literal('download/show'), fileId }),
   v.object({ target: v.literal('background'), type: v.literal('queue/list') }),
+  v.object({ target: v.literal('background'), type: v.literal('files/get'), fileId }),
   v.object({ target: v.literal('background'), type: v.literal('queue/retry-failed') }),
   v.object({
     target: v.literal('background'),
@@ -114,6 +138,9 @@ export type BackgroundRequest = v.InferOutput<typeof BackgroundRequest>;
 export type OffscreenRequest = v.InferOutput<typeof OffscreenRequest>;
 export type ContentRequest = v.InferOutput<typeof ContentRequest>;
 export type DownloadRequestMessage = v.InferOutput<typeof DownloadRequestMessage>;
+export type DownloadPreviewMessage = v.InferOutput<typeof DownloadPreviewMessage>;
+/** Fields shared by download requests and previews. */
+export type DownloadPayload = Omit<DownloadRequestMessage, 'type'>;
 export type DownloadUpdateMessage = Extract<ContentRequest, { type: 'content/download-update' }>;
 export type RuntimeMessage = v.InferOutput<typeof RuntimeMessage>;
 export type MessageTarget = RuntimeMessage['target'];
@@ -149,12 +176,44 @@ export interface ResponseMap {
   'download/request': DownloadRequestResponse;
   'download/open': { readonly outcome: 'opened' | 'shown' | 'blocked' };
   'download/show': { readonly shown: true };
+  'files/get': {
+    readonly downloadId: number;
+    readonly extension: string;
+    readonly relativePath: string;
+  };
   'queue/list': {
     readonly tasks: readonly Task[];
     readonly files: readonly FileRecord[];
+    readonly courses: readonly CourseMeta[];
+    /** Paused by the user ("Pausar") or by a lost session. */
     readonly paused: boolean;
+    readonly pausedBy: 'user' | 'session' | null;
   };
   'queue/retry-failed': { readonly retried: number };
+  'queue/control': { readonly paused: boolean; readonly cancelled: number };
+  'download/preview': DownloadPreviewResponse;
+  'files/status': { readonly files: readonly FileStatusEntry[] };
+}
+
+export interface DownloadPreviewResponse {
+  readonly fileId: string;
+  readonly status: FileStatus;
+  readonly willDownload: boolean;
+  /** Where it would be saved (existing path for files already in the index). */
+  readonly relativePath: string;
+  readonly size: number | null;
+  /** Bulk filter that left it out, if any. */
+  readonly omitted: 'extension' | 'size' | null;
+}
+
+/** A course file the index knows, for the page badges. */
+export interface FileStatusEntry {
+  readonly fileId: string;
+  readonly cmid: number;
+  readonly relativePath: string;
+  readonly downloadedAt: number;
+  /** null when the browser no longer knows the download. */
+  readonly localExists: boolean | null;
 }
 
 export interface DownloadRequestResponse {
