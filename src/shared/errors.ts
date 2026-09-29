@@ -17,6 +17,7 @@ export const ERROR_CODES = [
   'offscreen_unavailable',
   'storage',
   'unsafe_path',
+  'invalid_template',
 ] as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[number];

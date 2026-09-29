@@ -10,19 +10,76 @@ const page = (fixture: string, url: string) => {
   return result.value;
 };
 
-describe('onetopic, level-2 row after level-1 row', () => {
+describe('onetopic, real site markup (49946)', () => {
+  const url = courseUrl(49946, 2);
+  const p = page('real/onetopic-2level-49946.html', url);
+
+  it('lists level-1 tabs without children and the children of the active group', () => {
+    expect(p.sections.map((s) => [s.number, s.name, s.parent])).toEqual([
+      [0, 'General', null],
+      [1, 'Inicio', 'Contenido'],
+      [2, 'Semana 7', 'Contenido'],
+      [3, 'Semana 8', 'Contenido'],
+      [4, 'Semana 9', 'Contenido'],
+      [5, 'Semana10', 'Contenido'],
+      [6, 'Semana 11', 'Contenido'],
+      [7, 'Semana 12', 'Contenido'],
+      [8, 'Semana 13', 'Contenido'],
+      [9, 'Semana 14', 'Contenido'],
+    ]);
+  });
+
+  it('gives the active tab (no link) the number of the shown section', () => {
+    expect(p.sections.find((s) => s.name === 'Semana 7')).toEqual({
+      number: 2,
+      name: 'Semana 7',
+      parent: 'Contenido',
+      url: 'https://www.udbvirtual.edu.sv/auladigital/course/view.php?id=49946&section=2',
+      available: true,
+      highlighted: false,
+      rendered: true,
+    });
+  });
+
+  it('strips the #tabs-tree-start fragment from tab URLs', () => {
+    expect(p.sections.find((s) => s.number === 8)?.url).toBe(
+      'https://www.udbvirtual.edu.sv/auladigital/course/view.php?id=49946&section=8',
+    );
+  });
+
+  it('finds the number without ?section= through the breadcrumb', () => {
+    const doc = loadFixture('real/onetopic-2level-49946.html', courseUrl(49946));
+    const result = parseCourse(doc, courseUrl(49946));
+    expect(result.ok && result.value.sections.find((s) => s.rendered)?.number).toBe(2);
+  });
+
+  it('parses the shown week', () => {
+    expect(
+      p.activities.map((a) => [a.section.number, a.items.map((i) => [i.cmid, i.name])]),
+    ).toEqual([
+      [
+        2,
+        [
+          [2229872, 'DMD104 Secuencia Didactica Semana 7'],
+          [2229873, 'DMD104 S7 reglas-asociacion-kmeansv2'],
+        ],
+      ],
+    ]);
+  });
+});
+
+describe('onetopic, synthetic two levels', () => {
   const url = courseUrl(101, 14);
   const p = page('layouts/onetopic-2level.html', url);
 
-  it('orders sections: rendered extras, level-1 tabs, then their children', () => {
+  it('keeps page order and groups weeks under their level-1 tab', () => {
     expect(p.sections.slice(0, 4).map((s) => [s.number, s.name, s.parent])).toEqual([
       [0, 'General', null],
       [1, 'Planificación', null],
-      [2, 'Desarrollo', null],
+      [2, 'Inicio', 'Desarrollo'],
       [3, 'Semana 1', 'Desarrollo'],
     ]);
-    // The "Desarrollo" subtab duplicates its parent and is dropped.
-    expect(p.sections.filter((s) => s.number === 2)).toHaveLength(1);
+    expect(p.sections.some((s) => s.name === 'Desarrollo')).toBe(false);
     expect(p.sections.at(-1)).toMatchObject({
       number: 20,
       name: 'Semana 18',
@@ -46,20 +103,20 @@ describe('onetopic, level-2 row after level-1 row', () => {
     expect(week[3]).toMatchObject({ available: true, restricted: true });
   });
 
-  it('parseSection returns the same activities', () => {
+  it('parseSection returns nothing for sections not in this page', () => {
     const doc = loadFixture('layouts/onetopic-2level.html', url);
     const result = parseSection(doc, url, 0);
-    expect(result.ok && result.value.map((a) => a.name)).toEqual(['Avisos']);
+    expect(result.ok && result.value).toEqual([]);
   });
 });
 
-describe('onetopic, level-2 row nested in its parent tab', () => {
+describe('onetopic, dimmed tabs (synthetic, TODO(verify-real-DOM))', () => {
   const p = page('layouts/onetopic-dimmed-tabs.html', courseUrl(102, 15));
 
-  it('attaches nested children and keeps later level-1 tabs', () => {
+  it('keeps later level-1 tabs and drops tabs of other courses', () => {
     expect(p.sections.map((s) => s.name).slice(0, 3)).toEqual([
       'Organización',
-      'Desarrollo',
+      'Inicio',
       'Semana 1',
     ]);
     expect(p.sections.at(-1)).toMatchObject({
@@ -71,9 +128,12 @@ describe('onetopic, level-2 row nested in its parent tab', () => {
   });
 
   it('treats dimmed tabs as unavailable, with no fetch URL', () => {
-    const s13 = p.sections.find((s) => s.name === 'Semana 13');
-    expect(s13).toMatchObject({ number: 16, available: false, url: null });
-    // A tab without a link has no known number.
+    expect(p.sections.find((s) => s.name === 'Semana 13')).toMatchObject({
+      number: 16,
+      available: false,
+      url: null,
+    });
+    // An inactive tab without a link has no known number.
     expect(p.sections.find((s) => s.name === 'Semana 19')).toMatchObject({
       number: null,
       available: false,
@@ -82,6 +142,7 @@ describe('onetopic, level-2 row nested in its parent tab', () => {
 
   it('flags the highlighted tab from its <li> class', () => {
     expect(p.sections.find((s) => s.name === 'Semana 12')).toMatchObject({
+      number: 15,
       highlighted: true,
       rendered: true,
     });
@@ -98,6 +159,33 @@ describe('onetopic, level-2 row nested in its parent tab', () => {
       restricted: true,
       url: null,
     });
+  });
+});
+
+describe('onetopic, level-2 row nested in its parent <li>', () => {
+  it('attaches nested children to that parent', () => {
+    const url = courseUrl(7, 5);
+    const R = 'https://www.udbvirtual.edu.sv/auladigital/course/view.php?id=7&amp;section=';
+    const html = `<body class="format-onetopic course-7"><div class="course-content">
+      <ul class="nav nav-tabs">
+        <li><a class="nav-link" href="${R}1">A</a></li>
+        <li><a class="nav-link" href="${R}2">B</a>
+          <ul class="nav nav-tabs"><li><a class="nav-link" href="${R}4">B1</a></li><li><a class="nav-link active">B2</a></li></ul>
+        </li>
+        <li><a class="nav-link" href="${R}3">C</a></li>
+      </ul>
+      <ul class="topics"><li id="section-5" class="section main"><h3 class="sectionname">B2</h3></li></ul>
+    </div></body>`;
+    const doc = new JSDOM(html, { url }).window.document;
+    const result = parseCourse(doc, url);
+    expect(
+      result.ok && result.value.sections.map((s) => [s.number, s.name, s.parent, s.rendered]),
+    ).toEqual([
+      [1, 'A', null, false],
+      [4, 'B1', 'B', false],
+      [5, 'B2', 'B', true],
+      [3, 'C', null, false],
+    ]);
   });
 });
 
