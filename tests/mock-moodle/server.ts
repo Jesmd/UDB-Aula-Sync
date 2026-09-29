@@ -86,7 +86,7 @@ const int = (value: string | null) =>
 
 /**
  * /__test/state, /__test/reset, /__test/session?loggedIn=0|1,
- * /__test/resource?cmid=&revision=&size=&lastModified=&throttleMs=
+ * /__test/resource?cmid=&revision=&size=&lastModified=&throttleMs=&mode=
  */
 function handleControl(state: MockState, url: URL, res: ServerResponse): void {
   const json = (body: unknown) => {
@@ -116,6 +116,9 @@ function handleControl(state: MockState, url: URL, res: ServerResponse): void {
       if (size !== undefined) seed.size = size;
       if (throttleMs !== undefined) seed.throttleMs = throttleMs;
       if (lastModified !== null) seed.lastModified = lastModified;
+      const mode = url.searchParams.get('mode');
+      if (mode === 'redirect' || mode === 'embed' || mode === 'workaround' || mode === 'readonly')
+        seed.mode = mode;
       json(seed);
       return;
     }

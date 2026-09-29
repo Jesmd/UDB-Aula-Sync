@@ -28,6 +28,7 @@ const request = {
     etag: null,
     contentType: null,
   },
+  folderPath: null,
   open: true,
 } satisfies DownloadRequestMessage;
 
@@ -86,15 +87,19 @@ describe('DownloadsUi', () => {
     expect(toasts()).toEqual(['dlStarting|Guía']);
     ui.update(update({ state: 'hecha' }));
     expect(toasts()).toEqual(['dlSaved|UDB/C/S/Guía.pdf']);
-    expect(buttons()).toEqual(['dlOpen', 'dlShow']);
-    root.layer.querySelector<HTMLButtonElement>('.udbsync-toast__action')?.click();
-    expect(send).toHaveBeenLastCalledWith({
-      target: 'background',
-      type: 'download/open',
-      fileId: FILE_ID,
-    });
+    // The buttons are the framed extension page, not page buttons (ADR-016).
+    expect(buttons()).toEqual([]);
+    const frame = () =>
+      root.layer.querySelectorAll<HTMLIFrameElement>('iframe.udbsync-toast__frame');
+    expect(frame()).toHaveLength(1);
+    expect(frame()[0]?.src).toBe(
+      `chrome-extension://test-extension-id/src/open/index.html?id=${encodeURIComponent(FILE_ID)}`,
+    );
+    const first = frame()[0];
     ui.update(update({ event: 'opened', outcome: 'opened' }));
     expect(toasts()).toEqual(['dlOpened|UDB/C/S/Guía.pdf']);
+    // Same frame element, not reloaded.
+    expect(frame()[0]).toBe(first);
   });
 
   it('reports up-to-date files, skipped updates, failures, retries and errors', async () => {

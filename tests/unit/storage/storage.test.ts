@@ -4,7 +4,12 @@ import { createTask } from '../../../src/core/queue/task';
 import { openDatabase, type FileRecord } from '../../../src/storage/db';
 import { createFilesRepo } from '../../../src/storage/files-repo';
 import { DB_VERSION, MIGRATIONS } from '../../../src/storage/migrations';
-import { DEFAULT_SETTINGS, normalizeSettings } from '../../../src/storage/settings-schema';
+import {
+  courseSettings,
+  DEFAULT_SETTINGS,
+  EMPTY_OVERRIDE,
+  normalizeSettings,
+} from '../../../src/storage/settings-schema';
 import { createTasksRepo } from '../../../src/storage/tasks-repo';
 
 beforeEach(() => {
@@ -118,5 +123,66 @@ describe('settings', () => {
     expect(normalizeSettings({ paths: 'x', updatePolicy: 'borrar_todo' })).toEqual(
       DEFAULT_SETTINGS,
     );
+  });
+
+  it('migrates v1 data to v2 with defaults for the new fields', () => {
+    const v1 = { ...DEFAULT_SETTINGS, version: 1, updatePolicy: 'omitir' } as Record<
+      string,
+      unknown
+    >;
+    const dropped = new Set([
+      'hoverDetails',
+      'showStatusBadges',
+      'filters',
+      'syncIntervalHours',
+      'courses',
+    ]);
+    for (const key of dropped) Reflect.deleteProperty(v1, key);
+    expect(normalizeSettings(v1)).toEqual({ ...DEFAULT_SETTINGS, updatePolicy: 'omitir' });
+  });
+
+  it('validates filters and per-course overrides field by field', () => {
+    const result = normalizeSettings({
+      ...DEFAULT_SETTINGS,
+      filters: { excludedExtensions: ['.ZIP', 'pkt'], maxSizeMb: 50 },
+      courses: {
+        '101': {
+          template: '{base}/{curso}/{archivo}',
+          skipSections: ['Recursos Bibliográficos'],
+          excludedExtensions: null,
+          maxSizeMb: 0,
+          autoDownload: true,
+        },
+        abc: { template: null },
+        '102': 'broken',
+      },
+    });
+    expect(result.filters).toEqual({ excludedExtensions: ['zip', 'pkt'], maxSizeMb: 50 });
+    expect(Object.keys(result.courses)).toEqual(['101', '102']);
+    expect(result.courses['101']).toEqual({
+      template: '{base}/{curso}/{archivo}',
+      skipSections: ['Recursos Bibliográficos'],
+      excludedExtensions: null,
+      maxSizeMb: null,
+      autoDownload: true,
+    });
+    expect(result.courses['102']).toEqual(EMPTY_OVERRIDE);
+  });
+
+  it('applies course overrides over the global settings', () => {
+    const settings = normalizeSettings({
+      ...DEFAULT_SETTINGS,
+      filters: { excludedExtensions: ['zip'], maxSizeMb: 10 },
+      courses: { '7': { ...EMPTY_OVERRIDE, template: '{curso}/{archivo}', maxSizeMb: 99 } },
+    });
+    expect(courseSettings(settings, 7)).toMatchObject({
+      paths: { template: '{curso}/{archivo}', base: 'UDB' },
+      filters: { excludedExtensions: ['zip'], maxSizeMb: 99 },
+    });
+    expect(courseSettings(settings, 8)).toMatchObject({
+      paths: DEFAULT_SETTINGS.paths,
+      filters: settings.filters,
+      override: EMPTY_OVERRIDE,
+    });
   });
 });
