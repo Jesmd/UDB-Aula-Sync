@@ -17,6 +17,8 @@ const MOCK = 'https://127.0.0.1:8443';
 export interface MockControl {
   reset(): Promise<void>;
   requests(): Promise<string[]>;
+  /** Most requests served at once since the reset (course pages, files, probes). */
+  maxInFlight(): Promise<number>;
   setSession(loggedIn: boolean): Promise<void>;
   setResource(cmid: number, changes: Record<string, string | number>): Promise<void>;
 }
@@ -107,6 +109,8 @@ export const test = base.extend<Fixtures>({
           await call('/__test/reset');
         },
         requests: async () => ((await call('/__test/state')) as { requests: string[] }).requests,
+        maxInFlight: async () =>
+          ((await call('/__test/state')) as { maxInFlight: number }).maxInFlight,
         setSession: async (loggedIn) => {
           await call(`/__test/session?loggedIn=${loggedIn ? 1 : 0}`);
         },

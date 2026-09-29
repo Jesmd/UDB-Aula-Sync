@@ -6,6 +6,8 @@ import { parseMessage, type BackgroundRequest, type ResponseFor } from '../share
 import { err, ok, type Result } from '../shared/result';
 import type { TasksRepo } from '../storage/tasks-repo';
 import type { MetaRepo } from '../storage/meta-repo';
+import { isLoginUrl } from '../moodle/session';
+import type { CourseSync } from './course-sync';
 import {
   courseFileStatuses,
   handleDownloadRequest,
@@ -56,11 +58,15 @@ const ALLOWED: Record<BackgroundRequest['type'], readonly SenderKind[]> = {
   'download/preview': ['udb-content'],
   'files/status': ['udb-content'],
   'queue/control': ['extension-page', 'udb-content'],
+  'snapshot/save': ['udb-content'],
+  'sync/run': ['extension-page'],
+  'novelties/clear': ['extension-page'],
 };
 
 export interface DownloadServices extends RequestDeps {
   readonly tasks: TasksRepo;
   readonly meta: MetaRepo;
+  readonly sync: CourseSync;
 }
 
 export interface RouterDeps {
@@ -75,7 +81,9 @@ async function handle(
   deps: RouterDeps,
   tabId: number | null,
 ): Promise<ResponseFor<BackgroundRequest>> {
-  const needsDownloads = /^(download|queue|files)\//.test(message.type);
+  const needsDownloads =
+    /^(download|queue|files|snapshot|sync|novelties)\//.test(message.type) ||
+    message.type === 'content/hello';
   const downloads =
     needsDownloads && deps.downloads !== undefined ? await deps.downloads() : undefined;
   switch (message.type) {
@@ -96,7 +104,13 @@ async function handle(
       return previewDownload(message, downloads);
     case 'files/status':
       if (downloads === undefined) return err(appError('unsupported_message', message.type));
-      return ok({ files: await courseFileStatuses(message.courseId, downloads) });
+      return ok({
+        files: await courseFileStatuses(message.courseId, downloads),
+        novelties:
+          (await downloads.sync.noveltiesByCourse())[String(message.courseId)]?.flatMap((n) =>
+            n.kind === 'item' ? [n.cmid] : [],
+          ) ?? [],
+      });
     case 'queue/control': {
       if (downloads === undefined) return err(appError('unsupported_message', message.type));
       let cancelled = 0;
@@ -126,7 +140,20 @@ async function handle(
         courses: await downloads.meta.courses(),
         paused: downloads.queue.paused,
         pausedBy: downloads.queue.pausedBy,
+        novelties: await downloads.sync.noveltiesByCourse(),
+        sync: await downloads.sync.status(),
       });
+    case 'snapshot/save':
+      if (downloads === undefined) return err(appError('unsupported_message', message.type));
+      await downloads.sync.saveSnapshot(message.snapshot);
+      return ok({ novelties: 0 });
+    case 'sync/run':
+      if (downloads === undefined) return err(appError('unsupported_message', message.type));
+      return ok(await downloads.sync.run('manual'));
+    case 'novelties/clear':
+      if (downloads === undefined) return err(appError('unsupported_message', message.type));
+      await downloads.sync.clear(message.courseId);
+      return ok({ cleared: true } as const);
     case 'queue/retry-failed':
       if (downloads === undefined) return err(appError('unsupported_message', message.type));
       return ok({ retried: await downloads.queue.retryFailed() });
@@ -134,6 +161,8 @@ async function handle(
       return ok({ version: extensionVersion() });
     case 'content/hello':
       deps.log.info(`content script ready on ${new URL(message.url).pathname}`);
+      // Any Aula Digital page other than the login page means the session works again.
+      if (downloads !== undefined && !isLoginUrl(message.url)) await downloads.sync.sessionAlive();
       return ok({ accepted: true } as const);
     case 'logs/export':
       return ok({ text: exportLogs(deps.ring.snapshot()) });

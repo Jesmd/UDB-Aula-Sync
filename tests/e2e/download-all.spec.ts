@@ -32,6 +32,7 @@ async function openPanel(page: Page) {
 
 test('"Descargar todo" downloads the course into its folders; "Solo nuevos" then finds nothing', async ({
   context,
+  mock,
   queue,
   downloadsDir,
 }) => {
@@ -74,6 +75,9 @@ test('"Descargar todo" downloads the course into its folders; "Solo nuevos" then
     .analyze();
   expect(axe.violations.map((v) => v.id)).toEqual([]);
   expect(axe.passes.length).toBeGreaterThan(0);
+
+  // Never more than 2 requests at once (spec §2).
+  expect(await mock.maxInFlight()).toBeLessThanOrEqual(2);
 
   await panel.getByRole('button', { name: 'Solo nuevos' }).click();
   await expect(panel).toContainText('No hay nada que descargar: todo está al día.');

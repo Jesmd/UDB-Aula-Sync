@@ -7,6 +7,16 @@ export interface MockState {
   readonly requests: string[];
   readonly resources: Map<number, SeedResource>;
   readonly folders: Map<number, SeedFolder>;
+  /** Changes to a course page since the seeds: added activities, restricted sections opened. */
+  readonly pageEdits: Map<number, PageEdits>;
+  /** Requests being served now, and the most at once since the last reset (spec §2: 2). */
+  inFlight: number;
+  maxInFlight: number;
+}
+
+export interface PageEdits {
+  readonly activities: { readonly section: number; readonly cmid: number; readonly name: string }[];
+  readonly revealed: number[];
 }
 
 export interface Route {

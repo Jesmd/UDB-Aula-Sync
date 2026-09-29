@@ -69,6 +69,10 @@ button:disabled {
   color: var(--success);
 }
 
+.status-new {
+  color: var(--accent);
+}
+
 .status-error {
   color: var(--error);
 }
