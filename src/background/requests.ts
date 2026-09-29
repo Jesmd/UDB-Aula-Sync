@@ -1,3 +1,5 @@
+import { canAdopt, existsInFolder } from '../fs-access/adopt-existing';
+import type { FolderListing } from '../fs-access/scan-folder';
 import { parsePluginfileUrl, type PluginfileRef } from '../core/http/pluginfile-url';
 import {
   buildPath,
@@ -36,6 +38,8 @@ export interface RequestDeps {
   /** Download files only from the Moodle this build targets. */
   readonly moodleRoot?: string;
   readonly now?: () => number;
+  /** Optional folder verifier (M6): local presence and adoption of existing files. */
+  readonly folder?: { listing(): Promise<FolderListing | null> };
 }
 
 /** Relative path for a new file; adds " (cmid)" when another file already owns the path. */
@@ -70,6 +74,8 @@ interface Assessment {
   readonly localExists: boolean | null;
   readonly decision: Decision;
   readonly settings: Settings;
+  /** "ya_existe": the file already sits at this path; it is adopted, not downloaded. */
+  readonly adoptedPath: string | null;
 }
 
 /** Compares the file with the index and the local copy under the user's update policy. */
@@ -85,9 +91,17 @@ async function assess(
   const id = taskId(message.courseId, message.cmid, ref.fileKey);
   const fingerprint = fingerprintOf({ ...message.file, ref });
   const existing = await deps.files.get(id);
+  const listing = (await deps.folder?.listing()) ?? null;
+  const base = courseSettings(settings, message.courseId).paths.base;
   const local = existing?.downloadId == null ? null : await deps.backend.get(existing.downloadId);
-  const localExists = existing === undefined ? null : local === null ? null : local.exists;
-  const decision = reconcile(
+  // The folder, when readable, is the better witness; the browser's record may be stale.
+  const inFolder =
+    existing === undefined || listing === null
+      ? null
+      : existsInFolder(listing, existing.relativePath, base, existing.downloadedAt);
+  const localExists =
+    existing === undefined ? null : (inFolder ?? (local === null ? null : local.exists));
+  let decision = reconcile(
     existing === undefined
       ? null
       : { fingerprint: existing.fingerprint, versions: existing.versions },
@@ -95,7 +109,20 @@ async function assess(
     localExists,
     settings.updatePolicy,
   );
-  return ok({ id, ref, fingerprint, existing, localExists, decision, settings });
+  let adoptedPath: string | null = null;
+  if (existing === undefined && listing !== null && decision.status === 'nuevo') {
+    const path = await freshPath(
+      message,
+      courseSettings(settings, message.courseId).paths,
+      deps.files,
+      id,
+    );
+    if (path.ok && canAdopt(listing, path.value.relativePath, base, message.file.size)) {
+      adoptedPath = path.value.relativePath;
+      decision = { status: 'ya_existe', action: 'skip' };
+    }
+  }
+  return ok({ id, ref, fingerprint, existing, localExists, decision, settings, adoptedPath });
 }
 
 async function targetPath(
@@ -103,7 +130,7 @@ async function targetPath(
   a: Assessment,
   files: FilesRepo,
 ): Promise<Result<string, AppError>> {
-  if (a.decision.action === 'skip') return ok(a.existing?.relativePath ?? '');
+  if (a.decision.action === 'skip') return ok(a.adoptedPath ?? a.existing?.relativePath ?? '');
   if (a.existing !== undefined && a.decision.versionSuffix === null) {
     // Same file again (lost locally or overwritten): keep its place.
     return ok(a.existing.relativePath);
@@ -170,6 +197,30 @@ export async function handleDownloadRequest(
   const a = assessed.value;
   await rememberCourse(message, deps);
 
+  if (a.adoptedPath !== null) {
+    // Adopt the copy already on disk: index it without downloading (spec §5 b).
+    await deps.files.put({
+      id: a.id,
+      courseId: message.courseId,
+      cmid: message.cmid,
+      fileKey: a.ref.fileKey,
+      fingerprint: a.fingerprint,
+      url: message.file.url,
+      relativePath: a.adoptedPath,
+      localPath: null,
+      downloadId: null,
+      versions: 1,
+      downloadedAt: (deps.now ?? Date.now)(),
+    });
+    return ok({
+      status: 'ya_existe',
+      action: 'skipped',
+      fileId: a.id,
+      relativePath: a.adoptedPath,
+      outcome: null,
+    });
+  }
+
   if (a.decision.action === 'skip') {
     const openId =
       message.open && a.localExists !== false ? (a.existing?.downloadId ?? null) : null;
@@ -222,18 +273,28 @@ export async function handleDownloadRequest(
 /** Index state of a course's files for the page badges; local presence checked with the browser. */
 export async function courseFileStatuses(
   courseId: number,
-  deps: Pick<RequestDeps, 'files' | 'backend'>,
+  deps: Pick<RequestDeps, 'files' | 'backend' | 'folder'> & Partial<Pick<RequestDeps, 'settings'>>,
 ): Promise<FileStatusEntry[]> {
   const records = await deps.files.listByCourse(courseId);
+  const listing = (await deps.folder?.listing()) ?? null;
+  const base =
+    listing === null || deps.settings === undefined
+      ? null
+      : courseSettings(await deps.settings(), courseId).paths.base;
   return Promise.all(
     records.map(async (r) => {
-      const local = r.downloadId === null ? null : await deps.backend.get(r.downloadId);
+      const inFolder =
+        listing === null || base === null
+          ? null
+          : existsInFolder(listing, r.relativePath, base, r.downloadedAt);
+      const local =
+        inFolder !== null || r.downloadId === null ? null : await deps.backend.get(r.downloadId);
       return {
         fileId: r.id,
         cmid: r.cmid,
         relativePath: r.relativePath,
         downloadedAt: r.downloadedAt,
-        localExists: local === null ? null : local.exists,
+        localExists: inFolder ?? (local === null ? null : local.exists),
       };
     }),
   );
