@@ -1,8 +1,8 @@
 # Estructuras de curso
 
-Observadas en capturas de 3 cursos. **Nada de esto está verificado contra el DOM real**
-(TODO(verify-real-DOM)). El Diagnóstico de M1 lo confirmará; hasta entonces las fixtures son sintéticas
-y siguen el marcado de Moodle 3.10 (renderers del núcleo y `format_onetopic`).
+Verificado con informes de Diagnóstico reales (fixtures en `tests/fixtures/moodle/real/`):
+onetopic de dos niveles (curso 49946) y temas (curso 50454). **Sin verificar** (TODO(verify-real-DOM)):
+pestañas atenuadas, secciones o actividades restringidas/ocultas, formato semanas.
 
 ## Detección (`src/moodle/detect-layout.ts`)
 
@@ -16,15 +16,23 @@ La razón elegida se guarda en `detection.evidence` y aparece en el Diagnóstico
 
 - Nivel 1: "Planificación | Desarrollo" u "Organización | Desarrollo | Recursos Bibliográficos".
 - Nivel 2 bajo "Desarrollo": "Semana 1 … Semana 18/19". Solo se renderiza la pestaña seleccionada.
-- Se aceptan dos marcados para el nivel 2 (ambos con fixture):
-  - fila `ul.nav-tabs` aparte, después de la del nivel 1 (pertenece a la pestaña activa);
-  - fila anidada dentro del `<li>` de su pestaña padre.
-- La subpestaña que repite al padre (mismo número de sección) se descarta.
+- Marcado real: `.single-section.onetopic > ul.nav-tabs` (nivel 1) y
+  `.content-section > .onetopic-subtabs_body > ul.nav-tabs` (nivel 2), seguido de `ul.topics` con la
+  sección mostrada. Se acepta también un nivel 2 anidado dentro del `<li>` padre (prueba en línea).
+- Cada pestaña: `a.nav-link[href][title] > innertab.tab_content.tab_level_N > span.sectionname`.
+- **La pestaña activa no tiene `href`**: su número sale de `?section=`, de la miga `aria-current` o de la
+  única sección renderizada.
+- **Nivel 1 con hijos = grupo**: no se lista; su contenido es la primera subpestaña (`tab_initial`,
+  p. ej. "Inicio"), que lleva el grupo como padre. Solo se ven los hijos del grupo activo; los demás
+  grupos aparecen como una sección hasta que se abran (M5).
+- Se quita el sufijo `#tabs-tree-start` de las URL.
 - Pestañas de otro curso u otra página se ignoran.
 - **Atenuada** (`dimmed`, `disabled`, `dimmed_text`, `aria-disabled` o sin enlace) ⇒ `available: false`,
   sin URL. Sin enlace ⇒ número de sección desconocido (`number: null`).
-- **Destacada** (★): clase `marker`, `current` o `highlighted` en el enlace o su `<li>`.
-- Secciones renderizadas sin pestaña (sección 0 sobre las pestañas) se listan primero.
+- **Destacada** (★): clase `marker` (real: en `<innertab>`), `current` o `highlighted` en el enlace, su
+  `<li>` o sus descendientes.
+- Secciones renderizadas sin pestaña se listan primero (no ocurre en el sitio real: "General" es una
+  pestaña).
 - Ruta: `{base}/{curso}/{padre}/{sección}/{archivo}`.
 
 ## Estructura B: página única (`topics`, `weeks`)
