@@ -16,7 +16,9 @@ function courseId(doc: Document, url: string): number | null {
 function courseInfo(doc: Document, url: string, id: number): CourseInfo {
   const shortLink = queryAll(doc, SELECTORS.breadcrumbCourseLink).find((a) => {
     const href = absoluteUrl(a.getAttribute('href'), url);
-    return href !== null && intParam(href, 'id') === id && intParam(href, 'section') === null;
+    // Real site links the course crumb to section=0 (verified, 49946).
+    const section = href === null ? null : intParam(href, 'section');
+    return href !== null && intParam(href, 'id') === id && (section === null || section === 0);
   });
   const shortName = shortLink === undefined ? null : visibleText(shortLink) || null;
   const title = queryFirst(doc, SELECTORS.pageTitle);
