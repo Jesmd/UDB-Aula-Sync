@@ -41,8 +41,9 @@
   },
   "scripts": {
     "dev": "vite build --watch",
-    "build": "vite build && pnpm check:manifest",
+    "build": "vite build && pnpm check:manifest && pnpm check:budget",
     "check:manifest": "tsx scripts/check-manifest.ts",
+    "check:budget": "tsx scripts/check-budget.ts",
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
