@@ -100,6 +100,10 @@ describe('backup', () => {
       });
       expect(!result.ok && result.error.code).toBe('invalid_backup');
     }
+    const foreign = bad((b) => {
+      for (const f of b.files as { url: string }[]) f.url = 'https://evil.test/pluginfile.php/1/x';
+    });
+    expect(foreign.ok).toBe(false);
     // Broken settings fall back to defaults field by field, like stored ones.
     const loose = bad(
       (b) => (b.settings = { updatePolicy: 'borrar_todo', openAfterDownload: false }),

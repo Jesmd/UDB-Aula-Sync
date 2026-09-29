@@ -37,6 +37,12 @@ test('export writes a backup in UDB/_respaldo; import restores settings and inde
   // Nothing from the session or the page ends up in the file.
   expect(JSON.stringify(backup)).not.toMatch(/sesskey|MoodleSession|<html/i);
 
+  // Nor in anything else the extension keeps (spec §2: no cookies, sesskey or page HTML).
+  const local = await options.evaluate(async () =>
+    JSON.stringify(await chrome.storage.local.get()),
+  );
+  expect(local).not.toMatch(/sesskey=\w|MoodleSession|<html/i);
+
   // Restore an edited copy.
   backup.settings.updatePolicy = 'omitir';
   const edited = join(downloadsDir, 'edited.json');
