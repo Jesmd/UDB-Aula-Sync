@@ -11,6 +11,90 @@
   "toastClose": {
     "message": "Close notice"
   },
+  "dlStarting": {
+    "message": "Downloading “$NAME$”…",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlQueued": {
+    "message": "“$NAME$” queued for download.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlSaved": {
+    "message": "Saved to $PATH$",
+    "placeholders": {
+      "path": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlOpened": {
+    "message": "Opened: $PATH$",
+    "placeholders": {
+      "path": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlUpToDate": {
+    "message": "“$NAME$” is already downloaded and up to date.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlUpdateSkipped": {
+    "message": "There is a new version of “$NAME$”. Your setting is not to update.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlFailed": {
+    "message": "Could not download “$NAME$”: $ERROR$",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
+  },
+  "dlRetrying": {
+    "message": "Temporary error with “$NAME$”; it will be retried.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlReadOnly": {
+    "message": "“$NAME$” is read-only: there is no downloadable file.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "dlSaveDialog": {
+    "message": "The download does not start. If the browser asks where to save each file, turn off “Ask where to save” in the download settings and confirm your Downloads folder."
+  },
+  "dlOpen": {
+    "message": "Open"
+  },
+  "dlShow": {
+    "message": "Show in folder"
+  },
   "popupTitle": {
     "message": "UDB Aula Sync"
   },
@@ -157,6 +241,21 @@
   },
   "error_download_interrupted": {
     "message": "The download was interrupted."
+  },
+  "error_disk_full": {
+    "message": "There is no disk space for the download."
+  },
+  "error_file_rejected": {
+    "message": "The browser or the system rejected the file (blocked, invalid name or no permission)."
+  },
+  "error_cancelled": {
+    "message": "The download was cancelled."
+  },
+  "error_verification_failed": {
+    "message": "The downloaded file does not match the expected one. It will be retried."
+  },
+  "error_invalid_transition": {
+    "message": "Invalid internal queue state."
   },
   "error_open_blocked": {
     "message": "The browser did not allow opening the file."
