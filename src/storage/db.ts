@@ -31,6 +31,11 @@ export interface UdbSyncDb extends DBSchema {
   tasks: { key: string; value: Task; indexes: { byState: string } };
   snapshots: { key: number; value: CourseSnapshot };
   meta: { key: string; value: MetaRecord };
+  /**
+   * File System Access handles (M6), apart from `meta`: the worker reads `meta` in bulk and
+   * may not be able to deserialize a handle. Only pages and the offscreen document read it.
+   */
+  handles: { key: string; value: unknown };
 }
 
 export const DB_NAME = 'udbsync';
