@@ -40,7 +40,9 @@ function Options() {
 
   // Arrow keys move between tabs (WAI-ARIA tabs pattern).
   const onKeyDown = (event: KeyboardEvent) => {
-    const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+    const forward = event.key === 'ArrowRight' || event.key === 'ArrowDown';
+    const back = event.key === 'ArrowLeft' || event.key === 'ArrowUp';
+    const step = forward ? 1 : back ? -1 : 0;
     if (step === 0) return;
     event.preventDefault();
     const next = TABS[(index + step + TABS.length) % TABS.length] ?? TABS[0];
