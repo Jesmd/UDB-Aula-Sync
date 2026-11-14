@@ -16,7 +16,7 @@
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green">
 </p>
 
-> Versión 1.0.0. Es un proyecto personal de un estudiante, no una herramienta oficial de la UDB, y no
+> Versión 1.1.0. Es un proyecto personal de un estudiante, no una herramienta oficial de la UDB, y no
 > está en la Chrome Web Store.
 
 ## Qué hace
@@ -54,7 +54,7 @@ toca. Más detalles en [privacidad](docs/PRIVACY.md) y [seguridad](docs/SECURITY
 
 La extensión no está en la tienda de Chrome, así que se instala a mano. Son dos minutos.
 
-1. Descarga `udb-aula-sync-1.0.0.zip` desde la página de
+1. Descarga `udb-aula-sync-1.1.0.zip` desde la página de
    [versiones](https://github.com/Jesmd/UDB-Aula-Sync/releases/latest).
 2. Descomprímelo en una carpeta que no vayas a borrar, por ejemplo `Documentos\UDB-Aula-Sync`. El
    navegador carga la extensión desde ahí cada vez que se abre.

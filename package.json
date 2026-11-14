@@ -1,6 +1,6 @@
 {
   "name": "udb-aula-sync",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Extensión MV3 para descargar y organizar el material del Aula Digital UDB (Moodle).",

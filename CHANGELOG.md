@@ -4,8 +4,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+## [1.1.0] - 2026-11-14
+
 ### Cambiado
 
+- Rediseño de la interfaz: ventana emergente con tarjetas y encabezado, menú lateral en las opciones,
+  interruptores en lugar de casillas, notificaciones con nuevo estilo y panel, tarjetas y etiquetas en las
+  páginas de los cursos. Las pestañas de opciones se mueven con las flechas arriba y abajo.
 - README reescrito para estudiantes: qué hace, instalación paso a paso, actualización y preguntas
   frecuentes. Logo nuevo en pixel art (`docs/logo.svg`).
 - Workflow "Release": publica el zip en la página de versiones al subir un tag `v*` o a mano.
