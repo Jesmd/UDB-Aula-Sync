@@ -13,6 +13,8 @@ const ALLOWED_PERMISSIONS = new Set([
   'notifications',
   'offscreen',
   'idle',
+  'contextMenus',
+  'activeTab',
 ]);
 const ALLOWED_HOSTS = new Set(['https://www.udbvirtual.edu.sv/auladigital/*']);
 /** crxjs exposes content-script chunks to the page origin; nothing wider is allowed. */
@@ -64,7 +66,7 @@ export function checkManifest(manifest: Manifest): string[] {
   for (const directive of REQUIRED_CSP) {
     if (!csp.includes(directive)) problems.push(`CSP missing "${directive}"`);
   }
-  if (/unsafe-eval|unsafe-inline|https?:/.test(csp))
+  if (/(?<!wasm-)unsafe-eval|unsafe-inline|https?:/.test(csp))
     problems.push('CSP allows remote or inline code');
   return problems;
 }

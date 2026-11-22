@@ -10,6 +10,9 @@ export const PERMISSIONS = [
   'notifications',
   'offscreen',
   'idle',
+  // OCR (opt-in): the context menu entry, and a screenshot of the tab the user is looking at.
+  'contextMenus',
+  'activeTab',
 ] as const;
 
 export const HOST_PERMISSIONS = ['https://www.udbvirtual.edu.sv/auladigital/*'] as const;
@@ -52,7 +55,13 @@ export default defineManifest({
   permissions: [...PERMISSIONS],
   host_permissions: [...HOST_PERMISSIONS],
   content_security_policy: {
-    extension_pages: "script-src 'self'; object-src 'self'; base-uri 'none'",
+    extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; base-uri 'none'",
+  },
+  commands: {
+    'copiar-texto-imagen': {
+      suggested_key: { default: 'Alt+Shift+O' },
+      description: '__MSG_ocrMenu__',
+    },
   },
   // "Abrir"/"Mostrar en carpeta" live in this extension page, framed inside the page's toast:
   // a click there is a user gesture in the extension, which chrome.downloads.open requires

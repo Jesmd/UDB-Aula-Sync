@@ -21,6 +21,7 @@ import {
   showNoveltyNotification,
   showSessionNotification,
 } from './notifications';
+import './ocr';
 import { sendToOffscreen } from './offscreen-client';
 import { handleDownloadRequest } from './requests';
 import { createRouter, type DownloadServices } from './router';

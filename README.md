@@ -44,6 +44,8 @@ Lo que puedes hacer con ella:
 - Enterarte de lo que el docente sube. Revisa tus cursos cada 6 horas, pone un número en el icono y
   te avisa con una notificación. Si quieres, también lo descarga solo.
 - Ver en cada archivo si es nuevo, si ya lo tienes o si cambió desde la última vez.
+- Copiar el texto de una imagen o de un PDF escaneado (opcional, se activa en Opciones > General):
+  pulsa `Alt+Shift+O`, arrastra sobre el texto y queda en el portapapeles. Se procesa en tu equipo.
 
 Funciona con la sesión que ya tienes abierta en el navegador. No guarda tu contraseña ni tus cookies,
 no envía nada a ningún servidor y solo entra en `www.udbvirtual.edu.sv/auladigital`. Lo que el Aula

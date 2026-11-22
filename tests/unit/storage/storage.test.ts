@@ -150,6 +150,12 @@ describe('settings', () => {
     );
   });
 
+  it('keeps OCR off unless it is explicitly turned on', () => {
+    expect(DEFAULT_SETTINGS.ocrEnabled).toBe(false);
+    expect(normalizeSettings({ ...DEFAULT_SETTINGS, ocrEnabled: true }).ocrEnabled).toBe(true);
+    expect(normalizeSettings({ ...DEFAULT_SETTINGS, ocrEnabled: 'yes' }).ocrEnabled).toBe(false);
+  });
+
   it('migrates v1 data to v2 with defaults for the new fields', () => {
     const v1 = { ...DEFAULT_SETTINGS, version: 1, updatePolicy: 'omitir' } as Record<
       string,

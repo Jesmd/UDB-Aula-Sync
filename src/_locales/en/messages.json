@@ -1030,5 +1030,50 @@
         "content": "$3"
       }
     }
+  },
+  "optOcr": {
+    "message": "Copy text from images (OCR)"
+  },
+  "optOcrHint": {
+    "message": "Press Alt+Shift+O or right-click → “Copy text from an image”, drag over the area and the text is copied to the clipboard. Also works on PDFs opened in Chrome. Everything runs on your computer."
+  },
+  "ocrMenu": {
+    "message": "Copy text from an image"
+  },
+  "ocrTitle": {
+    "message": "Copy text from an image"
+  },
+  "ocrTip": {
+    "message": "Drag over the text you want to copy · Esc to exit"
+  },
+  "ocrWorking": {
+    "message": "Recognizing text…"
+  },
+  "ocrCopied": {
+    "message": "Text copied ✓"
+  },
+  "ocrCopyFailed": {
+    "message": "Check the text and press Copy"
+  },
+  "ocrEmpty": {
+    "message": "No text found in that area"
+  },
+  "ocrError": {
+    "message": "Could not recognize the text"
+  },
+  "ocrCopy": {
+    "message": "Copy"
+  },
+  "ocrAgain": {
+    "message": "Another area"
+  },
+  "ocrClose": {
+    "message": "Close"
+  },
+  "ocrNoShot": {
+    "message": "No capture. Use the shortcut or the context menu from the page."
+  },
+  "ocrCaptureFailed": {
+    "message": "This page cannot be captured (for example, internal Chrome pages or the Chrome Web Store)."
   }
 }

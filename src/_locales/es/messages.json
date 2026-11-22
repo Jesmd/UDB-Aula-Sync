@@ -1030,5 +1030,50 @@
         "content": "$3"
       }
     }
+  },
+  "optOcr": {
+    "message": "Copiar texto de imágenes (OCR)"
+  },
+  "optOcrHint": {
+    "message": "Pulsa Alt+Shift+O o usa clic derecho → «Copiar texto de una imagen», arrastra sobre la zona y el texto se copia al portapapeles. Funciona también en PDF abiertos en Chrome. Todo se procesa en tu equipo."
+  },
+  "ocrMenu": {
+    "message": "Copiar texto de una imagen"
+  },
+  "ocrTitle": {
+    "message": "Copiar texto de una imagen"
+  },
+  "ocrTip": {
+    "message": "Arrastra sobre el texto que quieres copiar · Esc para salir"
+  },
+  "ocrWorking": {
+    "message": "Reconociendo texto…"
+  },
+  "ocrCopied": {
+    "message": "Texto copiado ✓"
+  },
+  "ocrCopyFailed": {
+    "message": "Revisa el texto y pulsa Copiar"
+  },
+  "ocrEmpty": {
+    "message": "No se encontró texto en esa zona"
+  },
+  "ocrError": {
+    "message": "No se pudo reconocer el texto"
+  },
+  "ocrCopy": {
+    "message": "Copiar"
+  },
+  "ocrAgain": {
+    "message": "Otra zona"
+  },
+  "ocrClose": {
+    "message": "Cerrar"
+  },
+  "ocrNoShot": {
+    "message": "No hay captura. Usa el atajo o el menú contextual desde la página."
+  },
+  "ocrCaptureFailed": {
+    "message": "Esta página no se puede capturar (por ejemplo, páginas internas de Chrome o la Chrome Web Store)."
   }
 }

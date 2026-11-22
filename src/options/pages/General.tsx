@@ -42,6 +42,14 @@ export function GeneralPage({ settings, update }: SettingsProps) {
           update((s) => ({ ...s, showStatusBadges }));
         }}
       />
+      <Toggle
+        label={t('optOcr')}
+        hint={t('optOcrHint')}
+        checked={settings.ocrEnabled}
+        onChange={(ocrEnabled) => {
+          update((s) => ({ ...s, ocrEnabled }));
+        }}
+      />
       <BackupSection settings={settings} update={update} />
       <h2>{t('optResetTitle')}</h2>
       <p class="muted">{t('optResetHint')}</p>

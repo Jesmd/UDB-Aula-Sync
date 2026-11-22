@@ -75,6 +75,8 @@ export const SettingsSchema = v.object({
   hoverDetails: v.picklist(['simple', 'tarjeta']),
   /** Status pills next to the course's files. */
   showStatusBadges: v.boolean(),
+  /** Copy text from an image on screen (Alt+Shift+O or the context menu); off by default. */
+  ocrEnabled: v.boolean(),
   filters: FiltersSchema,
   syncIntervalHours: v.pipe(
     v.number(),
@@ -98,6 +100,7 @@ export const DEFAULT_SETTINGS: Settings = {
   interceptClicks: true,
   hoverDetails: 'simple',
   showStatusBadges: true,
+  ocrEnabled: false,
   filters: { excludedExtensions: [], maxSizeMb: null },
   syncIntervalHours: SYNC_INTERVAL_HOURS.default,
   courses: {},
@@ -163,6 +166,7 @@ export function normalizeSettings(raw: unknown): Settings {
       input.showStatusBadges,
       DEFAULT_SETTINGS.showStatusBadges,
     ),
+    ocrEnabled: pick(e.ocrEnabled, input.ocrEnabled, DEFAULT_SETTINGS.ocrEnabled),
     filters: pickEntries(FiltersSchema.entries, input.filters, DEFAULT_SETTINGS.filters),
     syncIntervalHours: pick(
       e.syncIntervalHours,

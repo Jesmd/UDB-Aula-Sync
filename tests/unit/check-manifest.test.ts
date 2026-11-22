@@ -19,6 +19,19 @@ describe('checkManifest', () => {
     expect(checkManifest(valid)).toEqual([]);
   });
 
+  it('allows wasm-unsafe-eval (OCR engine) but not unsafe-eval', () => {
+    const csp = (extension_pages: string) => ({
+      ...valid,
+      content_security_policy: { extension_pages },
+    });
+    expect(checkManifest(csp("script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"))).toEqual(
+      [],
+    );
+    expect(checkManifest(csp("script-src 'self' 'unsafe-eval'; object-src 'self'"))).toEqual([
+      'CSP allows remote or inline code',
+    ]);
+  });
+
   it('flags every widening', () => {
     expect(
       checkManifest({

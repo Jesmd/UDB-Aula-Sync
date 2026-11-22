@@ -35,6 +35,7 @@ export default defineConfig({
       input: {
         offscreen: 'src/offscreen/offscreen.html',
         open: 'src/open/index.html',
+        ocr: 'src/ocr/index.html',
       },
     },
   },

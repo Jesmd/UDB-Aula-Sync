@@ -5,7 +5,9 @@ describe('manifest config', () => {
   it('keeps the permission list from the spec', () => {
     expect([...PERMISSIONS].sort()).toEqual(
       [
+        'activeTab',
         'alarms',
+        'contextMenus',
         'downloads',
         'downloads.open',
         'idle',

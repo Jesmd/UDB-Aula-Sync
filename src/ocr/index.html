@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Copiar texto de una imagen</title>
+    <link rel="stylesheet" href="./ocr.css" />
+    <script type="module" src="./ocr.ts"></script>
+  </head>
+  <body>
+    <div id="stage">
+      <img id="shot" alt="" draggable="false" />
+      <div id="shade"></div>
+      <div id="sel" hidden></div>
+    </div>
+    <div id="tip" role="status"></div>
+    <section id="panel" hidden aria-live="polite">
+      <header>
+        <strong id="status"></strong>
+        <button id="close" type="button" title="Esc">✕</button>
+      </header>
+      <textarea id="text" spellcheck="false" rows="8"></textarea>
+      <div class="row">
+        <button id="copy" type="button" class="primary"></button>
+        <button id="again" type="button"></button>
+      </div>
+    </section>
+  </body>
+</html>

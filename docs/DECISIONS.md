@@ -409,3 +409,18 @@ registro" une ambos. El content script ignora los cambios de `logs` (solo reacci
 **Decisión.** `scripts/check-budget.ts` sigue los imports del content script en `dist/` (incluido el
 cargador de crxjs) y hace fallar el build si pasa de 60 KB gzip (1.0.0: unos 32 KB). El E2E de "Descargar
 todo" registra tareas largas (`longtask`) y exige que no haya ninguna de más de 50 ms.
+
+## ADR-031 Copiar texto de imágenes (OCR) opcional
+
+**Contexto.** Muchas guías son PDF escaneados o capturas, y no se puede seleccionar el texto.
+
+**Decisión.** Función desactivada por defecto (`ocrEnabled` en los ajustes). Con ella activa, `Alt+Shift+O` o
+el menú contextual capturan la pestaña visible (`captureVisibleTab`), la guardan en `chrome.storage.session`
+y abren `src/ocr/index.html`. Ahí el usuario arrastra un rectángulo, se reconoce el texto con Tesseract.js
+(`spa+eng`, empaquetado en `public/vendor/tesseract`, sin red) y se copia al portapapeles. No se guarda ningún
+archivo y la captura se borra al leerla.
+
+- Permisos nuevos: `contextMenus` y `activeTab`. La CSP añade `'wasm-unsafe-eval'` (solo compilar WebAssembly,
+  no `eval` de texto); `check-manifest` lo admite y sigue rechazando `unsafe-eval`.
+- El motor se carga por URL de la extensión, no entra en el content script (presupuesto de 60 KB intacto).
+- Se descartó leer PDF con PDF.js dentro de la extensión: la captura de pantalla sirve para PDF e imágenes por igual.

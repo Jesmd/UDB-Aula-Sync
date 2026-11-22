@@ -4,6 +4,18 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+## [1.2.0] - 2026-11-22
+
+### Añadido
+
+- Copiar texto de una imagen (OCR), desactivado por defecto. Se activa en Opciones > General. Con
+  `Alt+Shift+O` o clic derecho > "Copiar texto de una imagen" se captura la pestaña, arrastras sobre el
+  texto y se copia al portapapeles. Reconoce español e inglés y funciona también con PDF abiertos en el
+  navegador. No guarda archivos.
+- Permisos nuevos: `contextMenus` (la entrada del clic derecho) y `activeTab` (la captura de la pestaña
+  que estás viendo). El motor de reconocimiento (Tesseract.js) va dentro de la extensión, así que no se
+  descarga nada ni se envía ninguna imagen fuera del equipo. Esto añade unos 13 MB al zip.
+
 ## [1.1.0] - 2026-11-14
 
 ### Cambiado

@@ -3,3 +3,4 @@ release/
 coverage/
 pnpm-lock.yaml
 tests/fixtures/
+public/vendor/

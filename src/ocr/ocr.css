@@ -1,0 +1,154 @@
+:root {
+  --bg: #111;
+  --panel: #fff;
+  --ink: #1b1b1f;
+  --muted: #5d5f66;
+  --line: #d6d7dc;
+  --accent: #0b57d0;
+  --accent-ink: #fff;
+  --sel: #4c8dff;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --panel: #1f2023;
+    --ink: #e8e8ea;
+    --muted: #a5a7ad;
+    --line: #3a3c41;
+    --accent: #a8c7fa;
+    --accent-ink: #062e6f;
+    color-scheme: dark;
+  }
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+  font:
+    14px/1.4 system-ui,
+    'Segoe UI',
+    sans-serif;
+}
+#stage {
+  position: fixed;
+  inset: 0;
+  cursor: crosshair;
+  user-select: none;
+}
+#shot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: auto;
+  display: block;
+}
+#shade {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+#stage.busy {
+  cursor: progress;
+}
+#sel {
+  position: absolute;
+  border: 2px solid var(--sel);
+  box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.35);
+  background: transparent;
+  pointer-events: none;
+}
+#stage.selecting #shade,
+#stage.has-sel #shade {
+  display: none;
+}
+#tip {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgb(20 20 24 / 0.9);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 999px;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: calc(100vw - 32px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#tip:empty {
+  display: none;
+}
+#panel {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: min(460px, calc(100vw - 32px));
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#panel[hidden] {
+  display: none;
+}
+#panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+#status {
+  font-weight: 600;
+}
+#text {
+  width: 100%;
+  resize: vertical;
+  min-height: 120px;
+  max-height: 50vh;
+  padding: 8px;
+  font:
+    13px/1.45 ui-monospace,
+    Consolas,
+    monospace;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+button {
+  font: inherit;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+button.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+#close {
+  padding: 2px 8px;
+  border: none;
+  color: var(--muted);
+}
